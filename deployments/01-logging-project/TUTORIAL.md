@@ -15,6 +15,19 @@ Run this for greenfield, or when the only candidate is a **workload** project. T
 wrong answer: Pub/Sub publish quota is consumed in the destination project, and a security
 pipeline inside a workload project can be read or broken by that workload's owner.
 
+## Sign in first
+
+Cloud Shell opened this repository in a **temporary** session: Google gives repositories it does not own none of your credentials, and deletes the session's files when it ends.
+
+Sign in, then give Terraform the same sign-in:
+
+```bash
+gcloud auth login
+gcloud auth application-default login
+```
+
+<walkthrough-info-message>**Keep the Terraform state outside this session.** Copy `backend.tf.example` to `backend.tf` and set its bucket before `terraform apply`, or the state is deleted when the session ends.</walkthrough-info-message>
+
 ## Enable APIs on an existing project
 
 ```bash

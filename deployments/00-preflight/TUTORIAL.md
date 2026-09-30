@@ -17,6 +17,16 @@ some resources. This fails first, and tells you exactly what to fix.
 
 <walkthrough-project-setup></walkthrough-project-setup>
 
+## Sign in first
+
+Cloud Shell opened this repository in a **temporary** session: Google gives repositories it does not own none of your credentials, and deletes the session's files when it ends.
+
+Sign in:
+
+```bash
+gcloud auth login
+```
+
 ## Step 1 — Set your context
 
 ```bash

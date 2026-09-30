@@ -4,10 +4,9 @@
 # The Open in Cloud Shell buttons start a temporary session, and Google deletes its
 # files, that state file included, when the session ends.
 #
-# Lose the state for an ORGANIZATION-SCOPED SINK and the sink, topic,
-# subscription, service account and every IAM binding become unmanaged. Re-running
-# gives you "already exists" errors, and the only way back is hand-importing an
-# org sink.
+# Lose the state for an ORGANIZATION-SCOPED FEED and the feed, topic, subscription
+# and every IAM binding become unmanaged. Re-running gives you "already exists"
+# errors, and the only way back is hand-importing an organization feed.
 #
 # It also makes drift detection possible at all — `tofu plan -detailed-exitcode`
 # needs somewhere to compare against.
@@ -23,6 +22,6 @@ terraform {
   backend "gcs" {
     bucket = "acme-abstract-tfstate"
     # State key: this folder's original name, kept so existing state is found. Never change it.
-    prefix = "01-organization"
+    prefix = "11-asset-inventory"
   }
 }

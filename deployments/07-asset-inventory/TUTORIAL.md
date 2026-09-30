@@ -21,6 +21,19 @@ Three different API paths to the same IAM binding produce three different audit 
 the natural feed for an asset and identity model, because it carries inventory rather than
 only events.
 
+## Sign in first
+
+Cloud Shell opened this repository in a **temporary** session: Google gives repositories it does not own none of your credentials, and deletes the session's files when it ends.
+
+Sign in, then give Terraform the same sign-in:
+
+```bash
+gcloud auth login
+gcloud auth application-default login
+```
+
+<walkthrough-info-message>**Keep the Terraform state outside this session.** Copy `backend.tf.example` to `backend.tf` and set its bucket before `terraform apply`, or the state is deleted when the session ends.</walkthrough-info-message>
+
 ## Step 1 — Reuse Abstract's identity
 
 If `02-audit-logs-organization` used a GCS backend, read it rather than retyping it:

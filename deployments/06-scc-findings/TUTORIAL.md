@@ -12,6 +12,19 @@ export.</walkthrough-info-message>
 Needs **SCC Premium or Enterprise**, and
 `roles/securitycenter.notificationConfigEditor` at the organization.
 
+## Sign in first
+
+Cloud Shell opened this repository in a **temporary** session: Google gives repositories it does not own none of your credentials, and deletes the session's files when it ends.
+
+Sign in, then give Terraform the same sign-in:
+
+```bash
+gcloud auth login
+gcloud auth application-default login
+```
+
+<walkthrough-info-message>**Keep the Terraform state outside this session.** Copy `backend.tf.example` to `backend.tf` and set its bucket before `terraform apply`, or the state is deleted when the session ends.</walkthrough-info-message>
+
 ## Step 1 — Reuse Abstract's existing identity
 
 If you already deployed `02-audit-logs-organization`, take the service-account email from its output
