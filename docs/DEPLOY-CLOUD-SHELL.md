@@ -27,7 +27,7 @@ preinstalled, and 5 GB of persistent home directory.
 
 ```
 https://shell.cloud.google.com/cloudshell/editor
-  ?cloudshell_git_repo=https://github.com/IamABS3C/abstract-gcp-templates
+  ?cloudshell_git_repo=https://github.com/IamABS3C/abstract-gcp-templates&cloudshell_git_branch=main
   &cloudshell_workspace=deployments/02-audit-logs-organization
   &cloudshell_tutorial=TUTORIAL.md
 ```
@@ -48,9 +48,17 @@ https://shell.cloud.google.com/cloudshell/editor
 | `cloudshell_git_repo` | Repository to clone. **Must be public** — Cloud Shell clones anonymously |
 | `cloudshell_workspace` | Directory to open the terminal in |
 | `cloudshell_tutorial` | Tutorial file, **relative to the workspace** |
-| `cloudshell_git_branch` | Branch. Omit for the default |
+| `cloudshell_git_branch` | Branch. **Always set `main`**: Cloud Shell defaults to `master`, which this repository does not have, and without it the button opens an empty shell with nothing cloned |
 | `ephemeral` | Discard the VM at session end |
 | `show` | `ide`, `terminal`, or `ide%2Cterminal` |
+
+## The session is temporary
+
+Google opens a repository it does not own in a **temporary** Cloud Shell environment: it
+has none of your credentials, and its home directory is deleted when the session ends.
+So every tutorial starts by signing in (`gcloud auth login`, then
+`gcloud auth application-default login` for Terraform), and every Terraform template needs
+its `backend.tf` in place before `apply`, or the state disappears with the session.
 
 ## Adding a button for a new deployment
 
@@ -59,7 +67,7 @@ https://shell.cloud.google.com/cloudshell/editor
 3. Add a row to the README table:
 
 ```markdown
-[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/IamABS3C/abstract-gcp-templates&cloudshell_workspace=deployments/NN-name&cloudshell_tutorial=TUTORIAL.md)
+[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/IamABS3C/abstract-gcp-templates&cloudshell_git_branch=main&cloudshell_workspace=deployments/NN-name&cloudshell_tutorial=TUTORIAL.md)
 ```
 
 **Verify the resolved path, not the repo path:**
