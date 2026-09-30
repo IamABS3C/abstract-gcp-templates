@@ -1,0 +1,28 @@
+__pycache__/
+*.pyc
+.DS_Store
+.venv/
+dist/notion-plan.json
+
+# Terraform/OpenTofu provider binaries — never commit (117 MB blob once blocked a push)
+.terraform/
+*.tfstate
+*.tfstate.backup
+
+# Restricted-name list for the public export gate — never committed.
+export/.public-deny-names
+
+# generated asset payload for the site build
+generators/_assets.json
+
+# Onboarding app
+node_modules/
+app/.build/
+app/web/dist/
+app/infra/cdk.out/
+app/web/public/config.json
+app/web/.deploy.zip
+
+# Real deployment values: never commit (the *.tfvars.example files are the templates)
+*.tfvars
+!*.tfvars.example

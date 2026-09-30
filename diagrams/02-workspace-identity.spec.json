@@ -1,0 +1,162 @@
+{
+ "title": "Google Workspace identity \u2014 a separate pipeline, no sink anywhere",
+ "theme": "dark",
+ "pages": [
+  {
+   "name": "Workspace",
+   "width": 1560,
+   "height": 800,
+   "groups": [
+    {
+     "id": "ws",
+     "label": "Google Workspace tenant  \u00b7  NOT Google Cloud",
+     "kind": "plain",
+     "x": 50,
+     "y": 60,
+     "w": 700,
+     "h": 680,
+     "color": "#f5c61e"
+    },
+    {
+     "id": "gcp",
+     "label": "Google Cloud project  \u00b7  holds the identity only",
+     "kind": "plain",
+     "x": 810,
+     "y": 60,
+     "w": 330,
+     "h": 680,
+     "color": "#2e9bf0"
+    },
+    {
+     "id": "abs",
+     "label": "Abstract",
+     "kind": "plain",
+     "x": 1200,
+     "y": 60,
+     "w": 320,
+     "h": 680,
+     "color": "#FF216B"
+    }
+   ],
+   "nodes": [
+    {
+     "id": "login",
+     "label": "login \u00b7 saml \u00b7 token",
+     "icon": "gcp:users",
+     "parent": "ws",
+     "x": 110,
+     "y": 90,
+     "sublabel": "who signed in \u2014 usually the whole ask"
+    },
+    {
+     "id": "admin",
+     "label": "admin \u00b7 groups \u00b7 rules",
+     "icon": "gcp:cloud_iam",
+     "parent": "ws",
+     "x": 110,
+     "y": 250,
+     "sublabel": "console + membership changes"
+    },
+    {
+     "id": "data",
+     "label": "gmail \u00b7 drive",
+     "icon": "gcp:cloud_storage",
+     "parent": "ws",
+     "x": 110,
+     "y": 410,
+     "sublabel": "the volume monsters"
+    },
+    {
+     "id": "reports",
+     "label": "Admin SDK Reports API",
+     "icon": "gcp:logging",
+     "parent": "ws",
+     "x": 330,
+     "y": 250,
+     "sublabel": "NOT Cloud Logging"
+    },
+    {
+     "id": "dwd",
+     "label": "Domain-wide delegation",
+     "icon": "gcp:security_key_enforcement",
+     "parent": "gcp",
+     "x": 90,
+     "y": 150,
+     "sublabel": "granted by a SUPER ADMIN \u2014 no API"
+    },
+    {
+     "id": "sa",
+     "label": "Service account",
+     "icon": "gcp:cloud_iam",
+     "parent": "gcp",
+     "x": 90,
+     "y": 400,
+     "sublabel": "created by Terraform"
+    },
+    {
+     "id": "plat",
+     "label": "Abstract platform",
+     "icon": "img:../brand/abstract-logo-mark.svg",
+     "parent": "abs",
+     "x": 80,
+     "y": 280,
+     "sublabel": "google_workspace \u00b7 PULL"
+    }
+   ],
+   "edges": [
+    {
+     "from": "login",
+     "to": "reports",
+     "tone": "brand"
+    },
+    {
+     "from": "admin",
+     "to": "reports",
+     "tone": "brand"
+    },
+    {
+     "from": "data",
+     "to": "reports",
+     "tone": "warn",
+     "dashed": true
+    },
+    {
+     "from": "sa",
+     "to": "dwd",
+     "label": "client ID + 2 scopes",
+     "tone": "warn",
+     "exit": [
+      0.5,
+      0
+     ],
+     "entry": [
+      0.5,
+      1
+     ]
+    },
+    {
+     "from": "dwd",
+     "to": "reports",
+     "label": "impersonates admin_email",
+     "tone": "brand",
+     "exit": [
+      0,
+      0.5
+     ],
+     "entry": [
+      1,
+      0.5
+     ],
+     "label_x": 0.2
+    },
+    {
+     "from": "reports",
+     "to": "plat",
+     "label": "API poll",
+     "tone": "brand",
+     "label_x": 0.75
+    }
+   ]
+  }
+ ]
+}

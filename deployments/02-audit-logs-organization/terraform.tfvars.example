@@ -1,0 +1,39 @@
+# Minimal. Admin Activity + System Event + Policy Denied + GKE admin + firewall + DNS
+# across the whole organisation — small, high signal, and it delivers most detections.
+org_id      = "123456789012"        # gcloud organizations list
+log_project = "acme-security-logging"
+
+# ---------------------------------------------------------------------------
+# Everything below is optional. Every name here IS a declared variable in this
+# root — uncommenting something undeclared produces a warning and is then
+# SILENTLY IGNORED, which is the failure mode this repo exists to eliminate.
+# ---------------------------------------------------------------------------
+
+# Pick sources by name. See modules/log-export/log_catalog.tf for the catalog.
+# log_categories = [
+#   "admin_activity", "system_event", "policy_denied",
+#   "gke_control_plane", "firewall", "dns_queries",
+#   "nat_flows", "load_balancer", "cloudsql",
+# ]
+
+# Data Access is OFF unless "data_access_all" is in log_categories.
+# When it is, these services scope it. Empty = allServices = the expensive option.
+# data_access_services = [
+#   "bigquery.googleapis.com",
+#   "storage.googleapis.com",
+#   "cloudkms.googleapis.com",
+# ]
+
+# Drop noise at the sink, where filtering is free.
+# exclusions = [
+#   {
+#     name        = "exclude-health-checks"
+#     description = "GCP health-check prober traffic. High volume, zero security signal."
+#     filter      = "protoPayload.requestMetadata.callerSuppliedUserAgent=~\"GoogleHC\""
+#   },
+# ]
+
+# Required for vpc_flows, gke_container_logs, or unscoped data_access_all.
+# acknowledge_high_volume = true
+
+# labels = { owner = "security", managed_by = "terraform" }

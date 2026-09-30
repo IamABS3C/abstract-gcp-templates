@@ -1,0 +1,180 @@
+{
+ "title": "Sink scope \u2014 what each ring covers, and what it misses",
+ "theme": "dark",
+ "pages": [
+  {
+   "name": "Scope",
+   "width": 1620,
+   "height": 900,
+   "groups": [
+    {
+     "id": "org",
+     "label": "\u2460 ORGANIZATION  \u00b7  bind here \u2192 everything below, forever",
+     "kind": "plain",
+     "x": 50,
+     "y": 60,
+     "w": 940,
+     "h": 780,
+     "color": "#FF216B"
+    },
+    {
+     "id": "fld",
+     "label": "\u2461 FOLDER  \u00b7  bind here \u2192 this subtree only",
+     "kind": "plain",
+     "x": 90,
+     "y": 150,
+     "w": 560,
+     "h": 530,
+     "color": "#2e9bf0"
+    },
+    {
+     "id": "abs",
+     "label": "Abstract",
+     "kind": "plain",
+     "x": 1090,
+     "y": 60,
+     "w": 460,
+     "h": 780,
+     "color": "#FF216B"
+    }
+   ],
+   "nodes": [
+    {
+     "id": "pa",
+     "label": "Project A",
+     "icon": "gcp:folders",
+     "parent": "fld",
+     "x": 60,
+     "y": 80,
+     "sublabel": "\u2462 bind HERE = this box only"
+    },
+    {
+     "id": "pb",
+     "label": "Project B",
+     "icon": "gcp:folders",
+     "parent": "fld",
+     "x": 60,
+     "y": 250,
+     "sublabel": "in \u2460 and \u2461"
+    },
+    {
+     "id": "pz",
+     "label": "Project Z",
+     "icon": "gcp:folders",
+     "parent": "fld",
+     "x": 60,
+     "y": 400,
+     "sublabel": "created next year \u2014 still in \u2460 and \u2461"
+    },
+    {
+     "id": "pc",
+     "label": "Project C",
+     "icon": "gcp:folders",
+     "parent": "org",
+     "x": 700,
+     "y": 600,
+     "sublabel": "OUTSIDE the folder \u2014 \u2461 MISSES it"
+    },
+    {
+     "id": "router",
+     "label": "Log Router",
+     "icon": "gcp:logging",
+     "parent": "org",
+     "x": 700,
+     "y": 250,
+     "sublabel": "sits ABOVE every project"
+    },
+    {
+     "id": "topic",
+     "label": "Pub/Sub topic",
+     "icon": "gcp:cloud_pubsub",
+     "parent": "abs",
+     "x": 150,
+     "y": 150,
+     "sublabel": "dedicated logging project",
+     "fill": "#FF216B"
+    },
+    {
+     "id": "sub",
+     "label": "Pull subscription",
+     "icon": "gcp:cloud_pubsub",
+     "parent": "abs",
+     "x": 150,
+     "y": 380,
+     "sublabel": "expiration: never",
+     "fill": "#FF216B"
+    },
+    {
+     "id": "plat",
+     "label": "Abstract platform",
+     "icon": "img:../brand/abstract-logo-mark.svg",
+     "parent": "abs",
+     "x": 150,
+     "y": 600,
+     "sublabel": "normalised to ACS"
+    }
+   ],
+   "edges": [
+    {
+     "from": "pa",
+     "to": "router",
+     "tone": "muted"
+    },
+    {
+     "from": "pb",
+     "to": "router",
+     "tone": "muted"
+    },
+    {
+     "from": "pz",
+     "to": "router",
+     "label": "in scope the moment it exists",
+     "tone": "brand",
+     "label_x": -0.45
+    },
+    {
+     "from": "pc",
+     "to": "router",
+     "label": "only via \u2460",
+     "tone": "warn",
+     "label_x": -0.3
+    },
+    {
+     "from": "router",
+     "to": "topic",
+     "label": "writer identity needs\nroles/pubsub.publisher",
+     "tone": "warn",
+     "label_x": -0.15
+    },
+    {
+     "from": "topic",
+     "to": "sub",
+     "tone": "brand",
+     "exit": [
+      0.5,
+      1
+     ],
+     "entry": [
+      0.5,
+      0
+     ]
+    },
+    {
+     "from": "sub",
+     "to": "plat",
+     "label": "pull",
+     "tone": "brand",
+     "exit": [
+      0.5,
+      1
+     ],
+     "entry": [
+      0.5,
+      0
+     ],
+     "label_x": 0.3
+    }
+   ]
+  }
+ ]
+}

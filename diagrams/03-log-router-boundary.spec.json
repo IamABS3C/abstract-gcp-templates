@@ -1,0 +1,99 @@
+{
+ "title": "What the Log Router can and cannot carry",
+ "theme": "dark",
+ "pages": [
+  {
+   "name": "Boundary",
+   "width": 1460,
+   "height": 860,
+   "groups": [
+    {
+     "id": "in",
+     "label": "COLLECTABLE BY A SINK FILTER  \u00b7  one pipeline",
+     "kind": "plain",
+     "x": 50,
+     "y": 60,
+     "w": 640,
+     "h": 740,
+     "color": "#01e69d"
+    },
+    {
+     "id": "out",
+     "label": "NOT COLLECTABLE BY ANY FILTER, AT ANY SCOPE",
+     "kind": "plain",
+     "x": 750,
+     "y": 60,
+     "w": 660,
+     "h": 740,
+     "color": "#FF216B"
+    }
+   ],
+   "nodes": [
+    {
+     "id": "audit",
+     "label": "Cloud Audit Logs",
+     "icon": "gcp:logging",
+     "parent": "in",
+     "x": 60,
+     "y": 90,
+     "sublabel": "activity \u00b7 system_event \u00b7 policy \u00b7 data_access"
+    },
+    {
+     "id": "net",
+     "label": "Networking",
+     "icon": "gcp:cloud_firewall_rules",
+     "parent": "in",
+     "x": 60,
+     "y": 250,
+     "sublabel": "firewall \u00b7 DNS \u00b7 VPC flow \u00b7 NAT \u00b7 LB"
+    },
+    {
+     "id": "k8s",
+     "label": "GKE control plane",
+     "icon": "gcp:container_engine",
+     "parent": "in",
+     "x": 60,
+     "y": 400,
+     "sublabel": "pod exec \u2192 process.command_line"
+    },
+    {
+     "id": "db",
+     "label": "Databases",
+     "icon": "gcp:bigquery",
+     "parent": "in",
+     "x": 60,
+     "y": 550,
+     "sublabel": "Cloud SQL \u00b7 BigQuery \u00b7 Spanner"
+    },
+    {
+     "id": "scc",
+     "label": "Security Command Center",
+     "icon": "gcp:cloud_security_command_center",
+     "parent": "out",
+     "x": 60,
+     "y": 140,
+     "sublabel": "own NotificationConfig \u2192 Pub/Sub"
+    },
+    {
+     "id": "wks",
+     "label": "Workspace / Cloud Identity",
+     "icon": "gcp:users",
+     "parent": "out",
+     "x": 60,
+     "y": 400,
+     "sublabel": "Admin SDK Reports API"
+    },
+    {
+     "id": "gcs",
+     "label": "Objects already in a bucket",
+     "icon": "gcp:cloud_storage",
+     "parent": "out",
+     "x": 60,
+     "y": 600,
+     "sublabel": "GCS object notifications"
+    }
+   ],
+   "edges": []
+  }
+ ]
+}
