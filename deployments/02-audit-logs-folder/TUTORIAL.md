@@ -48,10 +48,57 @@ cat > terraform.tfvars <<EOF
 folder_id   = "YOUR_FOLDER_ID"
 log_project = "YOUR_LOG_PROJECT"
 EOF
-terraform init && terraform plan
+terraform init && terraform plan && terraform apply
 ```
 
-Read `effective_filter` and `volume_profile` before applying.
+Read `effective_filter` and `volume_profile` before applying:
+```bash
+terraform output -raw effective_filter
+terraform output volume_profile
+terraform output abstract_onboarding
+```
+
+## Step 4 — Verification & Failure Troubleshooting
+
+Run these checks to ensure the folder sink is operational:
+
+```bash
+# 1. Verify folder sink exists and includes child containers
+gcloud logging sinks describe abstract-folder-sink --folder="YOUR_FOLDER_ID" \
+  --format="table(name,destination,includeChildren)"
+
+# 2. Verify sink writer identity is authorized on the Pub/Sub topic
+WRITER=$(terraform output -raw sink_writer_identity)
+echo "Writer identity: $WRITER"
+gcloud pubsub topics get-iam-policy abstract-audit-logs --project="YOUR_LOG_PROJECT"
+
+# 3. Pull verification event from Pub/Sub
+gcloud pubsub subscriptions pull abstract-audit-logs-sub \
+  --project="YOUR_LOG_PROJECT" --limit=3 --auto-ack
+```
+
+### Failure Troubleshooting Tips
+
+* **Failure: Missing logs from child projects**:
+  Ensure `--include-children` is active on the folder sink:
+  ```bash
+  gcloud logging sinks update abstract-folder-sink --folder="YOUR_FOLDER_ID" --include-children
+  ```
+* **Failure: Silent Drop (#1 Trap)**:
+  If writer identity lacks `roles/pubsub.publisher` on the destination topic:
+  ```bash
+  gcloud pubsub topics add-iam-policy-binding abstract-audit-logs \
+    --project="YOUR_LOG_PROJECT" \
+    --member="$WRITER" \
+    --role="roles/pubsub.publisher"
+  ```
+* **Failure: Permission Denied during apply**:
+  Ensure you hold `roles/logging.configWriter` on the folder:
+  ```bash
+  gcloud resource-manager folders add-iam-policy-binding "YOUR_FOLDER_ID" \
+    --member="user:$(gcloud config get-value account)" \
+    --role="roles/logging.configWriter"
+  ```
 
 <walkthrough-conclusion-trophy></walkthrough-conclusion-trophy>
 
@@ -61,3 +108,4 @@ folder sinks. Several folder sinks is the shape this design exists to avoid.
 ---
 
 <sub>**Abstract Security · GCP log export** — [all scenarios](../../README.md) · [architecture](../../docs/ARCHITECTURE.md) · [permissions](../../docs/PERMISSIONS.md) · [filters](../../docs/FILTERS.md)</sub>
+

@@ -1,0 +1,359 @@
+{
+  "title": "Bootstrap the GCP logging project",
+  "theme": "dark",
+  "grid": false,
+  "animate": true,
+  "pages": [
+    {
+      "name": "Logging Project Hub",
+      "banner": {
+        "title": "Dedicated Logging Project Hub & Ingestion Engine",
+        "subtitle": "Centralized telemetry repository \u00b7 least-privilege identity \u00b7 Pub/Sub transport infrastructure",
+        "x": 40,
+        "y": 20,
+        "w": 1000,
+        "h": 56
+      },
+      "groups": [
+        {
+          "id": "org",
+          "label": "GCP Organization (Monitored Estate)",
+          "kind": "plain",
+          "x": 40,
+          "y": 90,
+          "w": 960,
+          "h": 720,
+          "color": "#2E9BF0"
+        },
+        {
+          "id": "lp",
+          "label": "Dedicated Logging Project (log_project)",
+          "kind": "plain",
+          "x": 340,
+          "y": 70,
+          "w": 580,
+          "h": 620,
+          "color": "#01E69D",
+          "parent": "org"
+        },
+        {
+          "id": "abs",
+          "label": "Abstract Security Platform",
+          "kind": "plain",
+          "x": 1040,
+          "y": 90,
+          "w": 460,
+          "h": 720,
+          "color": "#FF216B"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "parent",
+          "label": "Org or Folder",
+          "icon": "gcp:folders",
+          "parent": "org",
+          "x": 60,
+          "y": 160,
+          "sublabel": "project parent"
+        },
+        {
+          "id": "bill",
+          "label": "Billing Account",
+          "icon": "gcp:cost",
+          "parent": "org",
+          "x": 60,
+          "y": 420,
+          "sublabel": "linked on create"
+        },
+        {
+          "id": "pub_api",
+          "label": "Pub/Sub API",
+          "icon": "gcp:cloud_pubsub",
+          "parent": "lp",
+          "x": 60,
+          "y": 60,
+          "sublabel": "pubsub.googleapis.com"
+        },
+        {
+          "id": "log_api",
+          "label": "Cloud Logging API",
+          "icon": "gcp:logging",
+          "parent": "lp",
+          "x": 360,
+          "y": 60,
+          "sublabel": "logging.googleapis.com"
+        },
+        {
+          "id": "sa",
+          "label": "Reader Identity",
+          "icon": "gcp:cloud_iam",
+          "parent": "lp",
+          "x": 60,
+          "y": 210,
+          "sublabel": "abstract-gcp-reader",
+          "fill": "#01E69D"
+        },
+        {
+          "id": "topic",
+          "label": "Pub/Sub Topic",
+          "icon": "gcp:cloud_pubsub",
+          "parent": "lp",
+          "x": 360,
+          "y": 210,
+          "sublabel": "abstract-audit-logs",
+          "fill": "#FF216B"
+        },
+        {
+          "id": "sub",
+          "label": "Pull Subscription",
+          "icon": "gcp:cloud_pubsub",
+          "parent": "lp",
+          "x": 360,
+          "y": 360,
+          "sublabel": "expiration: never",
+          "fill": "#FF216B"
+        },
+        {
+          "id": "01-logging-project_pipe",
+          "label": "Pipelines (COLLECT)",
+          "icon": "img:../brand/abstract-logo-mark.svg",
+          "parent": "abs",
+          "x": 50,
+          "y": 110,
+          "sublabel": "streaming normalizer \u00b7 -80% drop"
+        },
+        {
+          "id": "01-logging-project_det",
+          "label": "Detections (DETECT)",
+          "icon": "gcp:anomaly_detection",
+          "parent": "abs",
+          "x": 260,
+          "y": 110,
+          "sublabel": "ASTRO real-time MITRE engine",
+          "fill": "#F5C61E"
+        },
+        {
+          "id": "01-logging-project_lake",
+          "label": "LakeVilla (RETAIN)",
+          "icon": "gcp:dataanalytics",
+          "parent": "abs",
+          "x": 50,
+          "y": 360,
+          "sublabel": "security data lake \u00b7 search",
+          "fill": "#2E9BF0"
+        },
+        {
+          "id": "01-logging-project_sec",
+          "label": "AI-SecOps (OPERATE)",
+          "icon": "gcp:threatintelligence",
+          "parent": "abs",
+          "x": 260,
+          "y": 360,
+          "sublabel": "ASTRO triage & response",
+          "fill": "#01E69D"
+        }
+      ],
+      "edges": [
+        {
+          "from": "parent",
+          "to": "lp",
+          "label": "creates & contains",
+          "tone": "muted",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.35
+          ]
+        },
+        {
+          "from": "bill",
+          "to": "lp",
+          "label": "funds logging project",
+          "tone": "muted",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.75
+          ]
+        },
+        {
+          "from": "pub_api",
+          "to": "topic",
+          "tone": "muted",
+          "dashed": true,
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "log_api",
+          "to": "topic",
+          "tone": "muted",
+          "dashed": true,
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "sa",
+          "to": "sub",
+          "label": "roles/pubsub.subscriber",
+          "tone": "teal",
+          "dashed": true,
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        },
+        {
+          "from": "topic",
+          "to": "sub",
+          "tone": "brand",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "sub",
+          "to": "01-logging-project_pipe",
+          "label": "pull telemetry",
+          "tone": "brand",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        },
+        {
+          "from": "01-logging-project_pipe",
+          "to": "01-logging-project_det",
+          "tone": "amber",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        },
+        {
+          "from": "01-logging-project_pipe",
+          "to": "01-logging-project_lake",
+          "tone": "brand",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "01-logging-project_det",
+          "to": "01-logging-project_sec",
+          "tone": "teal",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "01-logging-project_lake",
+          "to": "01-logging-project_sec",
+          "tone": "muted",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        }
+      ],
+      "badges": [
+        {
+          "id": "b1",
+          "text": "SINGLE LOGGING PROJECT: Avoids IAM sprawl and quota fragmentation",
+          "x": 370,
+          "y": 110,
+          "w": 480,
+          "h": 26,
+          "tone": "teal"
+        },
+        {
+          "id": "b2",
+          "text": "LEAST PRIVILEGE: Service Account holds roles/pubsub.subscriber ONLY",
+          "x": 370,
+          "y": 730,
+          "w": 480,
+          "h": 26,
+          "tone": "brand"
+        },
+        {
+          "id": "01-logging-project_b_abs1",
+          "text": "COMPOSABLE SIEM: Decoupled ingest, in-stream detect & LakeVilla",
+          "x": 1060,
+          "y": 125,
+          "w": 420,
+          "h": 26,
+          "tone": "brand"
+        },
+        {
+          "id": "01-logging-project_b_abs2",
+          "text": "DATA REDUCTION: Drops up to 80% volume before storage tier",
+          "x": 1060,
+          "y": 765,
+          "w": 420,
+          "h": 26,
+          "tone": "teal"
+        }
+      ],
+      "notes": [
+        {
+          "id": "n1",
+          "text": "PROJECT SIZING: Pub/Sub publish quota is consumed in the DESTINATION logging project, not the source projects. Size the logging project's regional quota to absorb peak ingest across all monitored workloads.",
+          "x": 40,
+          "y": 830,
+          "w": 1380,
+          "h": 50
+        }
+      ]
+    }
+  ]
+}

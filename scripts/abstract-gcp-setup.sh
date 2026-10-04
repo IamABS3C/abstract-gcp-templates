@@ -34,7 +34,7 @@ ROOT="$(cd "$HERE/.." && pwd)"
 # Defaults; anything in the state file wins.
 TOPIC="abstract-audit-logs"; SUB="abstract-audit-logs-sub"; SINK="abstract-org-audit-sink"  # the Terraform and deploy-script default
 SA="abstract-pubsub-reader"; WS_SA="abstract-workspace-reader"; RETENTION_DAYS=7
-DA_SERVICES="bigquery.googleapis.com,storage.googleapis.com,cloudkms.googleapis.com"; DA_TYPES="ADMIN_READ,DATA_WRITE"
+DA_SERVICES="bigquery.googleapis.com,storage.googleapis.com,cloudkms.googleapis.com,iamcredentials.googleapis.com,sts.googleapis.com,login.googleapis.com"; DA_TYPES="ADMIN_READ,DATA_WRITE"
 DATA_ACCESS=no; WORKSPACE=no; ALERTS=no
 ORG_ID=""; SCOPE=""; SCOPE_ID=""; LOG_PROJECT=""; BILLING=""; WS_ADMIN=""; ALERT_EMAIL=""
 # Keys go outside any checkout, in a folder only you can read, so they cannot be committed by accident.

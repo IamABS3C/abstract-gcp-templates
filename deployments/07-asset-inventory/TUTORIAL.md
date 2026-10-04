@@ -51,6 +51,13 @@ No shared backend? Paste it instead — and know you now own keeping it in sync:
 
 ```bash
 cd ../02-audit-logs-organization && terraform output -json abstract_onboarding | jq -r .service_account_email
+cd ../07-asset-inventory
+```
+
+<walkthrough-info-message>**Prerequisite API Check:** Ensure the Cloud Asset API is enabled in your logging project before applying:</walkthrough-info-message>
+
+```bash
+gcloud services enable cloudasset.googleapis.com --project="YOUR_LOG_PROJECT"
 ```
 
 ## Step 2 — Choose the content type
@@ -82,16 +89,54 @@ terraform init && terraform plan
 
 You need `roles/cloudasset.owner` at the organization.
 
-## Step 5 — If nothing arrives
+When the plan verifies, apply:
+
+```bash
+terraform apply
+```
+
+## Step 5 — Verify Feed & Identity Permissions
+
+Confirm the feed is active at the organization scope:
+
+```bash
+gcloud asset feeds list --organization="YOUR_ORG_ID"
+```
+
+Inspect the Cloud Asset Inventory service agent output:
 
 ```bash
 terraform output cai_service_agent
 ```
 
-CAI publishes as its **own service agent**, not as you — the same shape as the Log Router
+<walkthrough-info-message>**The Publisher Binding Check:** CAI publishes as its **own service agent**, not as you — the same shape as the Log Router
 writer identity and the GCS service agent. Without `roles/pubsub.publisher` on the topic
 the feed is created successfully and delivers nothing. Terraform grants it here; that
-output is where to look if it ever gets removed.
+output is where to look if it ever gets removed.</walkthrough-info-message>
+
+Verify the publisher binding on the topic:
+
+```bash
+gcloud pubsub topics get-iam-policy abstract-asset-inventory \
+  --project="YOUR_LOG_PROJECT" \
+  --filter="bindings.role:roles/pubsub.publisher"
+```
+
+## Step 6 — Troubleshooting & Failure Modes
+
+### 1. Missing Policy Diffs
+If IAM changes in projects do not generate feed events:
+- Check that `content_type` is set to `IAM_POLICY` or not overridden.
+- Check that the modified resource type (e.g. `iam.googleapis.com/ServiceAccountKey`) is included in your `asset_types` variable.
+
+### 2. Testing Feed Delivery
+Generate a benign asset event (such as updating a label or tag on a test resource) and pull from the subscription:
+
+```bash
+gcloud pubsub subscriptions pull abstract-asset-inventory-sub \
+  --project="YOUR_LOG_PROJECT" \
+  --limit=1
+```
 
 <walkthrough-conclusion-trophy></walkthrough-conclusion-trophy>
 

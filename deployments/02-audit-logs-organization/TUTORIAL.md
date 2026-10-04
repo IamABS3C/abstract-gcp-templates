@@ -107,10 +107,17 @@ cat > terraform.tfvars <<EOF
 org_id      = "$ORG_ID"
 log_project = "$LOG_PROJECT"
 EOF
-terraform init && terraform plan
+terraform init && terraform plan && terraform apply
 ```
 
 You are already in `deployments/02-audit-logs-organization` — the button put you here.
+
+Inspect the provisioned onboarding parameters and writer identity:
+```bash
+terraform output abstract_onboarding
+terraform output -raw sink_writer_identity
+```
+
 
 ## Step 5 — Wait before you verify
 
@@ -178,10 +185,25 @@ gcloud pubsub subscriptions pull abstract-audit-logs-sub \
 You should see your own `CreateTopic` and `DeleteTopic`, with `principalEmail`,
 `resourceName` and `callerIp` populated. That is the whole pipeline proven.
 
+### Troubleshooting Checkpoint Before Proceeding
+
+If the test probe returned 0 messages or threw an error, check these root causes before continuing:
+* **Silent Drop (#1 Root Cause)**: Sink writer identity missing publisher role on topic.
+  ```bash
+  WRITER=$(gcloud logging sinks describe abstract-org-audit-sink --organization="$ORG_ID" --format="value(writerIdentity)")
+  gcloud pubsub topics add-iam-policy-binding abstract-audit-logs --project="$LOG_PROJECT" --member="$WRITER" --role="roles/pubsub.publisher"
+  ```
+* **Child Projects Missing**: `includeChildren` was omitted or set to false.
+  ```bash
+  gcloud logging sinks update abstract-org-audit-sink --organization="$ORG_ID" --include-children
+  ```
+* **Pull Permission Denied**: Ensure caller or reader service account has `roles/pubsub.subscriber` on `abstract-audit-logs-sub`.
+
 <walkthrough-info-message>GCP is the only major cloud with a **first-class health signal
 for its own main failure mode**. A sink whose writer identity lacks `pubsub.publisher`
 produces `exports/error_count`, a `sink_error` log entry, **and a daily `[ACTION
 REQUIRED]` email**.</walkthrough-info-message>
+
 
 ## Step 7 — Connect Abstract
 

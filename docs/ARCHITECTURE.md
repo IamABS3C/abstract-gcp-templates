@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="../brand/abstract-logo-white.svg">
+  <img alt="Abstract Security" src="../brand/abstract-logo-black.svg" width="180">
+</picture>
+
 # Design decisions, and the limits that force them
 
 Read this before choosing a scope. Most of what goes wrong on this path is decided here,
@@ -6,6 +11,10 @@ not in Terraform.
 ---
 
 ## 1. Which scope?
+
+<p align="center">
+  <img src="../images/diagrams/01-sink-scope.png" alt="Comparative Sink Scope Matrix - Org vs Folder vs Project" width="100%">
+</p>
 
 | Scope | Covers future projects | Use when |
 |---|---|---|
@@ -74,7 +83,11 @@ high-signal, low-volume feed unaffected by the noisy one.
 
 ---
 
-## 3. Known limitations
+## 3. Known limitations & Log Router Boundary
+
+<p align="center">
+  <img src="../images/diagrams/03-log-router-boundary.png" alt="Google Cloud Log Router Architectural Boundary" width="100%">
+</p>
 
 These are the ones that change designs. All verified against Google's published limits.
 
@@ -87,7 +100,7 @@ These are the ones that change designs. All verified against Google's published 
 | **Log entries timestamped >24 h in the future are discarded** | A source with a broken clock loses data silently |
 | **Pub/Sub publish quota is consumed in the DESTINATION project** | Size the logging project, not the source projects |
 | **No cross-organization sink** | A sink cannot route logs from one organization into another organization's project. A multi-org customer needs one deployment per org |
-| **Workspace audit logs do not traverse the Log Router** | Separate pipeline. See [WORKSPACE.md](WORKSPACE.md) |
+| **Workspace audit logs traverse Log Router only if Native Sharing is enabled** | When native sharing is on, logs stream directly through org sink. When off, pulled via Admin SDK Reports API. See [WORKSPACE.md](WORKSPACE.md) |
 | **SCC findings do not traverse the Log Router** | Own NotificationConfig |
 
 ### Regions and residency
@@ -143,3 +156,67 @@ Every design here assumes a measurement, not an estimate.
 
 Then tighten the filter. Starting broad and narrowing is safe; the reverse leaves a hole
 you cannot fill, because routing is write-time and there is no backfill.
+
+---
+
+## 6. Architecture Diagrams & Visual Model Assets
+
+All architectural topologies in this repository are maintained as source-controlled **Draw.io (`.drawio`) XML models**, accompanied by machine-readable `.spec.json` definitions, 2x Retina PNGs, and scalable SVGs.
+
+### Diagram Directory Structure
+
+| Deployment / Topic | Draw.io Source | Vector SVG | 2x Retina PNG |
+|---|---|---|---|
+| **01 Sink Scope** | [`diagrams/01-sink-scope.drawio`](../diagrams/01-sink-scope.drawio) | [`diagrams/01-sink-scope.svg`](../diagrams/01-sink-scope.svg) | [`diagrams/01-sink-scope.png`](../diagrams/01-sink-scope.png) |
+| **02 Org-Wide Audit Sink** | [`diagrams/gcp-orgwide-audit-logs.drawio`](../diagrams/gcp-orgwide-audit-logs.drawio) | [`diagrams/gcp-orgwide-audit-logs.svg`](../diagrams/gcp-orgwide-audit-logs.svg) | [`diagrams/gcp-orgwide-audit-logs.png`](../diagrams/gcp-orgwide-audit-logs.png) |
+| **02 Folder Scope Sink** | [`diagrams/gcp.org-sink.folder.drawio`](../diagrams/gcp.org-sink.folder.drawio) | [`diagrams/gcp.org-sink.folder.svg`](../diagrams/gcp.org-sink.folder.svg) | [`diagrams/gcp.org-sink.folder.png`](../diagrams/gcp.org-sink.folder.png) |
+| **02 Project Pilot Scope** | [`diagrams/gcp.org-sink.project-pilot.drawio`](../diagrams/gcp.org-sink.project-pilot.drawio) | [`diagrams/gcp.org-sink.project-pilot.svg`](../diagrams/gcp.org-sink.project-pilot.svg) | [`diagrams/gcp.org-sink.project-pilot.png`](../diagrams/gcp.org-sink.project-pilot.png) |
+| **03 Data Access Audit Config** | [`diagrams/gcp.audit-config.drawio`](../diagrams/gcp.audit-config.drawio) | [`diagrams/gcp.audit-config.svg`](../diagrams/gcp.audit-config.svg) | [`diagrams/gcp.audit-config.png`](../diagrams/gcp.audit-config.png) |
+| **04 Workspace & Identity Auth** | [`diagrams/04-identity-auth-oneuptime.drawio`](../diagrams/04-identity-auth-oneuptime.drawio) | [`diagrams/04-identity-auth-oneuptime.svg`](../diagrams/04-identity-auth-oneuptime.svg) | [`diagrams/04-identity-auth-oneuptime.png`](../diagrams/04-identity-auth-oneuptime.png) |
+| **05 Pipeline Monitoring** | [`diagrams/gcp.monitoring.drawio`](../diagrams/gcp.monitoring.drawio) | [`diagrams/gcp.monitoring.svg`](../diagrams/gcp.monitoring.svg) | [`diagrams/gcp.monitoring.png`](../diagrams/gcp.monitoring.png) |
+| **06 SCC Finding Notifications** | [`diagrams/gcp.scc-findings.drawio`](../diagrams/gcp.scc-findings.drawio) | [`diagrams/gcp.scc-findings.svg`](../diagrams/gcp.scc-findings.svg) | [`diagrams/gcp.scc-findings.png`](../diagrams/gcp.scc-findings.png) |
+| **07 Asset Inventory Feeds** | [`diagrams/gcp.asset-inventory.drawio`](../diagrams/gcp.asset-inventory.drawio) | [`diagrams/gcp.asset-inventory.svg`](../diagrams/gcp.asset-inventory.svg) | [`diagrams/gcp.asset-inventory.png`](../diagrams/gcp.asset-inventory.png) |
+| **08 GCS Bucket Notifications** | [`diagrams/gcs-pubsub-notifications.drawio`](../diagrams/gcs-pubsub-notifications.drawio) | [`diagrams/gcs-pubsub-notifications.svg`](../diagrams/gcs-pubsub-notifications.svg) | [`diagrams/gcs-pubsub-notifications.png`](../diagrams/gcs-pubsub-notifications.png) |
+| **09 Long-Term Compliance Archive** | [`diagrams/gcp.gcs-archive.drawio`](../diagrams/gcp.gcs-archive.drawio) | [`diagrams/gcp.gcs-archive.svg`](../diagrams/gcp.gcs-archive.svg) | [`diagrams/gcp.gcs-archive.png`](../diagrams/gcp.gcs-archive.png) |
+| **10 Out-of-Hierarchy Billing** | [`diagrams/10-billing-account.drawio`](../diagrams/10-billing-account.drawio) | [`diagrams/10-billing-account.svg`](../diagrams/10-billing-account.svg) | [`diagrams/10-billing-account.png`](../diagrams/10-billing-account.png) |
+| **11 Network Threat Telemetry** | [`diagrams/11-network-threats.drawio`](../diagrams/11-network-threats.drawio) | [`diagrams/11-network-threats.svg`](../diagrams/11-network-threats.svg) | [`diagrams/11-network-threats.png`](../diagrams/11-network-threats.png) |
+
+### Multi-Page Draw.io Specifications
+
+The Draw.io diagram models in this repository feature structured, multi-page specifications designed for both architecture review and operational incident response:
+
+* **Page 1 — Enterprise System Topology**: Complete resource hierarchy visualization, VPC boundaries, IAM roles, service agents, and Pub/Sub streaming pipelines rendered with official GCP architectural iconography.
+* **Page 2 — Diagnostic Verification & Decision Tree**: Interactive troubleshooting flowcharts, validation command nodes, and remediation steps mapped directly to [Troubleshooting Runbooks](TROUBLESHOOTING-GUIDE.md).
+* **Page 3 — Event Payload & OCSF Normalization**: JSON event payload structures, Cloud Audit Log field extractions, and target Elastic Common Schema (ECS) / Open Cybersecurity Schema Framework (OCSF) normalizations.
+
+Accompanying each `.drawio` file is a machine-readable `.spec.json` (e.g. `images/diagrams/02-audit-logs-organization.spec.json`) specifying diagram nodes, edge connections, colors, and layout metadata.
+
+### Interactive Editing & CLI Tooling
+
+You can inspect, edit, and re-export any diagram using your local Draw.io Desktop application (`/Applications/draw.io.app`) or via the web at `app.diagrams.net`:
+
+```bash
+# 1. Open any diagram directly in Draw.io Desktop on macOS
+./scripts/open-diagram.sh 02-audit-logs-organization
+./scripts/open-diagram.sh 11-network-threats
+./scripts/open-diagram.sh 10-billing-account
+./scripts/open-diagram.sh 04-identity-auth-oneuptime
+
+# 2. Open directly in diagrams.net in your default web browser
+./scripts/open-diagram.sh 02-audit-logs-organization --web
+
+# 3. Explore interactively with pan/zoom in the web viewer
+open docs/architecture-explorer.html
+```
+
+---
+
+## 7. Deep Architecture & Diagnostic References
+
+* 📘 **Comprehensive Dataflow**: [Master GCP Telemetry Dataflow Reference](DATAFLOW-AND-ARCHITECTURE-REFERENCE.md)
+* 🛠️ **Diagnostic Runbook**: [Master Troubleshooting Guide](TROUBLESHOOTING-GUIDE.md)
+* 🔐 **Identity & Authentication**: [Enterprise Identity Threat Detection & Auth Guide](IDENTITY-AND-AUTHENTICATION-GUIDE.md)
+* 📋 **Permissions Matrix**: [Permissions Reference Across All Scopes](PERMISSIONS.md)
+* 🎯 **Filters & Costs**: [Log Category Catalog & Exclusion Rules](FILTERS.md)
+* 🏢 **Workspace Telemetry**: [Google Workspace & Identity Ingestion](WORKSPACE.md)
+* 🛡️ **VPC Service Controls**: [VPC-SC Perimeter Design](VPC-SC.md)

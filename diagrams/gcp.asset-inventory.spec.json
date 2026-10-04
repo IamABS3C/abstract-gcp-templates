@@ -1,0 +1,309 @@
+{
+  "title": "Asset and IAM change feeds to Abstract",
+  "theme": "dark",
+  "grid": false,
+  "animate": true,
+  "pages": [
+    {
+      "name": "Asset Feeds",
+      "banner": {
+        "title": "Cloud Asset Inventory Real-Time Change & IAM Feed",
+        "subtitle": "Configuration drift tracking \u00b7 IAM policy diffs \u00b7 continuous resource governance",
+        "x": 40,
+        "y": 20,
+        "w": 1050,
+        "h": 56
+      },
+      "groups": [
+        {
+          "id": "cai",
+          "label": "Cloud Asset Inventory (Org Level)",
+          "kind": "plain",
+          "x": 40,
+          "y": 110,
+          "w": 460,
+          "h": 660,
+          "color": "#2E9BF0"
+        },
+        {
+          "id": "lp",
+          "label": "Dedicated Logging Project",
+          "kind": "plain",
+          "x": 530,
+          "y": 110,
+          "w": 470,
+          "h": 660,
+          "color": "#01E69D"
+        },
+        {
+          "id": "abs",
+          "label": "Abstract Security Platform",
+          "kind": "plain",
+          "x": 1030,
+          "y": 110,
+          "w": 460,
+          "h": 660,
+          "color": "#FF216B"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "res_feed",
+          "label": "Resource Drift Feed",
+          "icon": "gcp:folders",
+          "parent": "cai",
+          "x": 60,
+          "y": 140,
+          "sublabel": "RESOURCE content type"
+        },
+        {
+          "id": "iam_feed",
+          "label": "IAM Policy Diff Feed",
+          "icon": "gcp:cloud_iam",
+          "parent": "cai",
+          "x": 60,
+          "y": 420,
+          "sublabel": "IAM_POLICY content type"
+        },
+        {
+          "id": "engine",
+          "label": "Asset Feed Engine",
+          "icon": "gcp:cloud_pubsub",
+          "parent": "cai",
+          "x": 300,
+          "y": 280,
+          "sublabel": "google_cloud_asset_organization_feed"
+        },
+        {
+          "id": "sa",
+          "label": "Asset Service Agent",
+          "icon": "gcp:cloud_iam",
+          "parent": "lp",
+          "x": 60,
+          "y": 140,
+          "sublabel": "service-NUM@gcp-sa-cloudasset...",
+          "fill": "#01E69D"
+        },
+        {
+          "id": "topic",
+          "label": "Pub/Sub Topic",
+          "icon": "gcp:cloud_pubsub",
+          "parent": "lp",
+          "x": 280,
+          "y": 140,
+          "sublabel": "abstract-asset-inventory",
+          "fill": "#FF216B"
+        },
+        {
+          "id": "sub",
+          "label": "Pull Subscription",
+          "icon": "gcp:cloud_pubsub",
+          "parent": "lp",
+          "x": 280,
+          "y": 400,
+          "sublabel": "abstract-asset-inventory-sub",
+          "fill": "#FF216B"
+        },
+        {
+          "id": "07-asset-inventory_pipe",
+          "label": "Pipelines (COLLECT)",
+          "icon": "img:../brand/abstract-logo-mark.svg",
+          "parent": "abs",
+          "x": 50,
+          "y": 110,
+          "sublabel": "streaming normalizer \u00b7 -80% drop"
+        },
+        {
+          "id": "07-asset-inventory_det",
+          "label": "Detections (DETECT)",
+          "icon": "gcp:anomaly_detection",
+          "parent": "abs",
+          "x": 260,
+          "y": 110,
+          "sublabel": "ASTRO real-time MITRE engine",
+          "fill": "#F5C61E"
+        },
+        {
+          "id": "07-asset-inventory_lake",
+          "label": "LakeVilla (RETAIN)",
+          "icon": "gcp:dataanalytics",
+          "parent": "abs",
+          "x": 50,
+          "y": 360,
+          "sublabel": "security data lake \u00b7 search",
+          "fill": "#2E9BF0"
+        },
+        {
+          "id": "07-asset-inventory_sec",
+          "label": "AI-SecOps (OPERATE)",
+          "icon": "gcp:threatintelligence",
+          "parent": "abs",
+          "x": 260,
+          "y": 360,
+          "sublabel": "ASTRO triage & response",
+          "fill": "#01E69D"
+        }
+      ],
+      "edges": [
+        {
+          "from": "res_feed",
+          "to": "engine",
+          "tone": "muted"
+        },
+        {
+          "from": "iam_feed",
+          "to": "engine",
+          "tone": "muted"
+        },
+        {
+          "from": "engine",
+          "to": "topic",
+          "tone": "brand",
+          "label": "publishes real-time diffs"
+        },
+        {
+          "from": "sa",
+          "to": "topic",
+          "tone": "teal",
+          "dashed": true,
+          "label": "roles/pubsub.publisher",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        },
+        {
+          "from": "topic",
+          "to": "sub",
+          "tone": "brand",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "sub",
+          "to": "07-asset-inventory_pipe",
+          "label": "pull",
+          "tone": "brand",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        },
+        {
+          "from": "07-asset-inventory_pipe",
+          "to": "07-asset-inventory_det",
+          "tone": "amber",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        },
+        {
+          "from": "07-asset-inventory_pipe",
+          "to": "07-asset-inventory_lake",
+          "tone": "brand",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "07-asset-inventory_det",
+          "to": "07-asset-inventory_sec",
+          "tone": "teal",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "07-asset-inventory_lake",
+          "to": "07-asset-inventory_sec",
+          "tone": "muted",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        }
+      ],
+      "badges": [
+        {
+          "id": "b1",
+          "text": "AUDIT LOGS VS ASSET FEEDS: Logs show who called; feeds show resulting state",
+          "x": 60,
+          "y": 75,
+          "w": 420,
+          "h": 26,
+          "tone": "teal"
+        },
+        {
+          "id": "b2",
+          "text": "ORGANIZATION PERMISSION: Deployer requires roles/cloudasset.owner at Org scope",
+          "x": 550,
+          "y": 75,
+          "w": 430,
+          "h": 26,
+          "tone": "amber"
+        },
+        {
+          "id": "07-asset-inventory_b_abs1",
+          "text": "COMPOSABLE SIEM: Decoupled ingest, in-stream detect & LakeVilla",
+          "x": 1050,
+          "y": 145,
+          "w": 420,
+          "h": 26,
+          "tone": "brand"
+        },
+        {
+          "id": "07-asset-inventory_b_abs2",
+          "text": "DATA REDUCTION: Drops up to 80% volume before storage tier",
+          "x": 1050,
+          "y": 725,
+          "w": 420,
+          "h": 26,
+          "tone": "teal"
+        }
+      ],
+      "notes": [
+        {
+          "id": "n1",
+          "text": "ASSET AGENT IDENTITY: Cloud Asset Inventory publishes using the service agent of the project where the feed is registered: service-@gcp-sa-cloudasset.iam.gserviceaccount.com. The template automatically grants roles/pubsub.publisher on the topic.",
+          "x": 40,
+          "y": 790,
+          "w": 1380,
+          "h": 50
+        }
+      ]
+    }
+  ]
+}

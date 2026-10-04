@@ -1,0 +1,340 @@
+---
+description: Pipeline for Google Cloud Security Command Center (SCC) finding notifications
+
+processors:
+  # Drop non-JSON messages (e.g. test probes or plain-text greetings)
+  - drop:
+      when:
+        not:
+          starts_with:
+            raw: "{"
+  - json:
+      field: raw
+  - drop:
+      when:
+        not:
+          has_fields: ["raw.finding"]
+
+  # Base envelope constants
+  - set:
+      field: vendor
+      value: GCP
+  - set:
+      field: product
+      value: "GCP Security Command Center"
+  - set:
+      field: cloud.provider
+      value: GCP
+  - set:
+      field: type
+      value: alert
+  - set:
+      field: event.kind
+      value: alert
+  - set:
+      field: event.dataset
+      value: gcp.scc_findings
+  - set:
+      field: event.provider
+      value: securitycenter
+  - set:
+      field: event.module
+      value: gcp_scc
+
+  # Event timestamp: prefer finding eventTime, fall back to createTime
+  - date:
+      field: raw.finding.eventTime
+      target_field: "@timestamp"
+      timezone: UTC
+      formats:
+        - ISO8601
+      ignore_failure: true
+      ignore_missing: true
+  - date:
+      field: raw.finding.createTime
+      target_field: "@timestamp"
+      timezone: UTC
+      formats:
+        - ISO8601
+      ignore_failure: true
+      ignore_missing: true
+      when:
+        not:
+          has_fields: ["@timestamp"]
+
+  # Resource array tuple (matching Cloud Asset Inventory & Cloud Audit shape)
+  - set:
+      field: _temp.resource.name
+      copy_from: raw.finding.resourceName
+      when:
+        has_fields: ["raw.finding.resourceName"]
+  - set:
+      field: _temp.resource.type
+      copy_from: raw.resource.type
+      when:
+        has_fields: ["raw.resource.type"]
+  - append:
+      field: resource
+      copy_from: _temp.resource
+      allow_duplicates: false
+      ignore_missing: true
+      when:
+        has_fields: ["_temp.resource.name"]
+  - remove:
+      field: _temp
+      ignore_missing: true
+
+  # Rich normalization script: finding ID, categories, severities, vulnerabilities, indicators, hierarchy
+  - script:
+      lang: js
+      description: Normalize SCC finding fields, classification, vulnerability details, IOC indicators, and cloud context
+      ignore_failure: true
+      source: >-
+        function process(event) {
+            var f = event.Get("raw.finding");
+            if (!f) return;
+
+            var res = event.Get("raw.resource") || {};
+            var name = f.name || "";
+            var category = f.category || "";
+            var severity = f.severity || "SEVERITY_UNSPECIFIED";
+            var state = f.state || "ACTIVE";
+            var mute = f.mute || "";
+            var findingClass = f.findingClass || "";
+            var resName = f.resourceName || res.name || "";
+            var extUri = f.externalUri || "";
+            var desc = f.description || "";
+            var eventTime = f.eventTime || f.createTime || "";
+
+            // 1. Finding ID & Event ID
+            var findingId = f.finding_id || f.id || "";
+            if (!findingId && name) {
+                var m = name.match(/\/findings\/([^\/]+)$/);
+                if (m) findingId = m[1];
+            }
+            if (!findingId) findingId = name;
+            event.Put("event.id", findingId ? (findingId + "@" + eventTime) : name);
+            if (findingId) {
+                event.Put("rule.id", findingId);
+                event.Put("threat.indicator", findingId);
+            }
+
+            // 2. Rule & Code
+            if (category) {
+                event.Put("rule.name", category);
+                event.Put("event.code", category);
+                event.Put("action", category);
+            }
+
+            // 3. Severity normalization (ACS canonical vs vendor)
+            event.Put("event.severity", severity);
+            var sevNorm = "info";
+            var sevUpper = String(severity).toUpperCase();
+            if (sevUpper === "CRITICAL") sevNorm = "critical";
+            else if (sevUpper === "HIGH") sevNorm = "high";
+            else if (sevUpper === "MEDIUM") sevNorm = "medium";
+            else if (sevUpper === "LOW") sevNorm = "low";
+            else if (sevUpper === "SEVERITY_UNSPECIFIED") sevNorm = "info";
+            event.Put("severity", sevNorm);
+
+            // 4. Finding Class -> Event Category & Type
+            var cat = "configuration";
+            var fClassUpper = String(findingClass).toUpperCase();
+            if (fClassUpper === "VULNERABILITY" || f.vulnerability) {
+                cat = "vulnerability";
+                event.Put("type", "vulnerability");
+            } else if (fClassUpper === "THREAT") {
+                cat = "threat";
+                event.Put("threat.framework", "MITRE ATT&CK");
+            } else if (fClassUpper === "MISCONFIGURATION") {
+                cat = "configuration";
+            } else if (fClassUpper === "OBSERVATION") {
+                cat = "observation";
+            }
+            event.Put("event.category", cat);
+            if (findingClass) event.Put("ext.scc_finding_class", findingClass);
+
+            // 5. State, Mute & Outcome
+            event.Put("ext.scc_state", state);
+            if (mute) event.Put("ext.scc_mute", mute);
+            if (state === "ACTIVE") {
+                event.Put("event.outcome", "failure");
+            } else if (state === "INACTIVE") {
+                event.Put("event.outcome", "success");
+            } else {
+                event.Put("event.outcome", "unknown");
+            }
+
+            // 6. Cloud hierarchy (project_id, organization.id, region/zone)
+            var projectId = res.projectId || res.projectDisplayName || "";
+            if (!projectId && resName) {
+                var pm = resName.match(/\/projects\/([^\/]+)/);
+                if (pm && !/^[0-9]+$/.test(pm[1])) projectId = pm[1];
+            }
+            if (projectId) {
+                event.Put("cloud.project_id", projectId);
+                event.Put("cloud.account_id", projectId);
+                event.Put("cloud.target.project_id", projectId);
+            }
+
+            // Organization ID
+            var orgId = "";
+            var orgMatch = (f.parent || name || res.parent || "").match(/organizations\/([0-9]+)/);
+            if (orgMatch) orgId = orgMatch[1];
+            if (orgId) event.Put("organization.id", orgId);
+
+            // Region / Zone extraction
+            var zm = resName.match(/\/zones\/([^\/]+)/);
+            if (zm) event.Put("cloud.availability_zone", zm[1]);
+            var rm = resName.match(/\/regions\/([^\/]+)/);
+            if (rm) event.Put("cloud.region", rm[1]);
+
+            // Service name
+            if (resName.indexOf("//") === 0) {
+                var slash = resName.indexOf(".googleapis.com");
+                if (slash > 2) {
+                    event.Put("service.name", resName.substring(2, slash));
+                }
+            }
+
+            // 7. Resource fields
+            if (resName) {
+                event.Put("resource.id", resName);
+                var lastSlash = resName.lastIndexOf("/");
+                event.Put("resource.name", lastSlash > 0 ? resName.substring(lastSlash + 1) : resName);
+            }
+            if (res.type) event.Put("resource.type", res.type);
+
+            // 8. External URI
+            if (extUri) {
+                event.Put("event.url", extUri);
+                event.Put("event.reference", extUri);
+            }
+
+            // 9. Vulnerability fields
+            if (f.vulnerability) {
+                var v = f.vulnerability;
+                if (v.cve) {
+                    var cveId = v.cve.id || "";
+                    if (cveId) {
+                        event.Put("vulnerability.id", cveId);
+                        event.Put("vulnerability_id", cveId);
+                    }
+                    if (v.cve.cvssv3 && v.cve.cvssv3.baseScore !== undefined) {
+                        event.Put("vulnerability.score.base", v.cve.cvssv3.baseScore);
+                    }
+                    if (v.cve.references && v.cve.references.length) {
+                        var refs = [];
+                        for (var r = 0; r < v.cve.references.length; r++) {
+                            if (v.cve.references[r].uri) refs.push(v.cve.references[r].uri);
+                        }
+                        if (refs.length) event.Put("vulnerability.reference", refs);
+                    }
+                    if (v.cve.upstreamFixAvailable !== undefined) {
+                        event.Put("vulnerability.fix_available", v.cve.upstreamFixAvailable);
+                    }
+                }
+                if (v.offendingPackage) {
+                    if (v.offendingPackage.packageName) {
+                        event.Put("vulnerability.package.name", v.offendingPackage.packageName);
+                    }
+                    if (v.offendingPackage.packageVersion) {
+                        event.Put("vulnerability.package.version", v.offendingPackage.packageVersion);
+                    }
+                    if (v.offendingPackage.packageType) {
+                        event.Put("vulnerability.package.architecture", v.offendingPackage.packageType);
+                    }
+                }
+                if (v.fixedPackage && v.fixedPackage.packageVersion) {
+                    event.Put("vulnerability.package.fixed_version", v.fixedPackage.packageVersion);
+                }
+                if (v.securityBulletin && v.securityBulletin.bulletinId) {
+                    event.Put("vulnerability.report_id", v.securityBulletin.bulletinId);
+                }
+            }
+
+            // 10. Indicators & IOCs
+            var relatedIps = [];
+            function addIp(ip) {
+                if (ip && relatedIps.indexOf(ip) === -1) relatedIps.push(ip);
+            }
+            if (f.indicator) {
+                var ind = f.indicator;
+                if (ind.ipAddresses && ind.ipAddresses.length) {
+                    for (var ipIdx = 0; ipIdx < ind.ipAddresses.length; ipIdx++) {
+                        var iip = ind.ipAddresses[ipIdx];
+                        addIp(iip);
+                        if (ipIdx === 0) {
+                            event.Put("source_ipv4", iip);
+                            event.Put("source_address", iip);
+                        }
+                    }
+                }
+                if (ind.domains && ind.domains.length) {
+                    event.Put("destination.domain", ind.domains[0]);
+                    event.Put("dns.question.name", ind.domains[0]);
+                }
+                if (ind.uris && ind.uris.length) {
+                    event.Put("url.original", ind.uris[0]);
+                }
+            }
+
+            // 11. Network connections
+            if (f.connections && f.connections.length) {
+                var conn = f.connections[0];
+                if (conn.sourceIp) {
+                    addIp(conn.sourceIp);
+                    event.Put("source_ipv4", conn.sourceIp);
+                    event.Put("source_address", conn.sourceIp);
+                }
+                if (conn.sourcePort !== undefined) event.Put("source_port", conn.sourcePort);
+                if (conn.destinationIp) {
+                    addIp(conn.destinationIp);
+                    event.Put("dest_ipv4", conn.destinationIp);
+                    event.Put("destination.address", conn.destinationIp);
+                }
+                if (conn.destinationPort !== undefined) event.Put("dest_port", conn.destinationPort);
+                if (conn.protocol) event.Put("network.transport", conn.protocol);
+            }
+
+            if (relatedIps.length) {
+                event.Put("related.ipv4", relatedIps);
+            }
+
+            // 12. Compliances
+            if (f.compliances && f.compliances.length) {
+                var compList = [];
+                for (var ci = 0; ci < f.compliances.length; ci++) {
+                    var c = f.compliances[ci];
+                    var cStr = (c.standard || "") + (c.version ? " " + c.version : "") + (c.ids ? " (" + c.ids.join(", ") + ")" : "");
+                    if (cStr) compList.push(cStr);
+                }
+                if (compList.length) event.Put("ext.compliance", compList.join("; "));
+            }
+
+            // 13. Source properties & explanation
+            var explanation = "";
+            if (f.sourceProperties) {
+                explanation = f.sourceProperties.Explanation || f.sourceProperties.explanation || "";
+                if (f.sourceProperties.Recommendation) {
+                    event.Put("ext.recommendation", f.sourceProperties.Recommendation);
+                }
+            }
+            if (explanation) {
+                event.Put("event.reason", explanation);
+            } else if (desc) {
+                event.Put("event.reason", desc);
+            }
+
+            // 14. Message synthesis
+            var summary = "SCC [" + sevNorm.toUpperCase() + "] " + (category || "Finding") + " on " + (resName || "resource");
+            var detail = desc || explanation;
+            if (detail) summary += ": " + detail;
+            event.Put("message", summary);
+        }
+
+  # Preserve raw finding under labels
+  - rename:
+      field: raw
+      target_field: labels
+      ignore_missing: true

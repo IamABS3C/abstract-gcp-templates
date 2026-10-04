@@ -1,0 +1,227 @@
+{
+  "title": "Tamper-Evident Long-Term Log Archive Bucket",
+  "theme": "dark",
+  "animate": true,
+  "pages": [
+    {
+      "name": "Compliance Archive",
+      "banner": {
+        "title": "Tamper-Evident Long-Term Log Archive Bucket",
+        "subtitle": "WORM Compliance \u00b7 Object Retention Lock \u00b7 Automated Multi-Tier Storage Lifecycle",
+        "w": 1000
+      },
+      "groups": [
+        {
+          "id": "org",
+          "label": "GCP Organization",
+          "x": 50,
+          "y": 80,
+          "w": 440,
+          "h": 660,
+          "color": "#2e9bf0"
+        },
+        {
+          "id": "lp",
+          "label": "Logging Project Infrastructure",
+          "x": 530,
+          "y": 80,
+          "w": 460,
+          "h": 660,
+          "color": "#01e69d"
+        },
+        {
+          "id": "abs",
+          "label": "Abstract SIEM Platform",
+          "x": 1030,
+          "y": 80,
+          "w": 360,
+          "h": 660,
+          "color": "#FF216B"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "router",
+          "label": "Log Router Org Sink",
+          "sublabel": "parallel destination routing",
+          "icon": "gcp:logging",
+          "parent": "org",
+          "x": 160,
+          "y": 160
+        },
+        {
+          "id": "writer",
+          "label": "Sink Writer Identity",
+          "sublabel": "roles/storage.objectCreator",
+          "icon": "gcp:cloud_iam",
+          "fill": "#01e69d",
+          "parent": "org",
+          "x": 160,
+          "y": 420
+        },
+        {
+          "id": "bkt_std",
+          "label": "Standard Tier (0-30d)",
+          "sublabel": "hot forensic analysis",
+          "icon": "gcp:cloud_storage",
+          "parent": "lp",
+          "x": 70,
+          "y": 120
+        },
+        {
+          "id": "bkt_near",
+          "label": "Nearline Tier (30-90d)",
+          "sublabel": "infrequent inspection",
+          "icon": "gcp:cloud_storage",
+          "parent": "lp",
+          "x": 70,
+          "y": 270
+        },
+        {
+          "id": "bkt_cold",
+          "label": "Coldline Tier (90-365d)",
+          "sublabel": "cold compliance store",
+          "icon": "gcp:cloud_storage",
+          "parent": "lp",
+          "x": 70,
+          "y": 420
+        },
+        {
+          "id": "bkt_arch",
+          "label": "Archive Tier (365d+)",
+          "sublabel": "lowest-cost long-term archive",
+          "icon": "gcp:cloud_storage",
+          "parent": "lp",
+          "x": 70,
+          "y": 550
+        },
+        {
+          "id": "worm",
+          "label": "Bucket Lock Policy",
+          "sublabel": "LOCKED retention (365d) \u00b7 WORM",
+          "icon": "gcp:security_key_enforcement",
+          "parent": "lp",
+          "x": 290,
+          "y": 300
+        },
+        {
+          "id": "topic",
+          "label": "Parallel Pub/Sub Topic",
+          "sublabel": "real-time SIEM ingestion",
+          "icon": "gcp:cloud_pubsub",
+          "fill": "#FF216B",
+          "parent": "lp",
+          "x": 290,
+          "y": 120
+        },
+        {
+          "id": "plat",
+          "label": "Abstract SIEM Engine",
+          "sublabel": "real-time threat correlation",
+          "icon": "img:brand/abstract-logo-mark.svg",
+          "parent": "abs",
+          "x": 130,
+          "y": 280
+        }
+      ],
+      "edges": [
+        {
+          "from": "router",
+          "to": "bkt_std",
+          "label": "routes logs to archive",
+          "tone": "teal"
+        },
+        {
+          "from": "router",
+          "to": "topic",
+          "label": "routes logs to SIEM",
+          "tone": "brand"
+        },
+        {
+          "from": "writer",
+          "to": "bkt_std",
+          "tone": "teal",
+          "dashed": true
+        },
+        {
+          "from": "bkt_std",
+          "to": "bkt_near",
+          "label": "30 days",
+          "tone": "muted",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "bkt_near",
+          "to": "bkt_cold",
+          "label": "90 days",
+          "tone": "muted",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "bkt_cold",
+          "to": "bkt_arch",
+          "label": "365 days",
+          "tone": "muted",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "topic",
+          "to": "plat",
+          "label": "pull",
+          "tone": "brand"
+        }
+      ],
+      "badges": [
+        {
+          "id": "b1",
+          "text": "WORM COMPLIANCE: Locked retention prevents modification even by Org Owner",
+          "x": 540,
+          "y": 100,
+          "w": 440,
+          "h": 26,
+          "tone": "teal"
+        },
+        {
+          "id": "b2",
+          "text": "DUAL PIPELINE: Real-time SIEM analytics + immutable regulatory archive",
+          "x": 60,
+          "y": 100,
+          "w": 420,
+          "h": 26,
+          "tone": "brand"
+        }
+      ],
+      "notes": [
+        {
+          "id": "n1",
+          "text": "WORM IMMUTABILITY: Regulatory frameworks (PCI-DSS 10.5, HIPAA, SOC 2) require tamper-evident retention. When Bucket Lock is placed in LOCKED state, the retention period cannot be shortened and no object can be deleted until retention expires.",
+          "x": 50,
+          "y": 760,
+          "w": 960,
+          "h": 50
+        }
+      ]
+    }
+  ]
+}

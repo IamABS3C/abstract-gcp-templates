@@ -1,0 +1,200 @@
+{
+  "title": "Security Command Center findings to Abstract",
+  "theme": "dark",
+  "animate": true,
+  "pages": [
+    {
+      "name": "SCC findings",
+      "banner": {
+        "title": "Security Command Center (SCC) Real-Time Finding Streaming",
+        "subtitle": "Real-time vulnerability posture \u00b7 Event Threat Detection (ETD) \u00b7 NotificationConfig to Pub/Sub",
+        "w": 1000
+      },
+      "groups": [
+        {
+          "id": "scc",
+          "label": "Security Command Center Engine",
+          "x": 50,
+          "y": 80,
+          "w": 460,
+          "h": 660,
+          "color": "#2e9bf0"
+        },
+        {
+          "id": "lp",
+          "label": "Dedicated Logging Project",
+          "x": 550,
+          "y": 80,
+          "w": 460,
+          "h": 660,
+          "color": "#01e69d"
+        },
+        {
+          "id": "abs",
+          "label": "Abstract Security Platform",
+          "x": 1050,
+          "y": 80,
+          "w": 360,
+          "h": 660,
+          "color": "#FF216B"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "etd",
+          "label": "Event Threat Detection",
+          "sublabel": "lateral movement, malware, mining",
+          "icon": "gcp:cloud_security_command_center",
+          "parent": "scc",
+          "x": 70,
+          "y": 100
+        },
+        {
+          "id": "vmtd",
+          "label": "VM & Container Threats",
+          "sublabel": "kernel rootkits, memory injection",
+          "icon": "gcp:cloud_security_command_center",
+          "parent": "scc",
+          "x": 70,
+          "y": 280
+        },
+        {
+          "id": "vuln",
+          "label": "Vulnerability Assessment",
+          "sublabel": "CVEs, misconfigurations, CIS",
+          "icon": "gcp:cloud_security_command_center",
+          "parent": "scc",
+          "x": 70,
+          "y": 460
+        },
+        {
+          "id": "notif_cfg",
+          "label": "SCC NotificationConfig",
+          "sublabel": "google_scc_notification_config",
+          "icon": "gcp:cloud_pubsub",
+          "parent": "scc",
+          "x": 300,
+          "y": 280
+        },
+        {
+          "id": "scc_sa",
+          "label": "SCC Service Agent",
+          "sublabel": "service-org-$ORG_ID@gcp-sa-scc...",
+          "icon": "gcp:cloud_iam",
+          "fill": "#01e69d",
+          "parent": "lp",
+          "x": 80,
+          "y": 160
+        },
+        {
+          "id": "topic",
+          "label": "Pub/Sub Topic",
+          "sublabel": "abstract-scc-findings",
+          "icon": "gcp:cloud_pubsub",
+          "fill": "#FF216B",
+          "parent": "lp",
+          "x": 280,
+          "y": 280
+        },
+        {
+          "id": "sub",
+          "label": "Pull Subscription",
+          "sublabel": "abstract-scc-findings-sub",
+          "icon": "gcp:cloud_pubsub",
+          "fill": "#FF216B",
+          "parent": "lp",
+          "x": 280,
+          "y": 460
+        },
+        {
+          "id": "plat",
+          "label": "Abstract SIEM",
+          "sublabel": "parsers/scc-findings.yml mapping",
+          "icon": "img:brand/abstract-logo-mark.svg",
+          "parent": "abs",
+          "x": 130,
+          "y": 360
+        }
+      ],
+      "edges": [
+        {
+          "from": "etd",
+          "to": "notif_cfg",
+          "tone": "muted"
+        },
+        {
+          "from": "vmtd",
+          "to": "notif_cfg",
+          "tone": "muted"
+        },
+        {
+          "from": "vuln",
+          "to": "notif_cfg",
+          "tone": "muted"
+        },
+        {
+          "from": "notif_cfg",
+          "to": "topic",
+          "label": "publishes findings",
+          "tone": "brand"
+        },
+        {
+          "from": "scc_sa",
+          "to": "topic",
+          "label": "roles/pubsub.publisher",
+          "tone": "teal",
+          "dashed": true
+        },
+        {
+          "from": "topic",
+          "to": "sub",
+          "tone": "brand",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "sub",
+          "to": "plat",
+          "label": "pull",
+          "tone": "brand"
+        }
+      ],
+      "badges": [
+        {
+          "id": "b1",
+          "text": "OUT-OF-ROUTER: SCC findings publish directly to Pub/Sub, not Log Router",
+          "x": 70,
+          "y": 100,
+          "w": 430,
+          "h": 26,
+          "tone": "amber"
+        },
+        {
+          "id": "b2",
+          "text": "AGENT BINDING: roles/pubsub.publisher bound to organization SCC agent",
+          "x": 570,
+          "y": 100,
+          "w": 420,
+          "h": 26,
+          "tone": "teal"
+        }
+      ],
+      "notes": [
+        {
+          "id": "n1",
+          "text": "SCC SERVICE AGENT PERMISSION: Organization-level SCC notifications publish using the dedicated service agent service-org-<ORG_ID>@gcp-sa-scc-notification.iam.gserviceaccount.com. This identity must hold roles/pubsub.publisher on the destination topic.",
+          "x": 50,
+          "y": 760,
+          "w": 960,
+          "h": 50
+        }
+      ]
+    }
+  ]
+}

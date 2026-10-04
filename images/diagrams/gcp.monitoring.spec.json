@@ -1,0 +1,207 @@
+{
+  "title": "Pipeline health monitoring & non-destructive observability",
+  "theme": "dark",
+  "animate": true,
+  "pages": [
+    {
+      "name": "Health Monitoring",
+      "banner": {
+        "title": "Pipeline Health Monitoring & Non-Destructive Observability",
+        "subtitle": "Zero Silent Failures \u00b7 Three Critical Alert Policies \u00b7 Real-Time Incident Routing",
+        "w": 1000
+      },
+      "groups": [
+        {
+          "id": "lp",
+          "label": "Logging Project Infrastructure",
+          "x": 40,
+          "y": 80,
+          "w": 440,
+          "h": 660,
+          "color": "#01e69d"
+        },
+        {
+          "id": "mon",
+          "label": "Cloud Monitoring & Alerting Engine",
+          "x": 520,
+          "y": 80,
+          "w": 460,
+          "h": 660,
+          "color": "#f5c61e"
+        },
+        {
+          "id": "abs",
+          "label": "Abstract SOC & Observability",
+          "x": 1020,
+          "y": 80,
+          "w": 360,
+          "h": 660,
+          "color": "#FF216B"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "sink",
+          "label": "Log Router Sink",
+          "sublabel": "exports to Pub/Sub",
+          "icon": "gcp:logging",
+          "parent": "lp",
+          "x": 160,
+          "y": 90
+        },
+        {
+          "id": "topic",
+          "label": "Pub/Sub Topic",
+          "sublabel": "abstract-audit-logs",
+          "icon": "gcp:cloud_pubsub",
+          "fill": "#FF216B",
+          "parent": "lp",
+          "x": 160,
+          "y": 290
+        },
+        {
+          "id": "sub",
+          "label": "Pull Subscription",
+          "sublabel": "abstract-audit-logs-sub",
+          "icon": "gcp:cloud_pubsub",
+          "fill": "#FF216B",
+          "parent": "lp",
+          "x": 160,
+          "y": 480
+        },
+        {
+          "id": "p1",
+          "label": "Policy 1: Sink Errors",
+          "sublabel": "logging.../exports/error_count > 0",
+          "icon": "gcp:monitor",
+          "parent": "mon",
+          "x": 80,
+          "y": 90
+        },
+        {
+          "id": "p2",
+          "label": "Policy 2: Inactivity",
+          "sublabel": "send_message_count == 0 (>60m)",
+          "icon": "gcp:monitor",
+          "parent": "mon",
+          "x": 80,
+          "y": 290
+        },
+        {
+          "id": "p3",
+          "label": "Policy 3: Backlog Stall",
+          "sublabel": "oldest_unacked_age > 1h",
+          "icon": "gcp:monitor",
+          "parent": "mon",
+          "x": 80,
+          "y": 480
+        },
+        {
+          "id": "notif",
+          "label": "Notification Channels",
+          "sublabel": "Email / Slack / PagerDuty / Webhook",
+          "icon": "gcp:cloud_pubsub",
+          "parent": "mon",
+          "x": 280,
+          "y": 290
+        },
+        {
+          "id": "plat",
+          "label": "Abstract SIEM Platform",
+          "sublabel": "synthetic canary probe every 5m",
+          "icon": "img:brand/abstract-logo-mark.svg",
+          "parent": "abs",
+          "x": 130,
+          "y": 280
+        }
+      ],
+      "edges": [
+        {
+          "from": "sink",
+          "to": "p1",
+          "tone": "danger",
+          "dashed": true
+        },
+        {
+          "from": "topic",
+          "to": "p2",
+          "tone": "amber",
+          "dashed": true
+        },
+        {
+          "from": "sub",
+          "to": "p3",
+          "tone": "warn",
+          "dashed": true
+        },
+        {
+          "from": "p1",
+          "to": "notif",
+          "tone": "danger"
+        },
+        {
+          "from": "p2",
+          "to": "notif",
+          "tone": "amber"
+        },
+        {
+          "from": "p3",
+          "to": "notif",
+          "tone": "warn"
+        },
+        {
+          "from": "notif",
+          "to": "plat",
+          "label": "incident webhook",
+          "tone": "brand"
+        },
+        {
+          "from": "plat",
+          "to": "sink",
+          "label": "synthetic canary probe",
+          "tone": "teal",
+          "dashed": true
+        }
+      ],
+      "badges": [
+        {
+          "id": "b1",
+          "text": "POLICY 1 (SINK ERRORS): Instant alert on publisher permission revocation",
+          "x": 540,
+          "y": 100,
+          "w": 420,
+          "h": 26,
+          "tone": "brand"
+        },
+        {
+          "id": "b2",
+          "text": "POLICY 2 (DEAD-MAN SWITCH): Catches silent pipeline drops within 60 min",
+          "x": 540,
+          "y": 300,
+          "w": 420,
+          "h": 26,
+          "tone": "amber"
+        },
+        {
+          "id": "b3",
+          "text": "POLICY 3 (SUBSCRIBER STALL): Alerts if consumer stops acknowledging",
+          "x": 540,
+          "y": 490,
+          "w": 420,
+          "h": 26,
+          "tone": "teal"
+        }
+      ],
+      "notes": [
+        {
+          "id": "n1",
+          "text": "THE DEAD-MAN PRINCIPLE: Logging pipelines must never fail quietly. If an adversary strips the sink publisher role or revokes credentials, an inactivity alert triggers immediately before damage spreads.",
+          "x": 40,
+          "y": 760,
+          "w": 960,
+          "h": 50
+        }
+      ]
+    }
+  ]
+}

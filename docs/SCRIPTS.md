@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="../brand/abstract-logo-white.svg">
+  <img alt="Abstract Security" src="../brand/abstract-logo-black.svg" width="180">
+</picture>
+
 # The scripts
 
 Two, with different jobs. **Run `preflight.sh` first, every time.**
@@ -173,8 +178,74 @@ gcloud pubsub subscriptions pull abstract-audit-logs-sub --project=P --limit=5 -
 
 ```
 Always:            preflight.sh
+Estate Discovery:  audit-gcp-estate.sh
+Guided Interactive: abstract-gcp-setup.sh
+Diagram Viewer:    open-diagram.sh
 Guided, no install: the Cloud Shell button          → docs/DEPLOY-CLOUD-SHELL.md
 Own CI and state:   terraform / tofu in deployments/
 Google holds state: Infrastructure Manager          → docs/DEPLOY-INFRA-MANAGER.md
 No IaC practice:    deploy-abstract-gcp.sh
 ```
+
+---
+
+# Additional Helper Scripts
+
+### `audit-gcp-estate.sh`
+Performs a comprehensive, non-destructive discovery audit across your Google Cloud organization:
+- Discovers Organization ID, active account, project inventory, and hierarchy structure.
+- Audits active log sinks, Data Access audit configs, Cloud Armor policies, and billing accounts.
+- Evaluates Org Policies (`constraints/iam.disableServiceAccountKeyCreation`).
+
+```bash
+./scripts/audit-gcp-estate.sh
+```
+
+### `abstract-gcp-setup.sh`
+Interactive 10-step guided onboarding wizard:
+- Step 1: Preflight IAM and Organization Policy check.
+- Step 2: Audit estate discovery.
+- Step 3: Central logging project creation or selection.
+- Step 4: Core Pub/Sub topic and subscription setup.
+- Step 5: Aggregated log sink creation.
+- Step 6: Data Access audit configuration.
+- Step 7: Workspace identity onboarding.
+- Step 8: Health alerting policies.
+- Step 9: Safe verification test probe.
+- Step 10: Abstract Security connector configuration generator.
+
+```bash
+# Run full interactive setup
+./scripts/abstract-gcp-setup.sh
+
+# Or run specific step
+./scripts/abstract-gcp-setup.sh --step 9
+```
+
+### `open-diagram.sh`
+Launches any architecture diagram directly into Draw.io Desktop or diagrams.net in your browser:
+
+```bash
+# Open in macOS Draw.io Desktop
+./scripts/open-diagram.sh 02-audit-logs-organization
+
+# Open in browser via diagrams.net
+./scripts/open-diagram.sh 02-audit-logs-organization --web
+```
+
+### Modular Setup Scripts
+Dedicated helper scripts for specific telemetry pipelines:
+- `scripts/setup-network-threats.sh`: Deploys isolated Cloud Armor / Cloud IDS pipeline.
+- `scripts/setup-billing-logs.sh`: Provisions out-of-hierarchy billing account sink.
+- `scripts/setup-scc-findings.sh`: Deploys Security Command Center findings notifications.
+- `scripts/setup-asset-inventory.sh`: Configures Cloud Asset Inventory real-time feeds.
+- `scripts/setup-workspace-reports.sh`: Sets up Google Workspace Admin SDK service accounts.
+
+---
+
+## Related Documentation & Diagnostics
+
+* 📘 **Master Walkthrough**: [Comprehensive Master Walkthrough](../WALKTHROUGH.md)
+* 🛠️ **Troubleshooting Runbooks**: [Master Troubleshooting Guide](TROUBLESHOOTING-GUIDE.md)
+* 📘 **Master Telemetry Reference**: [Master GCP Telemetry Dataflow Reference](DATAFLOW-AND-ARCHITECTURE-REFERENCE.md)
+* 🌐 **Interactive Diagram Explorer**: [Architecture Explorer Web UI](architecture-explorer.html)

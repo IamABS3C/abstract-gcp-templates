@@ -46,6 +46,15 @@ remote_state_bucket = "acme-abstract-tfstate"
 remote_state_prefix = "01-organization"  # its state key keeps the original folder name
 ```
 
+<walkthrough-info-message>**Prerequisite Preflight Check:** Verify your organization has SCC enabled and can query findings before provisioning notification feeds:</walkthrough-info-message>
+
+```bash
+# Verify SCC API access and active findings
+gcloud scc findings list --organization="YOUR_ORG_ID" --limit=1
+```
+
+If this command returns `PERMISSION_DENIED`, obtain `roles/securitycenter.admin` or `roles/securitycenter.notificationConfigEditor` before proceeding.
+
 ## Step 2 — Decide the filter
 
 The default is **active, unmuted** findings:
@@ -64,16 +73,58 @@ cat > terraform.tfvars <<EOF
 org_id                           = "YOUR_ORG_ID"
 log_project                      = "YOUR_LOG_PROJECT"
 subscriber_service_account_email = "abstract-pubsub-reader@YOUR_LOG_PROJECT.iam.gserviceaccount.com"
+filter                           = "state=\"ACTIVE\" AND NOT mute=\"MUTED\""
 EOF
 terraform init && terraform plan
 ```
 
-## Step 4 — Verify
+When the plan verifies, apply:
 
 ```bash
-gcloud scc notifications list --organization=YOUR_ORG_ID
-gcloud pubsub subscriptions describe abstract-audit-logs-sub-scc --project=YOUR_LOG_PROJECT
+terraform apply
 ```
+
+## Step 4 — Verify the deployment and outputs
+
+Check that the resources were provisioned:
+
+```bash
+terraform output -raw scc_topic
+terraform output -raw scc_subscription
+```
+
+Inspect the notification config at the organization:
+
+```bash
+gcloud scc notifications describe abstract-scc-findings-config --organization=YOUR_ORG_ID
+```
+
+Confirm the subscription exists and can receive findings:
+
+```bash
+gcloud pubsub subscriptions describe abstract-scc-findings-sub --project=YOUR_LOG_PROJECT
+```
+
+## Step 5 — Troubleshooting & Failure Modes
+
+Before wrapping up, verify the two most common failure modes:
+
+### 1. The SCC Service Agent Publisher Role Trap
+SCC publishes using its organization service agent, formatted as `service-org-ORG_NUM@gcp-sa-scc-notification.iam.gserviceaccount.com`. If this identity loses `roles/pubsub.publisher`, findings are dropped silently:
+
+```bash
+gcloud pubsub topics get-iam-policy abstract-scc-findings \
+  --project=YOUR_LOG_PROJECT \
+  --filter="bindings.role:roles/pubsub.publisher"
+```
+
+### 2. Muted Findings Not Appearing
+If you trigger a test finding in SCC and it does not arrive on Pub/Sub:
+1. Check if the finding was auto-muted by an SCC mute rule:
+   ```bash
+   gcloud scc findings list --organization=YOUR_ORG_ID --filter="mute=\"MUTED\"" --limit=5
+   ```
+2. Muted findings are explicitly excluded by `NOT mute="MUTED"`. To test unmuted flow, unmute the finding in the SCC console or adjust your filter.
 
 <walkthrough-conclusion-trophy></walkthrough-conclusion-trophy>
 

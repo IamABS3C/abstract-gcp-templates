@@ -40,6 +40,11 @@ locals {
       tier   = "low"
       what   = "A service denied access due to a security-policy violation. Always on, but charged."
     }
+    identity_access = {
+      clause = "(logName:\"cloudaudit.googleapis.com%2Fdata_access\" AND protoPayload.serviceName=(\"iamcredentials.googleapis.com\" OR \"sts.googleapis.com\" OR \"login.googleapis.com\" OR \"iap.googleapis.com\"))"
+      tier   = "low"
+      what   = "Authentication and identity events: service account impersonation (GenerateAccessToken), Workload Identity Federation (STS token exchange), Google Workspace shared login events, and Identity-Aware Proxy. Requires Data Access audit logging on these services."
+    }
 
     # ---- Kubernetes --------------------------------------------------------
     gke_control_plane = {

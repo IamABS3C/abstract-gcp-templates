@@ -62,21 +62,44 @@ terraform init && terraform plan
 Scope `object_name_prefix` — an unscoped config notifies on every object written, and you
 pay to fetch each one.
 
+When the plan verifies, apply:
+
+```bash
+terraform apply
+```
+
 ## Step 4 — The two permissions people miss
+
+Inspect the GCS service agent map created by Terraform:
 
 ```bash
 terraform output gcs_service_agents
 ```
 
-**The GCS service agent publishes, not you** — and there is one PER OWNING PROJECT, which is why this output is a map. Without `roles/pubsub.publisher` the config
+**1. The GCS service agent publishes, not you** — and there is one PER OWNING PROJECT, which is why this output is a map. Without `roles/pubsub.publisher` the config
 is created successfully and delivers nothing. Terraform grants it here.
 
-**The notification is a POINTER, not the data.** Abstract needs `pubsub.subscriber` on the
+Verify the publisher binding on the topic:
+
+```bash
+gcloud pubsub topics get-iam-policy abstract-bucket-logs \
+  --project="YOUR_LOG_PROJECT" \
+  --filter="bindings.role:roles/pubsub.publisher"
+```
+
+**2. The notification is a POINTER, not the data.** Abstract needs `pubsub.subscriber` on the
 subscription *and* `storage.objectViewer` on the bucket. Missing the second gives you
 notifications with no content — which reads like a parser bug and is not one. Both are
 granted here.
 
-## Step 5 — Test end to end
+Verify the reader identity on the bucket:
+
+```bash
+gcloud storage buckets get-iam-policy gs://YOUR_BUCKET \
+  --filter="bindings.role:roles/storage.objectViewer"
+```
+
+## Step 5 — Test end to end & Troubleshooting
 
 ```bash
 gsutil cp /tmp/real-sample.gz gs://YOUR_BUCKET/logs/
@@ -84,6 +107,20 @@ gsutil cp /tmp/real-sample.gz gs://YOUR_BUCKET/logs/
 
 Use a **real** file from the producer. A hand-made one is always the well-formed case,
 which is exactly why it proves nothing.
+
+### Troubleshooting: Verify Notification Arrival
+
+Pull the test notification from the subscription:
+
+```bash
+gcloud pubsub subscriptions pull abstract-bucket-logs-sub \
+  --project="YOUR_LOG_PROJECT" \
+  --limit=1
+```
+
+If no message arrives:
+1. Verify the uploaded file matches the configured `object_name_prefix` (`logs/`).
+2. Verify the bucket-owning project's GCS service agent has `roles/pubsub.publisher`.
 
 <walkthrough-conclusion-trophy></walkthrough-conclusion-trophy>
 

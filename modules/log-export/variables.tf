@@ -89,12 +89,13 @@ variable "audit_streams" {
 variable "data_access_services" {
   description = <<-EOT
     When data_access is in audit_streams, restrict it to these services rather than the whole
-    estate. Recommended opening position: bigquery.googleapis.com and storage.googleapis.com —
-    captures the exfiltration-shaped signal without ingesting every routine read.
+    estate. Recommended opening position: bigquery.googleapis.com, storage.googleapis.com,
+    cloudkms.googleapis.com, iamcredentials.googleapis.com, sts.googleapis.com, login.googleapis.com —
+    captures data exfiltration and identity/auth token events without ingesting every routine read.
     Empty list means ALL services, which is the expensive option. Choose it deliberately.
   EOT
   type        = list(string)
-  default     = ["bigquery.googleapis.com", "storage.googleapis.com", "cloudkms.googleapis.com"]
+  default     = ["bigquery.googleapis.com", "storage.googleapis.com", "cloudkms.googleapis.com", "iamcredentials.googleapis.com", "sts.googleapis.com", "login.googleapis.com"]
 }
 
 variable "platform_log_filters" {
@@ -202,7 +203,7 @@ variable "log_categories" {
     the module composes the filter. An unknown name FAILS AT PLAN rather than
     silently collecting nothing.
 
-    Audit and identity : admin_activity, system_event, policy_denied
+    Audit and identity : admin_activity, system_event, policy_denied, identity_access
     Kubernetes         : gke_control_plane, gke_container_logs
     Networking         : firewall, dns_queries, vpc_flows, nat_flows, load_balancer
     Compute            : cloud_run, vm_guest

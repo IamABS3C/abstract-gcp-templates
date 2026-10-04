@@ -1,0 +1,23 @@
+# Minimal configuration for billing account log export.
+# Admin Activity + System Event across the billing account.
+billing_account_id = "012345-567890-ABCDEF" # gcloud billing accounts list
+log_project        = "acme-security-logging"
+
+# ---------------------------------------------------------------------------
+# Everything below is optional. Every name here IS a declared variable in this
+# root — uncommenting something undeclared produces a warning and is then
+# SILENTLY IGNORED.
+# ---------------------------------------------------------------------------
+
+# log_categories = ["admin_activity", "system_event"]
+
+# Drop noise at the sink, where filtering is free.
+# exclusions = [
+#   {
+#     name        = "exclude-known-noise"
+#     description = "Exclude routine noisy calls if needed."
+#     filter      = "..."
+#   },
+# ]
+
+# labels = { owner = "security", managed_by = "terraform" }

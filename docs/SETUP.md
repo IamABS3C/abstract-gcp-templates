@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="../brand/abstract-logo-white.svg">
+  <img alt="Abstract Security" src="../brand/abstract-logo-black.svg" width="180">
+</picture>
+
 # Setting up from nothing
 
 Everything needed before the first deployment: which scope, whether to create a project,
@@ -10,6 +15,10 @@ against the real environment instead of in the abstract.
 ---
 
 ## 1. Decide the scope — this drives everything else
+
+<p align="center">
+  <img src="../images/diagrams/01-sink-scope.png" alt="Comparative Sink Scope Matrix - Org vs Folder vs Project" width="100%">
+</p>
 
 | | Covers future projects | Needs | Use when |
 |---|---|---|---|
@@ -150,12 +159,23 @@ gcloud alpha services quota list --service=pubsub.googleapis.com \
   --consumer=projects/$LOG_PROJECT 2>/dev/null | head -20
 ```
 
+> [!WARNING]
+> ### Deep Troubleshooting Callout: Destination Quota Saturation
+> Quota for Pub/Sub publish throughput is enforced on the destination project holding the topics, NOT the projects where events occur.
+> If large workloads trigger simultaneous audits or high-volume streams (`vpc_flows`, `data_access_all`) are routed into the default topic, publishing will fail with `RESOURCE_EXHAUSTED`.
+> - Check publisher errors: `gcloud monitoring metrics list --project="$LOG_PROJECT" --filter="metric.type:logging.googleapis.com/exports/error_count"`
+> - Partition high-volume telemetry onto a dedicated topic (`11-network-threats`) or request a regional throughput increase.
+
 If a sink cannot publish, **Cloud Logging drops the entry.** No retry, no backfill — only
 `logging.googleapis.com/exports/error_count`, which `05-health-alerts` alerts on.
 
 ---
 
 ## 5. Every permission, by task
+
+<p align="center">
+  <img src="../images/diagrams/02-audit-logs-organization.png" alt="Abstract Security - GCP Org-Wide Aggregated Audit Log Pipeline" width="100%">
+</p>
 
 ### Deploying the pipeline
 
@@ -167,6 +187,22 @@ If a sink cannot publish, **Cloud Logging drops the entry.** No retry, no backfi
 | you | `roles/serviceusage.serviceUsageAdmin` | logging project | Enable APIs |
 | **sink writer identity** | `roles/pubsub.publisher` | the **topic** | Automated here. **The #1 skipped step when done by hand** |
 | abstract | `roles/pubsub.subscriber` | the **subscription** | Abstract pulls; never publisher, never project-wide |
+
+> [!CAUTION]
+> ### Deep Troubleshooting Callout: Silent Sink Drops from Missing Topic IAM
+> When creating an aggregated sink at the Organization level, GCP automatically allocates a service account `serviceAccount:service-org-ORG_NUM@gcp-sa-logging.iam.gserviceaccount.com`.
+> **This account possesses NO IAM permissions by default.**
+> If the `roles/pubsub.publisher` role is not explicitly bound on the destination topic, the sink drops all logs with zero console warnings and zero error events!
+>
+> Always verify:
+> ```bash
+> WRITER_SA=$(gcloud logging sinks describe abstract-org-audit-sink --organization="$ORG_ID" --format="value(writerIdentity)")
+> gcloud pubsub topics get-iam-policy abstract-audit-logs --project="$LOG_PROJECT" \
+>   --flatten="bindings[].members" \
+>   --filter="bindings.role:roles/pubsub.publisher AND bindings.members:${WRITER_SA}" \
+>   --format="table(bindings.role,bindings.members)"
+> ```
+> See [Master Troubleshooting Guide: Step 3](TROUBLESHOOTING-GUIDE.md#step-3-sink-writer-identity--pubsub-topic-permissions-the-1-silent-failure-trap).
 
 ### Enabling Data Access
 
@@ -241,3 +277,14 @@ services that generate nothing.
 
 Audit config before the pipeline, so the logs exist by the time the filter looks for them.
 The reverse order works too — it just collects nothing until you catch up.
+
+---
+
+## 8. Related Architecture & Diagnostic Documentation
+
+* 📘 **Master Telemetry Reference**: [Master GCP Telemetry Dataflow Reference](DATAFLOW-AND-ARCHITECTURE-REFERENCE.md)
+* 🛠️ **Troubleshooting Runbooks**: [Master Troubleshooting Guide](TROUBLESHOOTING-GUIDE.md)
+* 📋 **Permissions Matrix**: [Permissions Reference Across All Scopes](PERMISSIONS.md)
+* 🎯 **Filters & Costs**: [Log Category Catalog & Exclusion Rules](FILTERS.md)
+* 🌐 **Interactive Diagram Explorer**: [Architecture Explorer Web Viewer](architecture-explorer.html)
+* 🎨 **Interactive Draw.io Launcher**: `./scripts/open-diagram.sh 02-audit-logs-organization`

@@ -1,0 +1,40 @@
+{
+    "workbench.commandPalette.preserveInput": true,
+    "telemetry.editStats.showDecorations": true,
+    "chat.includeReferencedInstructions": true,
+    "chat.mcp.discovery.enabled": {
+        "claude-desktop": true,
+        "copilot": true,
+        "cursor-global": true,
+        "cursor-workspace": true,
+        "windsurf": true
+    },
+    "chat.mcp.gallery.enabled": true,
+    "chat.mcp.assisted.nuget.enabled": true,
+    "chat.viewProgressBadge.enabled": true,
+    "chat.restoreLastPanelSession": true,
+    "dotnetAcquisitionExtension.allowInvalidPaths": true,
+    "dotnetAcquisitionExtension.enablePreviewFeatures": true,
+    "antigravity.autoOpenFiles": true,
+    "aws.experiments": {
+        "jsonResourceModification": true,
+        "amazonqLSP": true,
+        "amazonqLSPInline": true,
+        "amazonqChatLSP": true,
+        "amazonqLSPInlineChat": true,
+        "amazonqLSPNEP": true,
+        "cloudFormationService": true
+    },
+    "aws.sagemaker.studio.spaces.enableIdentityFiltering": true,
+    "aws.samcli.enableCodeLenses": true,
+    "aws.samcli.legacyDeploy": true,
+    "azureResourceGroups.duplicateSubscriptionMode": true,
+    "azureResourceGroups.enableChatStandIn": true,
+    "azureResourceGroups.showHiddenTypes": true,
+    "bicep.completions.getAllAccessibleAzureContainerRegistries": true,
+    "claudeCode.enableNewConversationShortcut": true,
+    "containers.contexts.showInStatusBar": true,
+    "application.experimental.rendererProfiling": true,
+    "workbench.editor.alwaysShowEditorActions": true,
+    "files.autoGuessEncoding": true
+}

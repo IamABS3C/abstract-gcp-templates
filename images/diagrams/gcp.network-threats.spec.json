@@ -1,0 +1,205 @@
+{
+  "title": "Network Threat Telemetry Export to Abstract Security",
+  "theme": "dark",
+  "animate": true,
+  "pages": [
+    {
+      "name": "Network Threats",
+      "banner": {
+        "title": "Network Threat Telemetry Export Pipeline",
+        "subtitle": "Four security pillars \u00b7 50,000 eps high-volume isolation \u00b7 Cloud Armor, IDS, DNS, Firewall",
+        "w": 1000
+      },
+      "groups": [
+        {
+          "id": "surfaces",
+          "label": "GCP Network Security Telemetry Surfaces",
+          "x": 50,
+          "y": 80,
+          "w": 480,
+          "h": 660,
+          "color": "#f5c61e"
+        },
+        {
+          "id": "agg_sink",
+          "label": "Aggregated Network Sink & Transport",
+          "x": 570,
+          "y": 80,
+          "w": 440,
+          "h": 660,
+          "color": "#2e9bf0"
+        },
+        {
+          "id": "abs",
+          "label": "Abstract Security SIEM",
+          "x": 1050,
+          "y": 80,
+          "w": 360,
+          "h": 660,
+          "color": "#FF216B"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "armor",
+          "label": "Cloud Armor WAF",
+          "sublabel": "resource.type=http_load_balancer \u00b7 OWASP & DDoS",
+          "icon": "gcp:cloud_armor",
+          "parent": "surfaces",
+          "x": 60,
+          "y": 100
+        },
+        {
+          "id": "ids",
+          "label": "Cloud IDS Threat Engine",
+          "sublabel": "logName:ids.../threat \u00b7 CVEs & malware",
+          "icon": "gcp:cloud_security",
+          "parent": "surfaces",
+          "x": 60,
+          "y": 240
+        },
+        {
+          "id": "dns",
+          "label": "VPC Cloud DNS Queries",
+          "sublabel": "logName:dns.../dns_queries \u00b7 C2 & tunneling",
+          "icon": "gcp:cloud_dns",
+          "parent": "surfaces",
+          "x": 60,
+          "y": 380
+        },
+        {
+          "id": "fw",
+          "label": "VPC Firewall Decisions",
+          "sublabel": "logName:compute.../firewall \u00b7 ALLOW / DENY",
+          "icon": "gcp:cloud_firewall_rules",
+          "parent": "surfaces",
+          "x": 60,
+          "y": 520
+        },
+        {
+          "id": "sink",
+          "label": "Network Log Sink",
+          "sublabel": "abstract-network-threats-sink",
+          "icon": "gcp:logging",
+          "parent": "agg_sink",
+          "x": 150,
+          "y": 140
+        },
+        {
+          "id": "topic",
+          "label": "Pub/Sub Topic",
+          "sublabel": "abstract-network-threats (dedicated 50k eps)",
+          "icon": "gcp:cloud_pubsub",
+          "fill": "#FF216B",
+          "parent": "agg_sink",
+          "x": 150,
+          "y": 340
+        },
+        {
+          "id": "sub",
+          "label": "Pull Subscription",
+          "sublabel": "abstract-network-threats-sub (tuned batching)",
+          "icon": "gcp:cloud_pubsub",
+          "fill": "#FF216B",
+          "parent": "agg_sink",
+          "x": 150,
+          "y": 520
+        },
+        {
+          "id": "plat",
+          "label": "Abstract SIEM Engine",
+          "sublabel": "high-throughput analytics & MITRE network detections",
+          "icon": "img:brand/abstract-logo-mark.svg",
+          "parent": "abs",
+          "x": 130,
+          "y": 320
+        }
+      ],
+      "edges": [
+        {
+          "from": "armor",
+          "to": "sink",
+          "tone": "muted"
+        },
+        {
+          "from": "ids",
+          "to": "sink",
+          "tone": "muted"
+        },
+        {
+          "from": "dns",
+          "to": "sink",
+          "tone": "muted"
+        },
+        {
+          "from": "fw",
+          "to": "sink",
+          "tone": "muted"
+        },
+        {
+          "from": "sink",
+          "to": "topic",
+          "label": "writer identity needs\nroles/pubsub.publisher",
+          "tone": "warn",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "topic",
+          "to": "sub",
+          "tone": "brand",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "sub",
+          "to": "plat",
+          "label": "high-speed pull",
+          "tone": "brand"
+        }
+      ],
+      "badges": [
+        {
+          "id": "b1",
+          "text": "NOISY NEIGHBOR ISOLATION: 50,000 eps stream isolated from control plane",
+          "x": 70,
+          "y": 100,
+          "w": 440,
+          "h": 26,
+          "tone": "teal"
+        },
+        {
+          "id": "b2",
+          "text": "DEDICATED TOPIC: Protects critical IAM audit logs during network attacks",
+          "x": 580,
+          "y": 100,
+          "w": 420,
+          "h": 26,
+          "tone": "brand"
+        }
+      ],
+      "notes": [
+        {
+          "id": "n1",
+          "text": "VOLUME PROFILE ISOLATION: Network telemetry (DNS queries, WAF decisions) produces 100x to 1000x the volume of administrative audit logs. Aggregating network logs into a dedicated topic protects the management plane from quota exhaustion during volumetric attacks.",
+          "x": 50,
+          "y": 760,
+          "w": 960,
+          "h": 50
+        }
+      ]
+    }
+  ]
+}

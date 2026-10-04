@@ -1,0 +1,223 @@
+{
+  "title": "Google Workspace logs to Abstract",
+  "theme": "dark",
+  "animate": true,
+  "pages": [
+    {
+      "name": "Workspace",
+      "banner": {
+        "title": "Google Workspace & Cloud Identity Ingestion",
+        "subtitle": "Dual Ingestion Pathways: Native Zero-Polling Sharing vs. Admin SDK Reports API",
+        "w": 1000
+      },
+      "groups": [
+        {
+          "id": "ws",
+          "label": "Google Workspace Tenant (admin.google.com)",
+          "x": 40,
+          "y": 80,
+          "w": 520,
+          "h": 680,
+          "color": "#f5c61e"
+        },
+        {
+          "id": "gcp",
+          "label": "Google Cloud Logging Plane & Projects",
+          "x": 600,
+          "y": 80,
+          "w": 460,
+          "h": 680,
+          "color": "#2e9bf0"
+        },
+        {
+          "id": "abs",
+          "label": "Abstract Security Platform",
+          "x": 1100,
+          "y": 80,
+          "w": 380,
+          "h": 680,
+          "color": "#FF216B"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "users",
+          "label": "User Logins & 2SV",
+          "sublabel": "login.googleapis.com",
+          "icon": "gcp:users",
+          "parent": "ws",
+          "x": 60,
+          "y": 80
+        },
+        {
+          "id": "admin",
+          "label": "Admin & Groups",
+          "sublabel": "privilege & group changes",
+          "icon": "gcp:cloud_iam",
+          "parent": "ws",
+          "x": 60,
+          "y": 240
+        },
+        {
+          "id": "monsters",
+          "label": "Gmail & Drive",
+          "sublabel": "volume monsters \u00b7 audit with care",
+          "icon": "gcp:cloud_storage",
+          "parent": "ws",
+          "x": 60,
+          "y": 400
+        },
+        {
+          "id": "native",
+          "label": "Native Audit Sharing",
+          "sublabel": "Admin Console GCP sharing toggle",
+          "icon": "gcp:logging",
+          "parent": "ws",
+          "x": 320,
+          "y": 140
+        },
+        {
+          "id": "reports",
+          "label": "Admin SDK Reports API",
+          "sublabel": "REST API with OAuth delegation",
+          "icon": "gcp:cloud_apis",
+          "parent": "ws",
+          "x": 320,
+          "y": 360
+        },
+        {
+          "id": "org_sink",
+          "label": "Org Log Sink",
+          "sublabel": "abstract-org-audit-sink",
+          "icon": "gcp:logging",
+          "parent": "gcp",
+          "x": 60,
+          "y": 140
+        },
+        {
+          "id": "sa",
+          "label": "Workspace Reader SA",
+          "sublabel": "abstract-workspace-reader",
+          "icon": "gcp:cloud_iam",
+          "fill": "#01e69d",
+          "parent": "gcp",
+          "x": 60,
+          "y": 360
+        },
+        {
+          "id": "topic",
+          "label": "Pub/Sub Topic",
+          "sublabel": "abstract-workspace-logs",
+          "icon": "gcp:cloud_pubsub",
+          "fill": "#FF216B",
+          "parent": "gcp",
+          "x": 280,
+          "y": 240
+        },
+        {
+          "id": "plat",
+          "label": "Abstract Connector",
+          "sublabel": "normalized user & admin telemetry",
+          "icon": "img:brand/abstract-logo-mark.svg",
+          "parent": "abs",
+          "x": 140,
+          "y": 240
+        }
+      ],
+      "edges": [
+        {
+          "from": "users",
+          "to": "native",
+          "tone": "teal"
+        },
+        {
+          "from": "admin",
+          "to": "native",
+          "tone": "teal"
+        },
+        {
+          "from": "users",
+          "to": "reports",
+          "tone": "muted",
+          "dashed": true
+        },
+        {
+          "from": "admin",
+          "to": "reports",
+          "tone": "muted",
+          "dashed": true
+        },
+        {
+          "from": "native",
+          "to": "org_sink",
+          "label": "Pathway A: Zero Polling",
+          "tone": "teal"
+        },
+        {
+          "from": "org_sink",
+          "to": "topic",
+          "label": "stream",
+          "tone": "teal"
+        },
+        {
+          "from": "sa",
+          "to": "reports",
+          "label": "Pathway B: Domain-Wide Delegation",
+          "tone": "amber",
+          "dashed": true
+        },
+        {
+          "from": "reports",
+          "to": "plat",
+          "label": "API pull",
+          "tone": "brand"
+        },
+        {
+          "from": "topic",
+          "to": "plat",
+          "label": "Pub/Sub pull",
+          "tone": "teal"
+        }
+      ],
+      "badges": [
+        {
+          "id": "b1",
+          "text": "PATHWAY A (RECOMMENDED): Native Cloud Audit Sharing (Real-Time, Zero Polling)",
+          "x": 60,
+          "y": 100,
+          "w": 460,
+          "h": 26,
+          "tone": "teal"
+        },
+        {
+          "id": "b2",
+          "text": "PATHWAY B (ENRICHMENT): Admin SDK Reports API with Domain-Wide Delegation",
+          "x": 60,
+          "y": 570,
+          "w": 450,
+          "h": 26,
+          "tone": "amber"
+        },
+        {
+          "id": "b3",
+          "text": "SUPER ADMIN MANDATE: Workspace Super Admin must approve OAuth client & scopes",
+          "x": 600,
+          "y": 570,
+          "w": 460,
+          "h": 26,
+          "tone": "brand"
+        }
+      ],
+      "notes": [
+        {
+          "id": "n1",
+          "text": "DUAL WORKSPACE ARCHITECTURE: Native GCP audit sharing is configured once in Admin Console (Account settings \u2192 Legal & compliance \u2192 Sharing options \u2192 GCP). It streams logins and admin events directly through the org sink into Pub/Sub with zero polling. Domain-wide delegation is used when native sharing cannot be enabled or for directory user/group queries.",
+          "x": 40,
+          "y": 780,
+          "w": 1000,
+          "h": 50
+        }
+      ]
+    }
+  ]
+}

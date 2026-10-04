@@ -54,6 +54,43 @@ cannot publish to Pub/Sub.
 `deletion_policy` defaults to **PREVENT**, which is right for a project holding an audit
 pipeline.
 
+## Step 3 — Verify the deployment
+
+Run these verification commands before proceeding to ensure the logging project is ready for telemetry:
+
+```bash
+# 1. Confirm the project was provisioned and active
+PROJ=$(terraform output -raw project_id)
+echo "Logging project: $PROJ"
+
+# 2. Verify that Pub/Sub and Logging APIs are enabled
+gcloud services list --project="$PROJ" --enabled \
+  --filter="name:(pubsub.googleapis.com OR logging.googleapis.com OR iam.googleapis.com)"
+
+# 3. Verify billing is linked (required for Pub/Sub quotas)
+gcloud beta billing projects describe "$PROJ" --format="table(billingAccountName,billingEnabled)"
+```
+
+### Failure Troubleshooting Tips
+
+* **Error: `billingAccount not configured` or `FAILED_PRECONDITION`**:
+  Pub/Sub cannot create topics without active billing. Re-link your billing account:
+  ```bash
+  gcloud beta billing projects link "$PROJ" --billing-account="YOUR_BILLING_ACCOUNT_ID"
+  ```
+* **Error: `The caller does not have permission` during project creation**:
+  Your identity needs `roles/resourcemanager.projectCreator` on the Organization or parent Folder:
+  ```bash
+  gcloud organizations add-iam-policy-binding "YOUR_ORG_ID" \
+    --member="user:$(gcloud config get-value account)" \
+    --role="roles/resourcemanager.projectCreator"
+  ```
+* **Error: `API is not enabled`**:
+  Enable missing APIs manually:
+  ```bash
+  gcloud services enable pubsub.googleapis.com logging.googleapis.com iam.googleapis.com --project="$PROJ"
+  ```
+
 <walkthrough-conclusion-trophy></walkthrough-conclusion-trophy>
 
 ```bash
@@ -66,3 +103,4 @@ That names the grants Terraform cannot verify for you — including
 ---
 
 <sub>**Abstract Security · GCP log export** — [all scenarios](../../README.md) · [architecture](../../docs/ARCHITECTURE.md) · [permissions](../../docs/PERMISSIONS.md) · [filters](../../docs/FILTERS.md)</sub>
+

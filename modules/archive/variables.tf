@@ -38,6 +38,18 @@ variable "org_id" {
   default = ""
 }
 
+variable "folder_id" {
+  description = "Folder ID when sink_scope is folder."
+  type        = string
+  default     = ""
+}
+
+variable "sink_project" {
+  description = "Project ID when sink_scope is project."
+  type        = string
+  default     = ""
+}
+
 variable "labels" {
   type    = map(string)
   default = {}

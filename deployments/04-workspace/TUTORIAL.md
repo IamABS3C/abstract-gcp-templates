@@ -61,21 +61,52 @@ scopes exactly as printed, comma-separated with no spaces.
 
 ```bash
 SA=$(terraform output -json workspace_onboarding | jq -r .service_account_email)
-echo "$SA"
-gcloud iam service-accounts keys create ws-key.json --iam-account="$SA"
+echo "Service Account: $SA"
+gcloud iam service-accounts keys create ws-key.json --iam-account="$SA" --project="YOUR_PROJECT"
 ```
 
 `-json | jq` rather than `-raw`: **`-raw` only works on a string output and errors on an
 object**, which `workspace_onboarding` is.
 
 Upload it to Abstract with the admin email and application list, then **delete the local
-copy**.
+copy**:
+```bash
+rm ws-key.json
+```
+
+## Step 5 — Verification & Failure Troubleshooting
+
+Run these checks to confirm the service account and APIs are properly configured:
+
+```bash
+# 1. Confirm Admin SDK API is enabled in your logging project
+gcloud services list --project="YOUR_PROJECT" --enabled --filter="name:admin.googleapis.com"
+
+# 2. Inspect the exact numeric Client ID and scopes required for Workspace DWD
+terraform output -json workspace_onboarding | jq -r '{client_id: .client_id, scopes: .scopes}'
+
+# 3. Test service account status in Google Cloud
+gcloud iam service-accounts describe "$SA" --project="YOUR_PROJECT" \
+  --format="table(email,disabled)"
+```
+
+### Failure Troubleshooting Tips
+
+* **Failure: HTTP 401 Unauthorized (`Invalid impersonation prn email address`)**:
+  Domain-wide delegation impersonates the subject passed in `workspace_admin_email`. If that user does not exist or is not a Workspace Admin, all API queries fail with 401. Ensure the user is an active Workspace administrator.
+* **Failure: HTTP 403 Forbidden (`Client not authorized for requested scopes`)**:
+  In `admin.google.com ➔ Security ➔ Access and data control ➔ API controls ➔ Domain-wide delegation`, check that:
+  1. The **numeric Client ID** was entered, NOT the service account email.
+  2. The scopes list contains commas with **zero spaces**.
+* **Failure: DWD Propagation Delay**:
+  After granting Domain-Wide Delegation in Workspace, allow **5 to 10 minutes** for Google identity caches to synchronize before testing in Abstract.
 
 <walkthrough-conclusion-trophy></walkthrough-conclusion-trophy>
 
-If the Reports API returns **401**, the delegation has not propagated or `admin_email` is
-not actually an admin. Delegation impersonates a real user — without a valid subject you
-get 401, not an empty result.
+If you only need real-time user sign-in events and have Super Admin access, remember that
+**Pathway A (Native Cloud Audit Logs Sharing)** streams Workspace logins directly into
+`02-audit-logs-organization` with zero DWD service account keys.
+
 
 ---
 

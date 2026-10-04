@@ -59,15 +59,48 @@ scope     = "organization"
 org_id    = "YOUR_ORG_ID"
 log_types = ["ADMIN_READ", "DATA_WRITE"]
 EOF
-terraform init && terraform plan
+terraform init && terraform plan && terraform apply
 ```
 
 You need **Organization Admin** — `resourcemanager.organizations.setIamPolicy`.
+
+Review the applied audit configuration:
+```bash
+terraform output enabled
+```
+
+## Step 4 — Verification & Failure Troubleshooting
+
+Run these checks to confirm Data Access audit policies are active:
+
+```bash
+# 1. Inspect active organization auditConfigs
+gcloud organizations get-iam-policy YOUR_ORG_ID --format="json(auditConfigs)"
+
+# 2. Test Data Access event emission (e.g. read storage bucket or BigQuery dataset metadata)
+gcloud logging read 'logName:"cloudaudit.googleapis.com%2Fdata_access"' \
+  --organization=YOUR_ORG_ID --limit=3
+```
+
+### Failure Troubleshooting Tips
+
+* **Failure: Zero logs appearing immediately after apply**:
+  IAM audit configuration changes take **5 to 15 minutes** to propagate across all regional API proxies in Google Cloud. Wait 15 minutes and trigger a fresh read operation.
+* **Failure: `PERMISSION_DENIED` on `setIamPolicy`**:
+  Your identity lacks `roles/resourcemanager.organizationAdmin` at the Organization level:
+  ```bash
+  gcloud organizations add-iam-policy-binding "YOUR_ORG_ID" \
+    --member="user:$(gcloud config get-value account)" \
+    --role="roles/resourcemanager.organizationAdmin"
+  ```
+* **Failure: Unexpected volume or bill surge**:
+  Ensure `DATA_READ` is not enabled on `allServices`. Keep `DATA_READ` restricted to specific high-risk services (`bigquery.googleapis.com`, `storage.googleapis.com`).
 
 <walkthrough-conclusion-trophy></walkthrough-conclusion-trophy>
 
 **Inheritance is one-way.** A project can add Data Access logging but cannot disable what
 the organization enabled — so scope deliberately at the org rather than blanket-enabling.
+
 
 ---
 

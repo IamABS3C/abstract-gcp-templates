@@ -1,0 +1,306 @@
+{
+  "title": "Folder-Scoped Aggregated Audit Sink",
+  "theme": "dark",
+  "grid": false,
+  "animate": true,
+  "pages": [
+    {
+      "name": "Folder Subtree Scope",
+      "banner": {
+        "title": "Folder-Scoped Subtree Audit Pipeline",
+        "subtitle": "Subtree containment \u00b7 partitioned trust boundary \u00b7 non-org admin deployment",
+        "x": 40,
+        "y": 20,
+        "w": 1000,
+        "h": 56
+      },
+      "groups": [
+        {
+          "id": "org",
+          "label": "GCP Organization (Outside Scope)",
+          "kind": "plain",
+          "x": 40,
+          "y": 90,
+          "w": 960,
+          "h": 680,
+          "color": "#7D7589"
+        },
+        {
+          "id": "fld",
+          "label": "Target Folder Subtree (In Scope)",
+          "kind": "plain",
+          "x": 260,
+          "y": 60,
+          "w": 660,
+          "h": 580,
+          "color": "#2E9BF0",
+          "parent": "org"
+        },
+        {
+          "id": "lp",
+          "label": "Logging Project",
+          "kind": "plain",
+          "x": 300,
+          "y": 60,
+          "w": 320,
+          "h": 540,
+          "color": "#01E69D",
+          "parent": "fld"
+        },
+        {
+          "id": "abs",
+          "label": "Abstract Security Platform",
+          "kind": "plain",
+          "x": 1040,
+          "y": 90,
+          "w": 460,
+          "h": 680,
+          "color": "#FF216B"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "missed",
+          "label": "Root Projects",
+          "icon": "gcp:folders",
+          "parent": "org",
+          "x": 60,
+          "y": 280,
+          "sublabel": "MISSED by folder sink"
+        },
+        {
+          "id": "captured",
+          "label": "Folder Projects",
+          "icon": "gcp:folders",
+          "parent": "fld",
+          "x": 60,
+          "y": 220,
+          "sublabel": "captured by folder sink"
+        },
+        {
+          "id": "sink",
+          "label": "Folder Log Sink",
+          "icon": "gcp:logging",
+          "parent": "lp",
+          "x": 110,
+          "y": 60,
+          "sublabel": "folders//sinks/...\nroles/pubsub.publisher"
+        },
+        {
+          "id": "topic",
+          "label": "Pub/Sub Topic",
+          "icon": "gcp:cloud_pubsub",
+          "parent": "lp",
+          "x": 110,
+          "y": 220,
+          "sublabel": "abstract-audit-logs",
+          "fill": "#FF216B"
+        },
+        {
+          "id": "sub",
+          "label": "Pull Subscription",
+          "icon": "gcp:cloud_pubsub",
+          "parent": "lp",
+          "x": 110,
+          "y": 380,
+          "sublabel": "abstract-audit-logs-sub",
+          "fill": "#FF216B"
+        },
+        {
+          "id": "02-audit-logs-folder_pipe",
+          "label": "Pipelines (COLLECT)",
+          "icon": "img:../brand/abstract-logo-mark.svg",
+          "parent": "abs",
+          "x": 50,
+          "y": 110,
+          "sublabel": "streaming normalizer \u00b7 -80% drop"
+        },
+        {
+          "id": "02-audit-logs-folder_det",
+          "label": "Detections (DETECT)",
+          "icon": "gcp:anomaly_detection",
+          "parent": "abs",
+          "x": 260,
+          "y": 110,
+          "sublabel": "ASTRO real-time MITRE engine",
+          "fill": "#F5C61E"
+        },
+        {
+          "id": "02-audit-logs-folder_lake",
+          "label": "LakeVilla (RETAIN)",
+          "icon": "gcp:dataanalytics",
+          "parent": "abs",
+          "x": 50,
+          "y": 360,
+          "sublabel": "security data lake \u00b7 search",
+          "fill": "#2E9BF0"
+        },
+        {
+          "id": "02-audit-logs-folder_sec",
+          "label": "AI-SecOps (OPERATE)",
+          "icon": "gcp:threatintelligence",
+          "parent": "abs",
+          "x": 260,
+          "y": 360,
+          "sublabel": "ASTRO triage & response",
+          "fill": "#01E69D"
+        }
+      ],
+      "edges": [
+        {
+          "from": "missed",
+          "to": "captured",
+          "tone": "muted",
+          "dashed": true,
+          "label": "BLIND SPOT (missed)"
+        },
+        {
+          "from": "captured",
+          "to": "sink",
+          "tone": "brand",
+          "label": "--include-children"
+        },
+        {
+          "from": "sink",
+          "to": "topic",
+          "tone": "brand",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "topic",
+          "to": "sub",
+          "tone": "brand",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "sub",
+          "to": "02-audit-logs-folder_pipe",
+          "label": "pull telemetry",
+          "tone": "brand",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        },
+        {
+          "from": "02-audit-logs-folder_pipe",
+          "to": "02-audit-logs-folder_det",
+          "tone": "amber",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        },
+        {
+          "from": "02-audit-logs-folder_pipe",
+          "to": "02-audit-logs-folder_lake",
+          "tone": "brand",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "02-audit-logs-folder_det",
+          "to": "02-audit-logs-folder_sec",
+          "tone": "teal",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "02-audit-logs-folder_lake",
+          "to": "02-audit-logs-folder_sec",
+          "tone": "muted",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        }
+      ],
+      "badges": [
+        {
+          "id": "b1",
+          "text": "SUBTREE ONLY: Projects outside this folder are NOT captured",
+          "x": 60,
+          "y": 110,
+          "w": 420,
+          "h": 26,
+          "tone": "amber"
+        },
+        {
+          "id": "b2",
+          "text": "REQUIRED IAM: roles/logging.configWriter on the target folder",
+          "x": 520,
+          "y": 110,
+          "w": 420,
+          "h": 26,
+          "tone": "teal"
+        },
+        {
+          "id": "02-audit-logs-folder_b_abs1",
+          "text": "COMPOSABLE SIEM: Decoupled ingest, in-stream detect & LakeVilla",
+          "x": 1060,
+          "y": 125,
+          "w": 420,
+          "h": 26,
+          "tone": "brand"
+        },
+        {
+          "id": "02-audit-logs-folder_b_abs2",
+          "text": "DATA REDUCTION: Drops up to 80% volume before storage tier",
+          "x": 1060,
+          "y": 725,
+          "w": 420,
+          "h": 26,
+          "tone": "teal"
+        }
+      ],
+      "notes": [
+        {
+          "id": "n1",
+          "text": "FOLDER BOUNDARY TRADEOFF: Folder sinks isolate tenants without requiring organization-wide roles. However, projects created at the org root escape monitoring until explicitly moved into the folder subtree.",
+          "x": 40,
+          "y": 790,
+          "w": 1380,
+          "h": 50
+        }
+      ]
+    }
+  ]
+}

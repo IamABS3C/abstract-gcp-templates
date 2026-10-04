@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="../brand/abstract-logo-white.svg">
+  <img alt="Abstract Security" src="../brand/abstract-logo-black.svg" width="180">
+</picture>
+
 # The Open in Cloud Shell button
 
 ## What it actually is
@@ -99,3 +104,26 @@ structure — renumbering headings renumbers the walkthrough.
 - **Deployment must be auditable and repeatable.** Use Infrastructure Manager — see
   [DEPLOY-INFRA-MANAGER.md](DEPLOY-INFRA-MANAGER.md).
 - **The repo is private.** The button cannot clone it.
+
+---
+
+## Verifying Cloud Shell Buttons
+
+Always run automated checks before committing new Cloud Shell buttons or tutorial edits:
+
+```bash
+# Validates button URLs, git branches, and resolved tutorial paths
+tests/check-buttons.sh
+
+# Verifies output references inside all TUTORIAL.md files match Terraform outputs
+python3 tests/check-tutorials.py
+```
+
+---
+
+## Related Documentation & Diagnostics
+
+* 📘 **Master Walkthrough**: [Comprehensive Master Walkthrough](../WALKTHROUGH.md)
+* 🛠️ **Troubleshooting Runbooks**: [Master Troubleshooting Guide](TROUBLESHOOTING-GUIDE.md)
+* 📘 **Master Telemetry Reference**: [Master GCP Telemetry Dataflow Reference](DATAFLOW-AND-ARCHITECTURE-REFERENCE.md)
+* 🌐 **Interactive Diagram Explorer**: [Architecture Explorer Web UI](architecture-explorer.html)

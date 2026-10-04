@@ -1,0 +1,191 @@
+{
+  "title": "Folder-Scoped Aggregated Audit Sink",
+  "theme": "dark",
+  "animate": true,
+  "pages": [
+    {
+      "name": "Folder Sink",
+      "banner": {
+        "title": "Folder-Scoped Aggregated Audit Sink",
+        "subtitle": "Subtree containment \u00b7 partitioned trust boundary \u00b7 non-org admin deployment",
+        "w": 950
+      },
+      "groups": [
+        {
+          "id": "org",
+          "label": "GCP Organization (Outside Scope)",
+          "x": 50,
+          "y": 80,
+          "w": 880,
+          "h": 660,
+          "color": "#7D7589"
+        },
+        {
+          "id": "fld",
+          "label": "Target Folder Subtree (In Scope)",
+          "x": 260,
+          "y": 70,
+          "w": 630,
+          "h": 540,
+          "color": "#2e9bf0",
+          "parent": "org"
+        },
+        {
+          "id": "lp",
+          "label": "Logging Project",
+          "x": 300,
+          "y": 140,
+          "w": 290,
+          "h": 360,
+          "color": "#01e69d",
+          "parent": "fld"
+        },
+        {
+          "id": "abs",
+          "label": "Abstract Security",
+          "x": 980,
+          "y": 80,
+          "w": 300,
+          "h": 660,
+          "color": "#FF216B"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "root_p",
+          "label": "Root Projects",
+          "sublabel": "MISSED by folder sink",
+          "icon": "gcp:folders",
+          "parent": "org",
+          "x": 60,
+          "y": 280
+        },
+        {
+          "id": "fld_p",
+          "label": "Folder Projects",
+          "sublabel": "captured by folder sink",
+          "icon": "gcp:folders",
+          "parent": "fld",
+          "x": 50,
+          "y": 180
+        },
+        {
+          "id": "sink",
+          "label": "Folder Log Sink",
+          "sublabel": "folders/<ID>/sinks/...",
+          "icon": "gcp:logging",
+          "parent": "lp",
+          "x": 100,
+          "y": 60
+        },
+        {
+          "id": "topic",
+          "label": "Pub/Sub Topic",
+          "sublabel": "abstract-audit-logs",
+          "icon": "gcp:cloud_pubsub",
+          "fill": "#FF216B",
+          "parent": "lp",
+          "x": 100,
+          "y": 220
+        },
+        {
+          "id": "sub",
+          "label": "Pull Subscription",
+          "sublabel": "abstract-audit-logs-sub",
+          "icon": "gcp:cloud_pubsub",
+          "fill": "#FF216B",
+          "parent": "abs",
+          "x": 100,
+          "y": 160
+        },
+        {
+          "id": "plat",
+          "label": "Abstract SIEM",
+          "sublabel": "ingestion & parsing",
+          "icon": "img:brand/abstract-logo-mark.svg",
+          "parent": "abs",
+          "x": 100,
+          "y": 380
+        }
+      ],
+      "edges": [
+        {
+          "from": "root_p",
+          "to": "sink",
+          "label": "BLIND SPOT (missed)",
+          "tone": "danger",
+          "dashed": true
+        },
+        {
+          "from": "fld_p",
+          "to": "sink",
+          "label": "--include-children",
+          "tone": "brand"
+        },
+        {
+          "from": "sink",
+          "to": "topic",
+          "label": "roles/pubsub.publisher",
+          "tone": "warn",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "topic",
+          "to": "sub",
+          "label": "pull",
+          "tone": "brand"
+        },
+        {
+          "from": "sub",
+          "to": "plat",
+          "tone": "brand",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        }
+      ],
+      "badges": [
+        {
+          "id": "b1",
+          "text": "SUBTREE ONLY: Projects outside this folder are 100% blind",
+          "x": 70,
+          "y": 100,
+          "w": 380,
+          "h": 26,
+          "tone": "amber"
+        },
+        {
+          "id": "b2",
+          "text": "REQUIRED IAM: roles/logging.configWriter on the target folder",
+          "x": 300,
+          "y": 100,
+          "w": 420,
+          "h": 26,
+          "tone": "teal"
+        }
+      ],
+      "notes": [
+        {
+          "id": "n1",
+          "text": "FOLDER BOUNDARY TRADEOFF: Folder sinks isolate tenants without requiring organization-wide roles. However, projects created at the org root escape monitoring until explicitly moved into the folder subtree.",
+          "x": 50,
+          "y": 760,
+          "w": 950,
+          "h": 50
+        }
+      ]
+    }
+  ]
+}

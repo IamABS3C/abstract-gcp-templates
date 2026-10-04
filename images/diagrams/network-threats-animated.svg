@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 560" width="100%" height="auto" style="background:#060608; border-radius:12px; font-family:'Barlow',-apple-system,sans-serif;">
+  <defs>
+    <linearGradient id="net-pink" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF216B"/>
+      <stop offset="100%" stop-color="#C2004C"/>
+    </linearGradient>
+    <filter id="f-glow-net" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Banner -->
+  <text x="40" y="44" fill="#FF216B" font-size="20" font-weight="700">Abstract Security — GCP Network Threat Pipeline</text>
+  <text x="40" y="68" fill="#8b93a7" font-size="12">High-Volume Telemetry Isolation (50,000 eps) · Cloud Armor, IDS, DNS, Firewall · Grid: OFF</text>
+  <line x1="40" y1="80" x2="320" y2="80" stroke="#FF216B" stroke-width="2"/>
+
+  <!-- Paths -->
+  <path d="M 240 140 H 420 V 270 H 480" fill="none" stroke="#2E9BF0" stroke-width="2.5" opacity="0.6"/>
+  <path d="M 240 220 H 400 V 270 H 480" fill="none" stroke="#FF216B" stroke-width="2.5" opacity="0.6"/>
+  <path d="M 240 320 H 400 V 270 H 480" fill="none" stroke="#F5C61E" stroke-width="2.5" opacity="0.6"/>
+  <path d="M 240 420 H 420 V 270 H 480" fill="none" stroke="#01e69d" stroke-width="2.5" opacity="0.6"/>
+  <path d="M 680 270 H 760" fill="none" stroke="#FF216B" stroke-width="3" opacity="0.7"/>
+  <path d="M 940 270 H 1020" fill="none" stroke="#01e69d" stroke-width="3" opacity="0.7"/>
+
+  <!-- Flow Packets -->
+  <circle r="4.5" fill="#2E9BF0" filter="url(#f-glow-net)"><animateMotion dur="2.2s" repeatCount="indefinite" path="M 240 140 H 420 V 270 H 480"/></circle>
+  <circle r="4.5" fill="#FF216B" filter="url(#f-glow-net)"><animateMotion dur="2.2s" repeatCount="indefinite" path="M 240 220 H 400 V 270 H 480"/></circle>
+  <circle r="4.5" fill="#F5C61E" filter="url(#f-glow-net)"><animateMotion dur="2.2s" repeatCount="indefinite" path="M 240 320 H 400 V 270 H 480"/></circle>
+  <circle r="4.5" fill="#01e69d" filter="url(#f-glow-net)"><animateMotion dur="2.2s" repeatCount="indefinite" path="M 240 420 H 420 V 270 H 480"/></circle>
+  <circle r="5" fill="#FF216B" filter="url(#f-glow-net)"><animateMotion dur="1.6s" repeatCount="indefinite" path="M 680 270 H 760"/></circle>
+  <circle r="5" fill="#01e69d" filter="url(#f-glow-net)"><animateMotion dur="1.6s" repeatCount="indefinite" path="M 940 270 H 1020"/></circle>
+
+  <!-- Nodes -->
+  <rect x="40" y="105" width="200" height="65" rx="8" fill="#0d1322" stroke="#2b3752" stroke-width="1.5"/>
+  <text x="56" y="132" fill="#ECEFF1" font-size="13" font-weight="600">Cloud Armor WAF</text>
+  <text x="56" y="152" fill="#8b93a7" font-size="11">OWASP, DDoS, L7 rules</text>
+
+  <rect x="40" y="185" width="200" height="65" rx="8" fill="#0d1322" stroke="#2b3752" stroke-width="1.5"/>
+  <text x="56" y="212" fill="#ECEFF1" font-size="13" font-weight="600">Cloud IDS Threats</text>
+  <text x="56" y="232" fill="#8b93a7" font-size="11">Malware, CVEs, Exploits</text>
+
+  <rect x="40" y="285" width="200" height="65" rx="8" fill="#0d1322" stroke="#2b3752" stroke-width="1.5"/>
+  <text x="56" y="312" fill="#ECEFF1" font-size="13" font-weight="600">VPC DNS Queries</text>
+  <text x="56" y="332" fill="#8b93a7" font-size="11">C2, Tunneling, Exfiltration</text>
+
+  <rect x="40" y="385" width="200" height="65" rx="8" fill="#0d1322" stroke="#2b3752" stroke-width="1.5"/>
+  <text x="56" y="412" fill="#ECEFF1" font-size="13" font-weight="600">VPC Firewalls</text>
+  <text x="56" y="432" fill="#8b93a7" font-size="11">ALLOW / DENY rule events</text>
+
+  <!-- Aggregated Sink -->
+  <rect x="480" y="215" width="200" height="110" rx="10" fill="#0d1322" stroke="#2E9BF0" stroke-width="2"/>
+  <text x="500" y="248" fill="#2E9BF0" font-size="14" font-weight="700">Network Log Sink</text>
+  <text x="500" y="270" fill="#ECEFF1" font-size="12">Org / Folder Level</text>
+  <text x="500" y="292" fill="#8b93a7" font-size="11">High-Volume Filter</text>
+  <text x="500" y="310" fill="#01e69d" font-family="'JetBrains Mono',monospace" font-size="10">Writer Identity Bound</text>
+
+  <!-- Dedicated PubSub -->
+  <rect x="760" y="215" width="180" height="110" rx="10" fill="#0d1322" stroke="#FF216B" stroke-width="2"/>
+  <text x="778" y="248" fill="#FF216B" font-size="14" font-weight="700">Dedicated Topic</text>
+  <text x="778" y="270" fill="#ECEFF1" font-size="12">abstract-network-threats</text>
+  <text x="778" y="292" fill="#8b93a7" font-size="11">50,000 eps Headroom</text>
+  <text x="778" y="310" fill="#F5C61E" font-family="'JetBrains Mono',monospace" font-size="10">Zero Noisy-Neighbor Risk</text>
+
+  <!-- Abstract Platform -->
+  <rect x="1020" y="200" width="220" height="140" rx="12" fill="#0d1322" stroke="#01e69d" stroke-width="2"/>
+  <text x="1042" y="238" fill="#01e69d" font-size="15" font-weight="700">Abstract Security</text>
+  <text x="1042" y="262" fill="#ECEFF1" font-size="13">Network Threat SIEM</text>
+  <text x="1042" y="286" fill="#8b93a7" font-size="11">Edge Attack Correlation</text>
+  <text x="1042" y="306" fill="#8b93a7" font-size="11">MITRE ATT&amp;CK Mapping</text>
+  <text x="1042" y="326" fill="#01e69d" font-family="'JetBrains Mono',monospace" font-size="10">Real-Time Ingestion</text>
+
+  <!-- Bottom Legend -->
+  <g transform="translate(40, 480)">
+    <rect width="1200" height="50" rx="8" fill="#090b10" stroke="#1f2430" stroke-width="1"/>
+    <text x="20" y="30" fill="#01e69d" font-family="'JetBrains Mono',monospace" font-size="11">ISOLATION BENEFIT: Network attacks produce bursts up to 50k eps. Dedicating a pipeline protects IAM audit delivery.</text>
+  </g>
+</svg>

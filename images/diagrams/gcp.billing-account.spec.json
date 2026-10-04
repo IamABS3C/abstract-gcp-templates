@@ -1,0 +1,219 @@
+{
+  "title": "Billing account audit logs to Pub/Sub",
+  "theme": "dark",
+  "animate": true,
+  "pages": [
+    {
+      "name": "Billing Account",
+      "banner": {
+        "title": "Out-of-Hierarchy Cloud Billing Account Audit Pipeline",
+        "subtitle": "Financial control plane security \u00b7 cryptomining project hijacking detection \u00b7 budget tampering alerts",
+        "w": 1000
+      },
+      "groups": [
+        {
+          "id": "ba",
+          "label": "Cloud Billing Account (Outside Resource Hierarchy)",
+          "x": 50,
+          "y": 80,
+          "w": 480,
+          "h": 660,
+          "color": "#f5c61e"
+        },
+        {
+          "id": "lp",
+          "label": "Dedicated Logging Project (log_project)",
+          "x": 570,
+          "y": 80,
+          "w": 440,
+          "h": 660,
+          "color": "#01e69d"
+        },
+        {
+          "id": "abs",
+          "label": "Abstract Security Platform",
+          "x": 1050,
+          "y": 80,
+          "w": 360,
+          "h": 660,
+          "color": "#FF216B"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "bill",
+          "label": "Billing Account",
+          "sublabel": "billingAccounts/012345-567890-ABCDEF",
+          "icon": "gcp:cost",
+          "parent": "ba",
+          "x": 60,
+          "y": 160
+        },
+        {
+          "id": "sink",
+          "label": "Billing Account Sink",
+          "sublabel": "google_logging_billing_account_sink",
+          "icon": "gcp:logging",
+          "parent": "ba",
+          "x": 300,
+          "y": 160
+        },
+        {
+          "id": "iam",
+          "label": "Billing IAM Activity",
+          "sublabel": "roles/billing.admin modifications",
+          "icon": "gcp:cloud_iam",
+          "parent": "ba",
+          "x": 60,
+          "y": 380
+        },
+        {
+          "id": "hijack",
+          "label": "Project Association",
+          "sublabel": "link/unlink (cryptomining precursor)",
+          "icon": "gcp:folders",
+          "parent": "ba",
+          "x": 180,
+          "y": 480
+        },
+        {
+          "id": "budget",
+          "label": "Budget Alert Changes",
+          "sublabel": "threshold edits & tampering",
+          "icon": "gcp:monitor",
+          "parent": "ba",
+          "x": 300,
+          "y": 380
+        },
+        {
+          "id": "topic",
+          "label": "Pub/Sub Topic",
+          "sublabel": "abstract-billing-audit-logs",
+          "icon": "gcp:cloud_pubsub",
+          "fill": "#FF216B",
+          "parent": "lp",
+          "x": 80,
+          "y": 160
+        },
+        {
+          "id": "sub",
+          "label": "Pull Subscription",
+          "sublabel": "abstract-billing-audit-logs-sub",
+          "icon": "gcp:cloud_pubsub",
+          "fill": "#FF216B",
+          "parent": "lp",
+          "x": 260,
+          "y": 160
+        },
+        {
+          "id": "sa",
+          "label": "Reader Identity",
+          "sublabel": "abstract-billing-reader",
+          "icon": "gcp:cloud_iam",
+          "fill": "#01e69d",
+          "parent": "lp",
+          "x": 170,
+          "y": 380
+        },
+        {
+          "id": "plat",
+          "label": "Abstract Financial SIEM",
+          "sublabel": "privilege escalation & spend anomaly alerts",
+          "icon": "img:brand/abstract-logo-mark.svg",
+          "parent": "abs",
+          "x": 130,
+          "y": 260
+        }
+      ],
+      "edges": [
+        {
+          "from": "bill",
+          "to": "sink",
+          "label": "billing audit events",
+          "tone": "amber"
+        },
+        {
+          "from": "iam",
+          "to": "sink",
+          "tone": "muted",
+          "dashed": true
+        },
+        {
+          "from": "hijack",
+          "to": "sink",
+          "tone": "muted",
+          "dashed": true
+        },
+        {
+          "from": "budget",
+          "to": "sink",
+          "tone": "muted",
+          "dashed": true
+        },
+        {
+          "from": "sink",
+          "to": "topic",
+          "label": "writer identity needs\nroles/pubsub.publisher",
+          "tone": "warn"
+        },
+        {
+          "from": "topic",
+          "to": "sub",
+          "tone": "brand"
+        },
+        {
+          "from": "sa",
+          "to": "sub",
+          "label": "roles/pubsub.subscriber",
+          "tone": "teal",
+          "dashed": true
+        },
+        {
+          "from": "sub",
+          "to": "plat",
+          "label": "pull",
+          "tone": "brand"
+        }
+      ],
+      "badges": [
+        {
+          "id": "b1",
+          "text": "OUT-OF-HIERARCHY: Sits outside Org, Folders, and Projects entirely",
+          "x": 70,
+          "y": 100,
+          "w": 420,
+          "h": 26,
+          "tone": "amber"
+        },
+        {
+          "id": "b2",
+          "text": "THE BLIND SPOT: An Organization-level sink CANNOT capture billing logs",
+          "x": 70,
+          "y": 630,
+          "w": 440,
+          "h": 26,
+          "tone": "brand"
+        },
+        {
+          "id": "b3",
+          "text": "REQUIRED IAM: roles/logging.configWriter on billing account",
+          "x": 580,
+          "y": 100,
+          "w": 400,
+          "h": 26,
+          "tone": "teal"
+        }
+      ],
+      "notes": [
+        {
+          "id": "n1",
+          "text": "FINANCIAL CONTROL PLANE: Billing accounts sit outside the resource hierarchy. If an adversary attaches rogue cryptomining projects or unlinks production billing to cause downtime, organization sinks remain blind. A dedicated billing sink captures these critical events.",
+          "x": 50,
+          "y": 760,
+          "w": 960,
+          "h": 50
+        }
+      ]
+    }
+  ]
+}

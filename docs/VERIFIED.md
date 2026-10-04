@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="../brand/abstract-logo-white.svg">
+  <img alt="Abstract Security" src="../brand/abstract-logo-black.svg" width="180">
+</picture>
+
 # What has actually been proven, and what has not
 
 This repo uses provenance tiers rather than a blanket claim, because "it validates" and

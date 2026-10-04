@@ -33,11 +33,13 @@ green and there is simply no data.
 
 ## Step 1 — You need a notification channel
 
+List existing channels in your security logging project:
+
 ```bash
 gcloud beta monitoring channels list --project=YOUR_LOG_PROJECT --format='table(name,type,displayName)'
 ```
 
-None? Create one:
+None? Create an email channel:
 
 ```bash
 gcloud beta monitoring channels create \
@@ -60,6 +62,16 @@ curl -s -X POST \
 ```
 
 The response `name` is what goes in `notification_channels`.
+
+<walkthrough-info-message>**Verify Channel Accessibility Before Proceeding:**
+Ensure the channel was created and is marked enabled. Alert policies attached to a disabled channel will evaluate conditions but cannot dispatch alerts.</walkthrough-info-message>
+
+```bash
+# Verify the channel exists and is enabled:
+gcloud beta monitoring channels list --project=YOUR_LOG_PROJECT \
+  --filter="displayName:'Security on-call'" \
+  --format="table(name,type,enabled)"
+```
 
 <walkthrough-info-message>The module **refuses to deploy without a channel** unless you
 explicitly acknowledge it. Alert policies with no channel fire into the void — the same
@@ -105,6 +117,12 @@ for p in json.load(sys.stdin).get("alertPolicies",[]):
           "| channels:", len(p.get("notificationChannels",[])))'
 ```
 
+### Inspect Output Policies
+
+```bash
+terraform output alert_policies
+```
+
 **Then confirm the metric actually exists.** Pub/Sub metrics only appear once a
 subscription has traffic — on a brand-new pipeline they are legitimately absent, and an
 alert on an absent metric cannot fire:
@@ -113,11 +131,23 @@ alert on an absent metric cannot fire:
 curl -s -G "https://monitoring.googleapis.com/v3/projects/$P/timeSeries" \
   -H "Authorization: Bearer $TOKEN" \
   --data-urlencode 'filter=metric.type="pubsub.googleapis.com/subscription/oldest_unacked_message_age"' \
-  --data-urlencode "interval.startTime=$(date -u -v-30M +%Y-%m-%dT%H:%M:%SZ)" \
+  --data-urlencode "interval.startTime=$(date -u -v-30M +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -d '-30 minutes' +%Y-%m-%dT%H:%M:%SZ)" \
   --data-urlencode "interval.endTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 ```
 
-## Step 4 — Expect the stall alert to fire before Abstract is connected
+## Step 4 — Troubleshooting & Failure Remediation
+
+If alerts fire unexpectedly or metrics report anomalous readings, verify these failure modes:
+
+### 1. Sink Error Alert Firing
+If `logging.googleapis.com/exports/error_count` fires:
+```bash
+# Check the sink writer identity permissions on the destination topic
+gcloud pubsub topics get-iam-policy abstract-audit-logs --project=YOUR_LOG_PROJECT
+```
+Fix: Grant `roles/pubsub.publisher` to the sink writer identity if missing.
+
+### 2. Expect the stall alert to fire before Abstract is connected
 
 <walkthrough-info-message>**This is not a false positive.** Until Abstract is pulling,
 nothing consumes the subscription, so `oldest_unacked_message_age` climbs past the 1-hour

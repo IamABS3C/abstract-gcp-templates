@@ -1,0 +1,320 @@
+{
+  "title": "Network Threat Telemetry Export to Abstract Security",
+  "theme": "dark",
+  "grid": false,
+  "animate": true,
+  "pages": [
+    {
+      "name": "Network Threats",
+      "banner": {
+        "title": "Network Threat Telemetry Export Pipeline",
+        "subtitle": "Four security pillars \u00b7 50,000 eps high-volume isolation \u00b7 Cloud Armor, Cloud IDS, DNS, Firewall",
+        "x": 40,
+        "y": 20,
+        "w": 1050,
+        "h": 56
+      },
+      "groups": [
+        {
+          "id": "surfaces",
+          "label": "GCP Network Security Telemetry Surfaces",
+          "kind": "plain",
+          "x": 40,
+          "y": 110,
+          "w": 460,
+          "h": 660,
+          "color": "#F5C61E"
+        },
+        {
+          "id": "agg_sink",
+          "label": "Aggregated Network Sink & Transport",
+          "kind": "plain",
+          "x": 530,
+          "y": 110,
+          "w": 470,
+          "h": 660,
+          "color": "#2E9BF0"
+        },
+        {
+          "id": "abs",
+          "label": "Abstract Security SIEM",
+          "kind": "plain",
+          "x": 1030,
+          "y": 110,
+          "w": 460,
+          "h": 660,
+          "color": "#FF216B"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "armor",
+          "label": "Cloud Armor WAF",
+          "icon": "gcp:cloud_armor",
+          "parent": "surfaces",
+          "x": 60,
+          "y": 80,
+          "sublabel": "OWASP & DDoS defense decisions"
+        },
+        {
+          "id": "ids",
+          "label": "Cloud IDS Threat Engine",
+          "icon": "gcp:securitycommandcenter",
+          "parent": "surfaces",
+          "x": 60,
+          "y": 220,
+          "sublabel": "logName:ids.../threat \u00b7 CVEs & malware"
+        },
+        {
+          "id": "dns",
+          "label": "VPC Cloud DNS Queries",
+          "icon": "gcp:cloud_dns",
+          "parent": "surfaces",
+          "x": 60,
+          "y": 360,
+          "sublabel": "logName:dns.../dns_queries \u00b7 C2 & tunneling"
+        },
+        {
+          "id": "fw",
+          "label": "VPC Firewall Decisions",
+          "icon": "gcp:cloud_firewall_rules",
+          "parent": "surfaces",
+          "x": 60,
+          "y": 500,
+          "sublabel": "logName:compute.../firewall \u00b7 ALLOW / DENY"
+        },
+        {
+          "id": "sink",
+          "label": "Network Log Sink",
+          "icon": "gcp:logging",
+          "parent": "agg_sink",
+          "x": 190,
+          "y": 100,
+          "sublabel": "abstract-network-threats-sink"
+        },
+        {
+          "id": "topic",
+          "label": "Pub/Sub Topic",
+          "icon": "gcp:cloud_pubsub",
+          "parent": "agg_sink",
+          "x": 190,
+          "y": 290,
+          "sublabel": "abstract-network-threats (dedicated 50k eps)",
+          "fill": "#FF216B"
+        },
+        {
+          "id": "sub",
+          "label": "Pull Subscription",
+          "icon": "gcp:cloud_pubsub",
+          "parent": "agg_sink",
+          "x": 190,
+          "y": 480,
+          "sublabel": "abstract-network-threats-sub (tuned batching)",
+          "fill": "#FF216B"
+        },
+        {
+          "id": "11-network-threats_pipe",
+          "label": "Pipelines (COLLECT)",
+          "icon": "img:../brand/abstract-logo-mark.svg",
+          "parent": "abs",
+          "x": 50,
+          "y": 110,
+          "sublabel": "streaming normalizer \u00b7 -80% drop"
+        },
+        {
+          "id": "11-network-threats_det",
+          "label": "Detections (DETECT)",
+          "icon": "gcp:anomaly_detection",
+          "parent": "abs",
+          "x": 260,
+          "y": 110,
+          "sublabel": "ASTRO real-time MITRE engine",
+          "fill": "#F5C61E"
+        },
+        {
+          "id": "11-network-threats_lake",
+          "label": "LakeVilla (RETAIN)",
+          "icon": "gcp:dataanalytics",
+          "parent": "abs",
+          "x": 50,
+          "y": 360,
+          "sublabel": "security data lake \u00b7 search",
+          "fill": "#2E9BF0"
+        },
+        {
+          "id": "11-network-threats_sec",
+          "label": "AI-SecOps (OPERATE)",
+          "icon": "gcp:threatintelligence",
+          "parent": "abs",
+          "x": 260,
+          "y": 360,
+          "sublabel": "ASTRO triage & response",
+          "fill": "#01E69D"
+        }
+      ],
+      "edges": [
+        {
+          "from": "armor",
+          "to": "sink",
+          "tone": "muted"
+        },
+        {
+          "from": "ids",
+          "to": "sink",
+          "tone": "muted"
+        },
+        {
+          "from": "dns",
+          "to": "sink",
+          "tone": "muted"
+        },
+        {
+          "from": "fw",
+          "to": "sink",
+          "tone": "muted"
+        },
+        {
+          "from": "sink",
+          "to": "topic",
+          "label": "writer identity needs roles/pubsub.publisher",
+          "tone": "warn",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "topic",
+          "to": "sub",
+          "tone": "brand",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "sub",
+          "to": "11-network-threats_pipe",
+          "label": "high-speed pull",
+          "tone": "brand",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        },
+        {
+          "from": "11-network-threats_pipe",
+          "to": "11-network-threats_det",
+          "tone": "amber",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        },
+        {
+          "from": "11-network-threats_pipe",
+          "to": "11-network-threats_lake",
+          "tone": "brand",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "11-network-threats_det",
+          "to": "11-network-threats_sec",
+          "tone": "teal",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "11-network-threats_lake",
+          "to": "11-network-threats_sec",
+          "tone": "muted",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        }
+      ],
+      "badges": [
+        {
+          "id": "b1",
+          "text": "NOISY NEIGHBOR ISOLATION: 50,000 eps stream isolated from control plane",
+          "x": 60,
+          "y": 75,
+          "w": 420,
+          "h": 26,
+          "tone": "teal"
+        },
+        {
+          "id": "b2",
+          "text": "DEDICATED TOPIC: Protects critical IAM audit logs during network attacks",
+          "x": 550,
+          "y": 75,
+          "w": 430,
+          "h": 26,
+          "tone": "brand"
+        },
+        {
+          "id": "11-network-threats_b_abs1",
+          "text": "COMPOSABLE SIEM: Decoupled ingest, in-stream detect & LakeVilla",
+          "x": 1050,
+          "y": 145,
+          "w": 420,
+          "h": 26,
+          "tone": "brand"
+        },
+        {
+          "id": "11-network-threats_b_abs2",
+          "text": "DATA REDUCTION: Drops up to 80% volume before storage tier",
+          "x": 1050,
+          "y": 725,
+          "w": 420,
+          "h": 26,
+          "tone": "teal"
+        }
+      ],
+      "notes": [
+        {
+          "id": "n1",
+          "text": "VOLUME PROFILE ISOLATION: Network telemetry (DNS queries, WAF decisions) produces 100x to 1000x the volume of administrative audit logs. Aggregating network logs into a dedicated topic protects the management plane from quota exhaustion during volumetric attacks.",
+          "x": 40,
+          "y": 790,
+          "w": 1380,
+          "h": 50
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,160 @@
+{
+  "title": "Single Project Pilot Pipeline",
+  "theme": "dark",
+  "animate": true,
+  "pages": [
+    {
+      "name": "Project Pilot",
+      "banner": {
+        "title": "Single Project Pilot Pipeline",
+        "subtitle": "Rapid validation \u00b7 zero organization-level permissions required \u00b7 ephemeral evaluation",
+        "w": 950
+      },
+      "groups": [
+        {
+          "id": "proj",
+          "label": "Pilot Project (pilot_project_id)",
+          "x": 50,
+          "y": 80,
+          "w": 700,
+          "h": 580,
+          "color": "#2e9bf0"
+        },
+        {
+          "id": "abs",
+          "label": "Abstract Security Platform",
+          "x": 800,
+          "y": 80,
+          "w": 350,
+          "h": 580,
+          "color": "#FF216B"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "res",
+          "label": "Project Resources",
+          "sublabel": "VMs, buckets, databases",
+          "icon": "gcp:folders",
+          "parent": "proj",
+          "x": 80,
+          "y": 160
+        },
+        {
+          "id": "iam",
+          "label": "Project IAM Activity",
+          "sublabel": "local mutations",
+          "icon": "gcp:cloud_iam",
+          "parent": "proj",
+          "x": 80,
+          "y": 360
+        },
+        {
+          "id": "sink",
+          "label": "Project Log Sink",
+          "sublabel": "google_logging_project_sink",
+          "icon": "gcp:logging",
+          "parent": "proj",
+          "x": 340,
+          "y": 160
+        },
+        {
+          "id": "topic",
+          "label": "Pub/Sub Topic",
+          "sublabel": "abstract-pilot-logs",
+          "icon": "gcp:cloud_pubsub",
+          "fill": "#FF216B",
+          "parent": "proj",
+          "x": 520,
+          "y": 160
+        },
+        {
+          "id": "sub",
+          "label": "Pull Subscription",
+          "sublabel": "abstract-pilot-sub",
+          "icon": "gcp:cloud_pubsub",
+          "fill": "#FF216B",
+          "parent": "proj",
+          "x": 520,
+          "y": 360
+        },
+        {
+          "id": "plat",
+          "label": "Abstract SIEM",
+          "sublabel": "schema validation & testing",
+          "icon": "img:brand/abstract-logo-mark.svg",
+          "parent": "abs",
+          "x": 130,
+          "y": 240
+        }
+      ],
+      "edges": [
+        {
+          "from": "res",
+          "to": "sink",
+          "tone": "muted"
+        },
+        {
+          "from": "iam",
+          "to": "sink",
+          "tone": "muted"
+        },
+        {
+          "from": "sink",
+          "to": "topic",
+          "label": "publishes",
+          "tone": "brand"
+        },
+        {
+          "from": "topic",
+          "to": "sub",
+          "tone": "brand",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "sub",
+          "to": "plat",
+          "label": "pull",
+          "tone": "brand"
+        }
+      ],
+      "badges": [
+        {
+          "id": "b1",
+          "text": "PILOT ONLY: Zero coverage for future projects or org-level changes",
+          "x": 70,
+          "y": 100,
+          "w": 440,
+          "h": 26,
+          "tone": "amber"
+        },
+        {
+          "id": "b2",
+          "text": "FAST EVALUATION: Prove telemetry flow & parser normalization in <5 min",
+          "x": 70,
+          "y": 510,
+          "w": 450,
+          "h": 26,
+          "tone": "teal"
+        }
+      ],
+      "notes": [
+        {
+          "id": "n1",
+          "text": "PILOT SINK LIMITATIONS: Project-scoped sinks cannot capture other projects or organization policies. Replace with deployment 02-audit-logs-organization once initial testing is approved.",
+          "x": 50,
+          "y": 680,
+          "w": 900,
+          "h": 50
+        }
+      ]
+    }
+  ]
+}

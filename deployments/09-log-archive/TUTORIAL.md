@@ -56,10 +56,61 @@ EOF
 terraform init && terraform plan
 ```
 
+When the plan verifies, apply:
+
+```bash
+terraform apply
+```
+
+## Step 4 — Verify the Archive Bucket & Permissions
+
+Inspect the created archive bucket output:
+
+```bash
+terraform output -raw archive_bucket
+```
+
+Verify that the sink was created at the organization level with `includeChildren = True`:
+
+```bash
+gcloud logging sinks describe abstract-org-audit-archive-sink \
+  --organization="YOUR_ORG_ID" \
+  --format="yaml(name,destination,includeChildren,writerIdentity)"
+```
+
+<walkthrough-info-message>**Verify the Storage Writer Binding:**
+The archive sink has its **own** writer identity, distinct from the streaming sink's, and
+it gets its own grant. If the bucket stays empty, that binding is where to look.</walkthrough-info-message>
+
+```bash
+BUCKET_NAME=$(terraform output -raw archive_bucket)
+gcloud storage buckets get-iam-policy "gs://$BUCKET_NAME" \
+  --filter="bindings.role:roles/storage.objectCreator"
+```
+
+## Step 5 — Troubleshooting & Batch Delivery Verification
+
+<walkthrough-info-message>**Do not panic if the bucket is empty immediately.**
+Cloud Logging flushes to Cloud Storage in **hourly batches**. Unlike Pub/Sub which streams sub-second, Cloud Storage logs accumulate in Google's internal buffer and write out once an hour in `YYYY/MM/DD/HH/` subdirectories.</walkthrough-info-message>
+
+To verify data arrival after the first hour:
+
+```bash
+BUCKET_NAME=$(terraform output -raw archive_bucket)
+gcloud storage ls --recursive "gs://$BUCKET_NAME/**" | head
+```
+
+If the bucket remains empty after 2 hours:
+1. Check for sink delivery errors:
+   ```bash
+   gcloud logging read 'logName:"logging.googleapis.com%2Fsink_error"' \
+     --project="YOUR_LOG_PROJECT" --limit=10
+   ```
+2. Confirm the sink writer identity has `roles/storage.objectCreator` on the bucket.
+
 <walkthrough-conclusion-trophy></walkthrough-conclusion-trophy>
 
-The archive sink has its **own** writer identity, distinct from the streaming sink's, and
-it gets its own grant. If the bucket stays empty, that binding is where to look.
+Your immutable compliance log archive is now active and collecting organization-wide audit trails in parallel with real-time detection.
 
 ---
 

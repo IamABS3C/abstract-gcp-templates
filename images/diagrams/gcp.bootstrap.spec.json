@@ -1,0 +1,188 @@
+{
+  "title": "Bootstrap the GCP logging project",
+  "theme": "dark",
+  "animate": true,
+  "pages": [
+    {
+      "name": "Bootstrap the GCP logging project",
+      "banner": {
+        "title": "Dedicated Logging Project Bootstrap",
+        "subtitle": "Centralized telemetry repository \u00b7 least-privilege identity \u00b7 Pub/Sub transport infrastructure",
+        "w": 950
+      },
+      "groups": [
+        {
+          "id": "org",
+          "label": "GCP Organization",
+          "x": 40,
+          "y": 80,
+          "w": 880,
+          "h": 620,
+          "color": "#2e9bf0"
+        },
+        {
+          "id": "lp",
+          "label": "Dedicated Logging Project (log_project)",
+          "x": 300,
+          "y": 50,
+          "w": 550,
+          "h": 530,
+          "color": "#01e69d",
+          "parent": "org"
+        },
+        {
+          "id": "abs",
+          "label": "Abstract Security Platform",
+          "x": 960,
+          "y": 80,
+          "w": 280,
+          "h": 620,
+          "color": "#FF216B"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "parent",
+          "label": "Org or Folder",
+          "sublabel": "project parent",
+          "icon": "gcp:folders",
+          "parent": "org",
+          "x": 60,
+          "y": 140
+        },
+        {
+          "id": "bill",
+          "label": "Billing Account",
+          "sublabel": "linked on create",
+          "icon": "gcp:cost",
+          "parent": "org",
+          "x": 60,
+          "y": 380
+        },
+        {
+          "id": "ps",
+          "label": "Pub/Sub API",
+          "sublabel": "pubsub.googleapis.com",
+          "icon": "gcp:cloud_pubsub",
+          "parent": "lp",
+          "x": 80,
+          "y": 90
+        },
+        {
+          "id": "lg",
+          "label": "Cloud Logging API",
+          "sublabel": "logging.googleapis.com",
+          "icon": "gcp:logging",
+          "parent": "lp",
+          "x": 320,
+          "y": 90
+        },
+        {
+          "id": "adm",
+          "label": "Admin SDK API",
+          "sublabel": "if Workspace enabled",
+          "icon": "gcp:cloud_iam",
+          "parent": "lp",
+          "x": 80,
+          "y": 300
+        },
+        {
+          "id": "sa",
+          "label": "Reader Identity",
+          "sublabel": "abstract-pubsub-reader",
+          "icon": "gcp:cloud_iam",
+          "fill": "#01e69d",
+          "parent": "lp",
+          "x": 320,
+          "y": 300
+        },
+        {
+          "id": "topic",
+          "label": "Pub/Sub Topic",
+          "sublabel": "abstract-audit-logs",
+          "icon": "gcp:cloud_pubsub",
+          "fill": "#FF216B",
+          "parent": "lp",
+          "x": 200,
+          "y": 420
+        },
+        {
+          "id": "plat",
+          "label": "Abstract SIEM",
+          "sublabel": "least-privilege pull",
+          "icon": "img:brand/abstract-logo-mark.svg",
+          "parent": "abs",
+          "x": 90,
+          "y": 260
+        }
+      ],
+      "edges": [
+        {
+          "from": "parent",
+          "to": "lp",
+          "label": "contains",
+          "tone": "muted"
+        },
+        {
+          "from": "bill",
+          "to": "lp",
+          "label": "funds",
+          "tone": "muted"
+        },
+        {
+          "from": "ps",
+          "to": "topic",
+          "tone": "teal"
+        },
+        {
+          "from": "lg",
+          "to": "topic",
+          "tone": "teal"
+        },
+        {
+          "from": "sa",
+          "to": "topic",
+          "label": "roles/pubsub.subscriber",
+          "tone": "teal",
+          "dashed": true
+        },
+        {
+          "from": "topic",
+          "to": "plat",
+          "label": "pull telemetry",
+          "tone": "brand"
+        }
+      ],
+      "badges": [
+        {
+          "id": "b1",
+          "text": "SINGLE LOGGING PROJECT: Avoids IAM sprawl and quota fragmentation",
+          "x": 320,
+          "y": 105,
+          "w": 460,
+          "h": 26,
+          "tone": "teal"
+        },
+        {
+          "id": "b2",
+          "text": "LEAST PRIVILEGE: Service Account holds roles/pubsub.subscriber ONLY",
+          "x": 320,
+          "y": 530,
+          "w": 460,
+          "h": 26,
+          "tone": "brand"
+        }
+      ],
+      "notes": [
+        {
+          "id": "n1",
+          "text": "PROJECT SIZING: Pub/Sub publish quota is consumed in the DESTINATION logging project, not the source projects. Size the logging project's regional quota to absorb peak ingest across all monitored workloads.",
+          "x": 40,
+          "y": 720,
+          "w": 960,
+          "h": 50
+        }
+      ]
+    }
+  ]
+}

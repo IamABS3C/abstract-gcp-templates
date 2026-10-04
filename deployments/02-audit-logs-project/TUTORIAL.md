@@ -39,13 +39,53 @@ gcloud auth application-default login
 
 ```bash
 cat > terraform.tfvars <<EOF
-log_project  = "YOUR_PROJECT"
-sink_project = "YOUR_PROJECT"
+log_project             = "YOUR_PROJECT"
+sink_project            = "YOUR_PROJECT"
+acknowledge_pilot_scope = true
 EOF
-terraform init && terraform plan
+terraform init && terraform plan && terraform apply
 ```
 
-## Step 3 — Then replace it
+Review the onboarding outputs:
+```bash
+terraform output abstract_onboarding
+terraform output -raw sink_writer_identity
+```
+
+## Step 3 — Verification & Failure Troubleshooting
+
+Run these commands to verify that the project sink is active and delivering telemetry:
+
+```bash
+# 1. Verify sink exists on the project
+gcloud logging sinks describe abstract-project-sink --project="YOUR_PROJECT"
+
+# 2. Check topic IAM policy for the writer identity
+WRITER=$(terraform output -raw sink_writer_identity)
+echo "Writer identity: $WRITER"
+gcloud pubsub topics get-iam-policy abstract-audit-logs --project="YOUR_PROJECT"
+
+# 3. Pull a test message from the subscription
+gcloud pubsub subscriptions pull abstract-audit-logs-sub \
+  --project="YOUR_PROJECT" --limit=3 --auto-ack
+```
+
+### Failure Troubleshooting Tips
+
+* **Failure: `project scope needs acknowledgement`**:
+  Ensure `acknowledge_pilot_scope = true` is set in `terraform.tfvars`.
+* **Failure: Silent drop (Zero messages arriving)**:
+  Ensure the sink's writer identity is bound to `roles/pubsub.publisher` on the destination topic:
+  ```bash
+  gcloud pubsub topics add-iam-policy-binding abstract-audit-logs \
+    --project="YOUR_PROJECT" \
+    --member="$WRITER" \
+    --role="roles/pubsub.publisher"
+  ```
+* **Failure: Permission denied creating sink**:
+  Verify your identity has `roles/logging.configWriter` on `sink_project`.
+
+## Step 4 — Then replace it
 
 <walkthrough-conclusion-trophy></walkthrough-conclusion-trophy>
 
@@ -54,6 +94,7 @@ organization, deploy `02-audit-logs-organization` and **delete this sink**.
 
 **Do not repeat this per project.** Seventy project sinks is exactly the linear toil the
 aggregated sink exists to eliminate — and each one silently decays as projects change.
+
 
 ---
 

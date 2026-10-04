@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    name: Lint, Guards & Integrity Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.8.2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Verify OpenTofu formatting
+        run: tofu fmt -check -recursive .
+
+      - name: Validate OpenTofu guards and preconditions
+        run: bash tests/guards.sh
+
+      - name: Check Cloud Shell button links
+        run: bash tests/check-buttons.sh
+
+      - name: Verify tutorial command integrity
+        run: python3 tests/check-tutorials.py
+
+      - name: Scan for secrets and unpermitted strings
+        run: bash tests/check-leaks.sh

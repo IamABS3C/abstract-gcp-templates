@@ -21,11 +21,12 @@ provider "google" {
 module "workspace" {
   source = "../../modules/workspace"
 
-  enable_workspace             = true
-  log_project                  = var.log_project
-  workspace_admin_email        = var.workspace_admin_email
-  workspace_app_groups         = var.workspace_app_groups
-  workspace_applications       = var.workspace_applications
-  workspace_service_account_id = var.workspace_service_account_id
-  acknowledge_high_volume      = var.acknowledge_high_volume
+  enable_workspace                    = true
+  log_project                         = var.log_project
+  workspace_admin_email               = var.workspace_admin_email
+  workspace_app_groups                = var.workspace_app_groups
+  workspace_applications              = var.workspace_applications
+  workspace_service_account_id        = var.workspace_service_account_id
+  acknowledge_high_volume             = var.acknowledge_high_volume
+  include_directory_enrichment_scopes = var.include_directory_enrichment_scopes
 }

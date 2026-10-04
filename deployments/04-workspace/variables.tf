@@ -29,3 +29,9 @@ variable "acknowledge_high_volume" {
   type        = bool
   default     = false
 }
+
+variable "include_directory_enrichment_scopes" {
+  description = "Include Admin SDK Directory API scopes (admin.directory.user.readonly, admin.directory.group.readonly) for identity context enrichment (department, manager, org unit, group membership)."
+  type        = bool
+  default     = false
+}

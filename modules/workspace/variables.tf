@@ -1,12 +1,19 @@
 variable "enable_workspace" {
   description = <<-EOT
-    Set up the Google Workspace audit-log integration. This is a SEPARATE pipeline from
-    the log sink -- Workspace audit data comes from the Admin SDK Reports API and never
-    touches Cloud Logging, so no filter at any scope can collect it.
+    Set up the Google Workspace Admin SDK Reports API integration (Pathway B).
 
-    Creates a dedicated service account and emits the exact client ID, scopes and Abstract
-    field values. Domain-wide delegation itself must be granted by a Workspace SUPER ADMIN
-    in admin.google.com -- there is no API for it.
+    Google Workspace supports two ingestion architectures:
+      Pathway A (Native Cloud Audit Sharing): Configured in admin.google.com -> Account Settings
+        -> Legal and compliance -> Sharing options -> Google Cloud Platform. Writes audit logs
+        directly to Cloud Logging at the Organization level, streaming real-time to Pub/Sub via
+        modules/log-export with zero polling.
+      Pathway B (Admin SDK Reports API): Used when native sharing is disabled, or when directory
+        enrichment scopes (admin.directory.user.readonly, admin.directory.group.readonly) or
+        application-specific streams (Drive, Gmail, Vault) are needed.
+
+    This module provisions the dedicated GCP service account for Pathway B and emits the exact
+    client ID, OAuth scopes, and Abstract onboarding values. Domain-wide delegation itself must
+    be granted by a Workspace SUPER ADMIN in admin.google.com -- there is no API for it.
   EOT
   type        = bool
   default     = false
@@ -52,6 +59,12 @@ variable "log_project" {
 
 variable "acknowledge_high_volume" {
   description = "Required to include gmail or drive — on a large tenant they dwarf every other application combined."
+  type        = bool
+  default     = false
+}
+
+variable "include_directory_enrichment_scopes" {
+  description = "Include Admin SDK Directory API scopes (admin.directory.user.readonly, admin.directory.group.readonly) for user identity and group enrichment (department, manager, org unit, group membership)."
   type        = bool
   default     = false
 }

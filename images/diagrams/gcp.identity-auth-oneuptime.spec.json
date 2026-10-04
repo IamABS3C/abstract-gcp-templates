@@ -1,0 +1,279 @@
+{
+  "title": "Enterprise Identity & Authentication Auditing Architecture",
+  "theme": "dark",
+  "animate": true,
+  "pages": [
+    {
+      "name": "Identity Auth Architecture",
+      "banner": {
+        "title": "Enterprise Identity & Authentication Auditing Architecture",
+        "subtitle": "OneUptime Auditing Principles \u00b7 5 Auth Streams \u00b7 Zero Silent Failures \u00b7 Synthetic Probes",
+        "w": 1000
+      },
+      "groups": [
+        {
+          "id": "auth",
+          "label": "1. Five Authentication Streams",
+          "x": 50,
+          "y": 80,
+          "w": 460,
+          "h": 720,
+          "color": "#f5c61e"
+        },
+        {
+          "id": "telemetry",
+          "label": "2. Google Cloud Telemetry Plane",
+          "x": 550,
+          "y": 80,
+          "w": 460,
+          "h": 720,
+          "color": "#2e9bf0"
+        },
+        {
+          "id": "obs",
+          "label": "3. Transport & OneUptime Probing",
+          "x": 1050,
+          "y": 80,
+          "w": 440,
+          "h": 340,
+          "color": "#01e69d"
+        },
+        {
+          "id": "siem",
+          "label": "4. Abstract SIEM & Detection",
+          "x": 1050,
+          "y": 450,
+          "w": 440,
+          "h": 350,
+          "color": "#FF216B"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "login",
+          "label": "User Logins & 2SV",
+          "sublabel": "login.googleapis.com",
+          "icon": "gcp:users",
+          "parent": "auth",
+          "x": 60,
+          "y": 70
+        },
+        {
+          "id": "sa_imp",
+          "label": "SA Impersonation",
+          "sublabel": "iamcredentials.googleapis.com (DATA_READ)",
+          "icon": "gcp:cloud_iam",
+          "parent": "auth",
+          "x": 60,
+          "y": 200
+        },
+        {
+          "id": "wif",
+          "label": "Workload Identity Fed",
+          "sublabel": "sts.googleapis.com (GitHub/AWS OIDC tokens)",
+          "icon": "gcp:cloud_iam",
+          "parent": "auth",
+          "x": 60,
+          "y": 330
+        },
+        {
+          "id": "sa_key",
+          "label": "Static SA Key Usage",
+          "sublabel": "serviceAccountKeyName tracking & IP anomalies",
+          "icon": "gcp:security_key_enforcement",
+          "parent": "auth",
+          "x": 60,
+          "y": 460
+        },
+        {
+          "id": "iam_mut",
+          "label": "IAM Policy Mutations",
+          "sublabel": "cloudaudit.../activity & policy denials",
+          "icon": "gcp:cloud_iam",
+          "parent": "auth",
+          "x": 60,
+          "y": 590
+        },
+        {
+          "id": "ws_share",
+          "label": "Workspace Audit Sharing",
+          "sublabel": "native sharing into Cloud Logging",
+          "icon": "gcp:logging",
+          "parent": "telemetry",
+          "x": 60,
+          "y": 140
+        },
+        {
+          "id": "da_cfg",
+          "label": "Data Access Audit Config",
+          "sublabel": "DATA_READ on iamcredentials & sts",
+          "icon": "gcp:security_key_enforcement",
+          "parent": "telemetry",
+          "x": 60,
+          "y": 360
+        },
+        {
+          "id": "router",
+          "label": "Aggregated Org Sink",
+          "sublabel": "collects all 5 auth streams",
+          "icon": "gcp:logging",
+          "parent": "telemetry",
+          "x": 280,
+          "y": 250
+        },
+        {
+          "id": "topic",
+          "label": "Pub/Sub Topic",
+          "sublabel": "abstract-audit-logs",
+          "icon": "gcp:cloud_pubsub",
+          "fill": "#FF216B",
+          "parent": "obs",
+          "x": 60,
+          "y": 130
+        },
+        {
+          "id": "sub",
+          "label": "Pull Subscription",
+          "sublabel": "abstract-audit-logs-sub",
+          "icon": "gcp:cloud_pubsub",
+          "fill": "#FF216B",
+          "parent": "obs",
+          "x": 260,
+          "y": 130
+        },
+        {
+          "id": "canary",
+          "label": "OneUptime Canary Probes",
+          "sublabel": "synthetic token exchange every 5m",
+          "icon": "gcp:monitor",
+          "parent": "obs",
+          "x": 160,
+          "y": 240
+        },
+        {
+          "id": "plat",
+          "label": "Abstract SIEM Engine",
+          "sublabel": "parsers/gcp-identity-auth.yml",
+          "icon": "img:brand/abstract-logo-mark.svg",
+          "parent": "siem",
+          "x": 80,
+          "y": 140
+        },
+        {
+          "id": "lake",
+          "label": "BigQuery Security Lake",
+          "sublabel": "long-term identity forensics",
+          "icon": "gcp:bigquery",
+          "parent": "siem",
+          "x": 280,
+          "y": 140
+        }
+      ],
+      "edges": [
+        {
+          "from": "login",
+          "to": "ws_share",
+          "tone": "amber"
+        },
+        {
+          "from": "sa_imp",
+          "to": "da_cfg",
+          "tone": "amber"
+        },
+        {
+          "from": "wif",
+          "to": "da_cfg",
+          "tone": "amber"
+        },
+        {
+          "from": "sa_key",
+          "to": "router",
+          "tone": "muted"
+        },
+        {
+          "from": "iam_mut",
+          "to": "router",
+          "tone": "muted"
+        },
+        {
+          "from": "ws_share",
+          "to": "router",
+          "tone": "teal"
+        },
+        {
+          "from": "da_cfg",
+          "to": "router",
+          "tone": "teal"
+        },
+        {
+          "from": "router",
+          "to": "topic",
+          "label": "roles/pubsub.publisher",
+          "tone": "warn"
+        },
+        {
+          "from": "topic",
+          "to": "sub",
+          "tone": "brand"
+        },
+        {
+          "from": "sub",
+          "to": "canary",
+          "tone": "teal",
+          "dashed": true
+        },
+        {
+          "from": "sub",
+          "to": "plat",
+          "label": "real-time pull",
+          "tone": "brand"
+        },
+        {
+          "from": "plat",
+          "to": "lake",
+          "label": "archive",
+          "tone": "muted"
+        }
+      ],
+      "badges": [
+        {
+          "id": "b1",
+          "text": "ONEUPTIME PRINCIPLE: Deterministic credential attribution & impersonation chains",
+          "x": 70,
+          "y": 100,
+          "w": 430,
+          "h": 26,
+          "tone": "amber"
+        },
+        {
+          "id": "b2",
+          "text": "DATA ACCESS REQUIREMENT: iamcredentials & sts require DATA_READ to log",
+          "x": 570,
+          "y": 100,
+          "w": 420,
+          "h": 26,
+          "tone": "teal"
+        },
+        {
+          "id": "b3",
+          "text": "ZERO SILENT FAILURES: Drop triggers dead-man alarm within 30 min",
+          "x": 1060,
+          "y": 100,
+          "w": 410,
+          "h": 26,
+          "tone": "brand"
+        }
+      ],
+      "notes": [
+        {
+          "id": "n1",
+          "text": "IDENTITY PERIMETER: Network firewalls cannot stop an adversary with valid credentials or impersonation rights. Capturing iamcredentials and sts via Data Access audit logging is the foundation of modern zero-trust cloud defense.",
+          "x": 50,
+          "y": 820,
+          "w": 1000,
+          "h": 50
+        }
+      ]
+    }
+  ]
+}

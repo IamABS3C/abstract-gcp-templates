@@ -1,0 +1,186 @@
+{
+  "title": "Cloud Storage bucket notifications to Abstract",
+  "theme": "dark",
+  "animate": true,
+  "pages": [
+    {
+      "name": "Bucket Notifications",
+      "banner": {
+        "title": "Cloud Storage Bucket Object Change Notifications",
+        "subtitle": "Real-time object lifecycle tracking \u00b7 data exfiltration monitoring \u00b7 backup integrity",
+        "w": 1000
+      },
+      "groups": [
+        {
+          "id": "workload",
+          "label": "Sensitive Storage Workload Projects",
+          "x": 50,
+          "y": 80,
+          "w": 460,
+          "h": 660,
+          "color": "#2e9bf0"
+        },
+        {
+          "id": "lp",
+          "label": "Dedicated Logging Project",
+          "x": 550,
+          "y": 80,
+          "w": 460,
+          "h": 660,
+          "color": "#01e69d"
+        },
+        {
+          "id": "abs",
+          "label": "Abstract Security Platform",
+          "x": 1050,
+          "y": 80,
+          "w": 360,
+          "h": 660,
+          "color": "#FF216B"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "bkt_fin",
+          "label": "Customer PII Bucket",
+          "sublabel": "payment records, documents",
+          "icon": "gcp:cloud_storage",
+          "parent": "workload",
+          "x": 70,
+          "y": 120
+        },
+        {
+          "id": "bkt_bak",
+          "label": "Database Backups",
+          "sublabel": "snapshots, SQL dumps",
+          "icon": "gcp:cloud_storage",
+          "parent": "workload",
+          "x": 70,
+          "y": 340
+        },
+        {
+          "id": "notif_cfg",
+          "label": "Notification Config",
+          "sublabel": "OBJECT_FINALIZE + DELETE",
+          "icon": "gcp:cloud_pubsub",
+          "parent": "workload",
+          "x": 300,
+          "y": 230
+        },
+        {
+          "id": "gcs_sa",
+          "label": "GCS Service Agent",
+          "sublabel": "service-$NUM@gs-project-accounts...",
+          "icon": "gcp:cloud_iam",
+          "fill": "#01e69d",
+          "parent": "lp",
+          "x": 80,
+          "y": 140
+        },
+        {
+          "id": "topic",
+          "label": "Pub/Sub Topic",
+          "sublabel": "abstract-gcs-notifications",
+          "icon": "gcp:cloud_pubsub",
+          "fill": "#FF216B",
+          "parent": "lp",
+          "x": 280,
+          "y": 230
+        },
+        {
+          "id": "sub",
+          "label": "Pull Subscription",
+          "sublabel": "abstract-gcs-notifications-sub",
+          "icon": "gcp:cloud_pubsub",
+          "fill": "#FF216B",
+          "parent": "lp",
+          "x": 280,
+          "y": 440
+        },
+        {
+          "id": "plat",
+          "label": "Abstract SIEM",
+          "sublabel": "mass exfiltration detection",
+          "icon": "img:brand/abstract-logo-mark.svg",
+          "parent": "abs",
+          "x": 130,
+          "y": 320
+        }
+      ],
+      "edges": [
+        {
+          "from": "bkt_fin",
+          "to": "notif_cfg",
+          "tone": "muted"
+        },
+        {
+          "from": "bkt_bak",
+          "to": "notif_cfg",
+          "tone": "muted"
+        },
+        {
+          "from": "notif_cfg",
+          "to": "topic",
+          "label": "publishes object events",
+          "tone": "brand"
+        },
+        {
+          "from": "gcs_sa",
+          "to": "topic",
+          "label": "roles/pubsub.publisher",
+          "tone": "teal",
+          "dashed": true
+        },
+        {
+          "from": "topic",
+          "to": "sub",
+          "tone": "brand",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "sub",
+          "to": "plat",
+          "label": "pull",
+          "tone": "brand"
+        }
+      ],
+      "badges": [
+        {
+          "id": "b1",
+          "text": "EXFILTRATION DETECTION: Instant alert on mass file creation/deletion",
+          "x": 70,
+          "y": 100,
+          "w": 420,
+          "h": 26,
+          "tone": "teal"
+        },
+        {
+          "id": "b2",
+          "text": "MULTI-PROJECT: Central topic collects from buckets in multiple projects",
+          "x": 570,
+          "y": 100,
+          "w": 420,
+          "h": 26,
+          "tone": "amber"
+        }
+      ],
+      "notes": [
+        {
+          "id": "n1",
+          "text": "OBJECT CHANGE NOTIFICATIONS: GCS bucket notifications publish directly from Cloud Storage to Pub/Sub when objects are created or deleted. The Cloud Storage service agent in each source project needs roles/pubsub.publisher on the central topic.",
+          "x": 50,
+          "y": 760,
+          "w": 960,
+          "h": 50
+        }
+      ]
+    }
+  ]
+}

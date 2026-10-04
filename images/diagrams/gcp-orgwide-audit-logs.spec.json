@@ -1,0 +1,210 @@
+{
+  "title": "GCP org-wide audit logs to Abstract",
+  "theme": "dark",
+  "animate": true,
+  "pages": [
+    {
+      "name": "Aggregated sink",
+      "banner": {
+        "title": "Organization-Wide Aggregated Audit Pipeline",
+        "subtitle": "Comprehensive control plane telemetry \u00b7 Admin Activity & System Events \u00b7 Real-time streaming",
+        "w": 1000
+      },
+      "groups": [
+        {
+          "id": "org",
+          "label": "GCP Organization (All Projects)",
+          "x": 60,
+          "y": 80,
+          "w": 840,
+          "h": 700,
+          "color": "#2e9bf0"
+        },
+        {
+          "id": "logproj",
+          "label": "Dedicated Logging Project",
+          "x": 470,
+          "y": 170,
+          "w": 390,
+          "h": 460,
+          "color": "#01e69d",
+          "parent": "org"
+        },
+        {
+          "id": "abs",
+          "label": "Abstract Security Platform",
+          "x": 950,
+          "y": 80,
+          "w": 420,
+          "h": 700,
+          "color": "#FF216B"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "folders",
+          "label": "Folders & Projects",
+          "sublabel": "current & future (--include-children)",
+          "icon": "gcp:folders",
+          "parent": "org",
+          "x": 70,
+          "y": 100
+        },
+        {
+          "id": "iam",
+          "label": "Cloud IAM",
+          "sublabel": "admin activity & policy mutations",
+          "icon": "gcp:cloud_iam",
+          "parent": "org",
+          "x": 70,
+          "y": 240
+        },
+        {
+          "id": "bq",
+          "label": "BigQuery",
+          "sublabel": "data access auditing",
+          "icon": "gcp:bigquery",
+          "parent": "org",
+          "x": 70,
+          "y": 380
+        },
+        {
+          "id": "gke",
+          "label": "GKE Clusters",
+          "sublabel": "control plane API events",
+          "icon": "gcp:container_engine",
+          "parent": "org",
+          "x": 70,
+          "y": 520
+        },
+        {
+          "id": "router",
+          "label": "Log Router Org Sink",
+          "sublabel": "abstract-org-audit-sink",
+          "icon": "gcp:logging",
+          "parent": "logproj",
+          "x": 150,
+          "y": 70
+        },
+        {
+          "id": "topic",
+          "label": "Pub/Sub Topic",
+          "sublabel": "abstract-audit-logs",
+          "icon": "gcp:cloud_pubsub",
+          "fill": "#FF216B",
+          "parent": "logproj",
+          "x": 150,
+          "y": 280
+        },
+        {
+          "id": "sub",
+          "label": "Pull Subscription",
+          "sublabel": "abstract-audit-logs-sub \u00b7 7d retention",
+          "icon": "gcp:cloud_pubsub",
+          "fill": "#FF216B",
+          "parent": "abs",
+          "x": 160,
+          "y": 180
+        },
+        {
+          "id": "plat",
+          "label": "Abstract SIEM Engine",
+          "sublabel": "real-time threat correlation",
+          "icon": "img:brand/abstract-logo-mark.svg",
+          "parent": "abs",
+          "x": 160,
+          "y": 420
+        }
+      ],
+      "edges": [
+        {
+          "from": "folders",
+          "to": "router",
+          "label": "--include-children",
+          "tone": "brand",
+          "label_x": -0.6
+        },
+        {
+          "from": "iam",
+          "to": "router",
+          "tone": "muted"
+        },
+        {
+          "from": "bq",
+          "to": "router",
+          "tone": "muted"
+        },
+        {
+          "from": "gke",
+          "to": "router",
+          "tone": "muted"
+        },
+        {
+          "from": "router",
+          "to": "topic",
+          "label": "writer identity needs\nroles/pubsub.publisher",
+          "tone": "warn",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ],
+          "label_x": 0.5
+        },
+        {
+          "from": "topic",
+          "to": "sub",
+          "label": "pull",
+          "tone": "brand",
+          "label_x": 0.4
+        },
+        {
+          "from": "sub",
+          "to": "plat",
+          "tone": "brand",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        }
+      ],
+      "badges": [
+        {
+          "id": "b1",
+          "text": "CRITICAL TRAP: writer_identity MUST have roles/pubsub.publisher on topic",
+          "x": 480,
+          "y": 190,
+          "w": 460,
+          "h": 26,
+          "tone": "brand"
+        },
+        {
+          "id": "b2",
+          "text": "FREE TIER: Admin Activity and System Events have zero GCP ingest cost",
+          "x": 80,
+          "y": 660,
+          "w": 440,
+          "h": 26,
+          "tone": "teal"
+        }
+      ],
+      "notes": [
+        {
+          "id": "n1",
+          "text": "THE #1 FAILURE MODE: Google Cloud generates a unique service account (service-org-123456@gcp-sa-logging.iam.gserviceaccount.com) when an aggregated sink is created. It holds ZERO permissions by default. Without an explicit IAM grant of roles/pubsub.publisher on the topic, the sink drops 100% of logs silently with NO console warning.",
+          "x": 60,
+          "y": 800,
+          "w": 1000,
+          "h": 50
+        }
+      ]
+    }
+  ]
+}

@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="brand/abstract-logo-white.svg">
+  <img alt="Abstract Security" src="brand/abstract-logo-black.svg" width="220">
+</picture>
+
 # Abstract Security — Google Cloud templates
 
 Everything needed to send Google Cloud logs to Abstract. Each template lists what it creates and what it never touches; you deploy it in your own account, with your own credentials.
@@ -27,6 +32,8 @@ cloudshell launch-tutorial WALKTHROUGH.md     # in Cloud Shell: opens the walkth
 | <img src="images/diagrams/gcp.scc-findings.png" width="180" alt=""> | **Security Command Center findings** | Organization | [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/IamABS3C/abstract-gcp-templates&cloudshell_git_branch=main&cloudshell_workspace=deployments/06-scc-findings&cloudshell_tutorial=TUTORIAL.md) |
 | <img src="images/diagrams/gcs-pubsub-notifications.png" width="180" alt=""> | **Logs in a Cloud Storage bucket** | Project | [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/IamABS3C/abstract-gcp-templates&cloudshell_git_branch=main&cloudshell_workspace=deployments/08-bucket-logs&cloudshell_tutorial=TUTORIAL.md) |
 | <img src="images/diagrams/gcp.asset-inventory.png" width="180" alt=""> | **Asset and IAM changes** | Organization | [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/IamABS3C/abstract-gcp-templates&cloudshell_git_branch=main&cloudshell_workspace=deployments/07-asset-inventory&cloudshell_tutorial=TUTORIAL.md) |
+| <img src="images/diagrams/gcp.billing-account.png" width="180" alt=""> | **Billing account audit logs** | Billing account | [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/IamABS3C/abstract-gcp-templates&cloudshell_git_branch=main&cloudshell_workspace=deployments/10-billing-account&cloudshell_tutorial=TUTORIAL.md) |
+| <img src="images/diagrams/gcp.network-threats.png" width="180" alt=""> | **Network threat & security logs** | Organization | [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/IamABS3C/abstract-gcp-templates&cloudshell_git_branch=main&cloudshell_workspace=deployments/11-network-threats&cloudshell_tutorial=TUTORIAL.md) |
 | | **Monitoring** | | |
 | <img src="images/diagrams/gcp.monitoring.png" width="180" alt=""> | **Pipeline health alerts** | Project | [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/IamABS3C/abstract-gcp-templates&cloudshell_git_branch=main&cloudshell_workspace=deployments/05-health-alerts&cloudshell_tutorial=TUTORIAL.md) |
 | | **Archive** | | |
@@ -55,6 +62,17 @@ terraform apply -var org_id="$ORG_ID" -var log_project="$LOG_PROJECT"
 ```
 
 Each template's parameters, permissions and checks are in the file itself and in `docs/`.
+
+## Architecture & Interactive Diagrams
+
+- [Architecture Design & Decisions Guide](docs/ARCHITECTURE.md): Complete breakdown of log scopes, quotas, regional residency, VPC-SC boundaries, and Draw.io visual models.
+- [Identity Threat Detection & Authentication Auditing Guide](docs/IDENTITY-AND-AUTHENTICATION-GUIDE.md): Enterprise reference for Google Workspace logins (`login.googleapis.com`), service account impersonation (`iamcredentials`), Workload Identity Federation (`sts`), static key leakage detection, OneUptime auditing principles, and production SIEM detection rules.
+- **Draw.io Desktop & Web Integration**: Open and customize any architecture diagram in this repository directly in your desktop Draw.io application or via diagrams.net:
+  ```bash
+  ./scripts/open-diagram.sh 04-identity-auth-oneuptime          # Opens in macOS Draw.io Desktop
+  ./scripts/open-diagram.sh 11-network-threats --web            # Opens in diagrams.net
+  ```
+
 
 <details><summary>Renamed folders (for older copies)</summary>
 

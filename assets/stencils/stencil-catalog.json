@@ -1,0 +1,4604 @@
+{
+ "_meta": {
+  "counts": {
+   "aws": 440,
+   "azure": 423,
+   "gcp": 270,
+   "groups": 14
+  },
+  "source": "draw.io desktop application bundle",
+  "why": "Names the renderer actually knows. An unknown name renders a blank square instead of failing, so this is extracted rather than hand-written.",
+  "corrections": [
+   {
+    "date": "2026-08-26",
+    "what": "Azure shape values were extracted as stencil FILE PATHS ('mscae/ADFS') rather than draw.io shape names ('mxgraph.mscae.cloud.adfs'). Every Azure icon therefore rendered as a blank white square while passing the catalog's own existence check -- the exact failure the catalog exists to prevent, hiding inside the catalog.",
+    "how_verified": "Rendered each candidate and measured SVG byte size against a deliberately fake negative control (909b). Resolved shapes return 1.9-3.4 KB. Primitive counting does NOT discriminate here -- these stencils emit no path elements, so the original verifier's metric reported a false negative on every Azure name.",
+    "was": 564,
+    "now": 423,
+    "malformed_before": 492
+   }
+  ]
+ },
+ "aws": {
+  "a1_instance": {
+   "category": "default",
+   "shape": "mxgraph.aws4.a1_instance"
+  },
+  "action": {
+   "category": "default",
+   "shape": "mxgraph.aws4.action"
+  },
+  "actuator": {
+   "category": "default",
+   "shape": "mxgraph.aws4.actuator"
+  },
+  "ad_connector": {
+   "category": "default",
+   "shape": "mxgraph.aws4.ad_connector"
+  },
+  "addon": {
+   "category": "default",
+   "shape": "mxgraph.aws4.addon"
+  },
+  "agent": {
+   "category": "default",
+   "shape": "mxgraph.aws4.agent"
+  },
+  "agent2": {
+   "category": "default",
+   "shape": "mxgraph.aws4.agent2"
+  },
+  "alarm": {
+   "category": "default",
+   "shape": "mxgraph.aws4.alarm"
+  },
+  "alexa_enabled_device": {
+   "category": "default",
+   "shape": "mxgraph.aws4.alexa_enabled_device"
+  },
+  "alexa_for_business": {
+   "category": "default",
+   "shape": "mxgraph.aws4.alexa_for_business"
+  },
+  "alexa_skill": {
+   "category": "default",
+   "shape": "mxgraph.aws4.alexa_skill"
+  },
+  "ami": {
+   "category": "default",
+   "shape": "mxgraph.aws4.ami"
+  },
+  "amplify": {
+   "category": "default",
+   "shape": "mxgraph.aws4.amplify"
+  },
+  "analytics": {
+   "category": "default",
+   "shape": "mxgraph.aws4.analytics"
+  },
+  "apache_mxnet_on_aws": {
+   "category": "default",
+   "shape": "mxgraph.aws4.apache_mxnet_on_aws"
+  },
+  "api_gateway": {
+   "category": "integration",
+   "shape": "mxgraph.aws4.api_gateway"
+  },
+  "app_mesh": {
+   "category": "default",
+   "shape": "mxgraph.aws4.app_mesh"
+  },
+  "application": {
+   "category": "default",
+   "shape": "mxgraph.aws4.application"
+  },
+  "application_discovery_service": {
+   "category": "default",
+   "shape": "mxgraph.aws4.application_discovery_service"
+  },
+  "application_integration": {
+   "category": "default",
+   "shape": "mxgraph.aws4.application_integration"
+  },
+  "application_load_balancer": {
+   "category": "default",
+   "shape": "mxgraph.aws4.application_load_balancer"
+  },
+  "appstream_20": {
+   "category": "default",
+   "shape": "mxgraph.aws4.appstream_20"
+  },
+  "appsync": {
+   "category": "integration",
+   "shape": "mxgraph.aws4.appsync"
+  },
+  "ar_vr": {
+   "category": "default",
+   "shape": "mxgraph.aws4.ar_vr"
+  },
+  "archive": {
+   "category": "default",
+   "shape": "mxgraph.aws4.archive"
+  },
+  "artifact": {
+   "category": "security",
+   "shape": "mxgraph.aws4.artifact"
+  },
+  "athena": {
+   "category": "analytics",
+   "shape": "mxgraph.aws4.athena"
+  },
+  "attribute": {
+   "category": "default",
+   "shape": "mxgraph.aws4.attribute"
+  },
+  "attributes": {
+   "category": "default",
+   "shape": "mxgraph.aws4.attributes"
+  },
+  "aurora": {
+   "category": "database",
+   "shape": "mxgraph.aws4.aurora"
+  },
+  "auto_scaling2": {
+   "category": "default",
+   "shape": "mxgraph.aws4.auto_scaling2"
+  },
+  "automation": {
+   "category": "default",
+   "shape": "mxgraph.aws4.automation"
+  },
+  "autoscaling": {
+   "category": "default",
+   "shape": "mxgraph.aws4.autoscaling"
+  },
+  "aws_cloud": {
+   "category": "default",
+   "shape": "mxgraph.aws4.aws_cloud"
+  },
+  "backup": {
+   "category": "storage",
+   "shape": "mxgraph.aws4.backup"
+  },
+  "bank": {
+   "category": "default",
+   "shape": "mxgraph.aws4.bank"
+  },
+  "batch": {
+   "category": "compute",
+   "shape": "mxgraph.aws4.batch"
+  },
+  "blockchain": {
+   "category": "default",
+   "shape": "mxgraph.aws4.blockchain"
+  },
+  "bucket": {
+   "category": "storage",
+   "shape": "mxgraph.aws4.bucket"
+  },
+  "bucket_with_objects": {
+   "category": "storage",
+   "shape": "mxgraph.aws4.bucket_with_objects"
+  },
+  "budgets": {
+   "category": "default",
+   "shape": "mxgraph.aws4.budgets"
+  },
+  "business_application": {
+   "category": "default",
+   "shape": "mxgraph.aws4.business_application"
+  },
+  "bycicle": {
+   "category": "default",
+   "shape": "mxgraph.aws4.bycicle"
+  },
+  "c4_instance": {
+   "category": "default",
+   "shape": "mxgraph.aws4.c4_instance"
+  },
+  "c5_instance": {
+   "category": "default",
+   "shape": "mxgraph.aws4.c5_instance"
+  },
+  "c5n_instance": {
+   "category": "default",
+   "shape": "mxgraph.aws4.c5n_instance"
+  },
+  "cache_node": {
+   "category": "default",
+   "shape": "mxgraph.aws4.cache_node"
+  },
+  "cached_volume": {
+   "category": "default",
+   "shape": "mxgraph.aws4.cached_volume"
+  },
+  "camera": {
+   "category": "default",
+   "shape": "mxgraph.aws4.camera"
+  },
+  "car": {
+   "category": "default",
+   "shape": "mxgraph.aws4.car"
+  },
+  "cart": {
+   "category": "default",
+   "shape": "mxgraph.aws4.cart"
+  },
+  "certificate_manager": {
+   "category": "security",
+   "shape": "mxgraph.aws4.certificate_manager"
+  },
+  "certificate_manager_2": {
+   "category": "security",
+   "shape": "mxgraph.aws4.certificate_manager_2"
+  },
+  "certificate_manager_3": {
+   "category": "security",
+   "shape": "mxgraph.aws4.certificate_manager_3"
+  },
+  "change_set": {
+   "category": "default",
+   "shape": "mxgraph.aws4.change_set"
+  },
+  "checklist": {
+   "category": "default",
+   "shape": "mxgraph.aws4.checklist"
+  },
+  "checklist_cost": {
+   "category": "default",
+   "shape": "mxgraph.aws4.checklist_cost"
+  },
+  "checklist_fault_tolerant": {
+   "category": "default",
+   "shape": "mxgraph.aws4.checklist_fault_tolerant"
+  },
+  "checklist_performance": {
+   "category": "default",
+   "shape": "mxgraph.aws4.checklist_performance"
+  },
+  "checklist_security": {
+   "category": "default",
+   "shape": "mxgraph.aws4.checklist_security"
+  },
+  "chime": {
+   "category": "default",
+   "shape": "mxgraph.aws4.chime"
+  },
+  "classic_load_balancer": {
+   "category": "default",
+   "shape": "mxgraph.aws4.classic_load_balancer"
+  },
+  "client": {
+   "category": "default",
+   "shape": "mxgraph.aws4.client"
+  },
+  "client_vpn": {
+   "category": "default",
+   "shape": "mxgraph.aws4.client_vpn"
+  },
+  "cloud9": {
+   "category": "default",
+   "shape": "mxgraph.aws4.cloud9"
+  },
+  "cloud_development_kit": {
+   "category": "default",
+   "shape": "mxgraph.aws4.cloud_development_kit"
+  },
+  "cloud_directory": {
+   "category": "default",
+   "shape": "mxgraph.aws4.cloud_directory"
+  },
+  "cloud_extension_ros": {
+   "category": "default",
+   "shape": "mxgraph.aws4.cloud_extension_ros"
+  },
+  "cloud_map": {
+   "category": "default",
+   "shape": "mxgraph.aws4.cloud_map"
+  },
+  "cloudformation": {
+   "category": "management",
+   "shape": "mxgraph.aws4.cloudformation"
+  },
+  "cloudfront": {
+   "category": "network",
+   "shape": "mxgraph.aws4.cloudfront"
+  },
+  "cloudhsm": {
+   "category": "default",
+   "shape": "mxgraph.aws4.cloudhsm"
+  },
+  "cloudsearch": {
+   "category": "default",
+   "shape": "mxgraph.aws4.cloudsearch"
+  },
+  "cloudtrail": {
+   "category": "management",
+   "shape": "mxgraph.aws4.cloudtrail"
+  },
+  "cloudwatch": {
+   "category": "management",
+   "shape": "mxgraph.aws4.cloudwatch"
+  },
+  "cluster": {
+   "category": "default",
+   "shape": "mxgraph.aws4.cluster"
+  },
+  "codebuild": {
+   "category": "default",
+   "shape": "mxgraph.aws4.codebuild"
+  },
+  "codecommit": {
+   "category": "default",
+   "shape": "mxgraph.aws4.codecommit"
+  },
+  "codedeploy": {
+   "category": "default",
+   "shape": "mxgraph.aws4.codedeploy"
+  },
+  "codepipeline": {
+   "category": "default",
+   "shape": "mxgraph.aws4.codepipeline"
+  },
+  "codestar": {
+   "category": "default",
+   "shape": "mxgraph.aws4.codestar"
+  },
+  "coffee_pot": {
+   "category": "default",
+   "shape": "mxgraph.aws4.coffee_pot"
+  },
+  "cognito": {
+   "category": "security",
+   "shape": "mxgraph.aws4.cognito"
+  },
+  "command_line_interface": {
+   "category": "default",
+   "shape": "mxgraph.aws4.command_line_interface"
+  },
+  "comprehend": {
+   "category": "ml",
+   "shape": "mxgraph.aws4.comprehend"
+  },
+  "compute": {
+   "category": "compute",
+   "shape": "mxgraph.aws4.compute"
+  },
+  "config": {
+   "category": "management",
+   "shape": "mxgraph.aws4.config"
+  },
+  "connect": {
+   "category": "default",
+   "shape": "mxgraph.aws4.connect"
+  },
+  "connector": {
+   "category": "default",
+   "shape": "mxgraph.aws4.connector"
+  },
+  "container_1": {
+   "category": "compute",
+   "shape": "mxgraph.aws4.container_1"
+  },
+  "container_2": {
+   "category": "compute",
+   "shape": "mxgraph.aws4.container_2"
+  },
+  "container_3": {
+   "category": "compute",
+   "shape": "mxgraph.aws4.container_3"
+  },
+  "container_registry_image": {
+   "category": "compute",
+   "shape": "mxgraph.aws4.container_registry_image"
+  },
+  "control_tower": {
+   "category": "management",
+   "shape": "mxgraph.aws4.control_tower"
+  },
+  "corporate_data_center": {
+   "category": "analytics",
+   "shape": "mxgraph.aws4.corporate_data_center"
+  },
+  "cost_and_usage_report": {
+   "category": "default",
+   "shape": "mxgraph.aws4.cost_and_usage_report"
+  },
+  "cost_explorer": {
+   "category": "default",
+   "shape": "mxgraph.aws4.cost_explorer"
+  },
+  "cost_management": {
+   "category": "management",
+   "shape": "mxgraph.aws4.cost_management"
+  },
+  "customer_engagement": {
+   "category": "default",
+   "shape": "mxgraph.aws4.customer_engagement"
+  },
+  "customer_gateway": {
+   "category": "default",
+   "shape": "mxgraph.aws4.customer_gateway"
+  },
+  "d2_instance": {
+   "category": "default",
+   "shape": "mxgraph.aws4.d2_instance"
+  },
+  "data_encryption_key": {
+   "category": "analytics",
+   "shape": "mxgraph.aws4.data_encryption_key"
+  },
+  "data_lake_resource_icon": {
+   "category": "analytics",
+   "shape": "mxgraph.aws4.data_lake_resource_icon"
+  },
+  "data_pipeline": {
+   "category": "analytics",
+   "shape": "mxgraph.aws4.data_pipeline"
+  },
+  "data_set": {
+   "category": "analytics",
+   "shape": "mxgraph.aws4.data_set"
+  },
+  "database": {
+   "category": "database",
+   "shape": "mxgraph.aws4.database"
+  },
+  "database_migration_service": {
+   "category": "database",
+   "shape": "mxgraph.aws4.database_migration_service"
+  },
+  "database_migration_workflow_job": {
+   "category": "database",
+   "shape": "mxgraph.aws4.database_migration_workflow_job"
+  },
+  "datasync": {
+   "category": "storage",
+   "shape": "mxgraph.aws4.datasync"
+  },
+  "db_on_instance2": {
+   "category": "default",
+   "shape": "mxgraph.aws4.db_on_instance2"
+  },
+  "deep_learning_amis": {
+   "category": "default",
+   "shape": "mxgraph.aws4.deep_learning_amis"
+  },
+  "deep_learning_containers": {
+   "category": "compute",
+   "shape": "mxgraph.aws4.deep_learning_containers"
+  },
+  "deeplens": {
+   "category": "default",
+   "shape": "mxgraph.aws4.deeplens"
+  },
+  "deepracer": {
+   "category": "default",
+   "shape": "mxgraph.aws4.deepracer"
+  },
+  "dense_compute_node": {
+   "category": "compute",
+   "shape": "mxgraph.aws4.dense_compute_node"
+  },
+  "dense_storage_node": {
+   "category": "storage",
+   "shape": "mxgraph.aws4.dense_storage_node"
+  },
+  "deployment": {
+   "category": "default",
+   "shape": "mxgraph.aws4.deployment"
+  },
+  "deployments": {
+   "category": "default",
+   "shape": "mxgraph.aws4.deployments"
+  },
+  "desired_state": {
+   "category": "default",
+   "shape": "mxgraph.aws4.desired_state"
+  },
+  "desktop_and_app_streaming": {
+   "category": "default",
+   "shape": "mxgraph.aws4.desktop_and_app_streaming"
+  },
+  "developer_tools": {
+   "category": "default",
+   "shape": "mxgraph.aws4.developer_tools"
+  },
+  "development_environment": {
+   "category": "default",
+   "shape": "mxgraph.aws4.development_environment"
+  },
+  "device_farm": {
+   "category": "default",
+   "shape": "mxgraph.aws4.device_farm"
+  },
+  "direct_connect": {
+   "category": "network",
+   "shape": "mxgraph.aws4.direct_connect"
+  },
+  "directory_service": {
+   "category": "security",
+   "shape": "mxgraph.aws4.directory_service"
+  },
+  "disk": {
+   "category": "default",
+   "shape": "mxgraph.aws4.disk"
+  },
+  "documentdb_with_mongodb_compatibility": {
+   "category": "database",
+   "shape": "mxgraph.aws4.documentdb_with_mongodb_compatibility"
+  },
+  "documents": {
+   "category": "default",
+   "shape": "mxgraph.aws4.documents"
+  },
+  "door_lock": {
+   "category": "default",
+   "shape": "mxgraph.aws4.door_lock"
+  },
+  "download_distribution": {
+   "category": "default",
+   "shape": "mxgraph.aws4.download_distribution"
+  },
+  "dynamodb": {
+   "category": "database",
+   "shape": "mxgraph.aws4.dynamodb"
+  },
+  "dynamodb_dax": {
+   "category": "database",
+   "shape": "mxgraph.aws4.dynamodb_dax"
+  },
+  "ec2": {
+   "category": "compute",
+   "shape": "mxgraph.aws4.ec2"
+  },
+  "echo": {
+   "category": "default",
+   "shape": "mxgraph.aws4.echo"
+  },
+  "ecr": {
+   "category": "default",
+   "shape": "mxgraph.aws4.ecr"
+  },
+  "ecs": {
+   "category": "compute",
+   "shape": "mxgraph.aws4.ecs"
+  },
+  "ecs_service": {
+   "category": "compute",
+   "shape": "mxgraph.aws4.ecs_service"
+  },
+  "ecs_task": {
+   "category": "compute",
+   "shape": "mxgraph.aws4.ecs_task"
+  },
+  "edge_location": {
+   "category": "default",
+   "shape": "mxgraph.aws4.edge_location"
+  },
+  "efs_infrequentaccess": {
+   "category": "storage",
+   "shape": "mxgraph.aws4.efs_infrequentaccess"
+  },
+  "efs_standard": {
+   "category": "storage",
+   "shape": "mxgraph.aws4.efs_standard"
+  },
+  "eks": {
+   "category": "compute",
+   "shape": "mxgraph.aws4.eks"
+  },
+  "elastic_beanstalk": {
+   "category": "compute",
+   "shape": "mxgraph.aws4.elastic_beanstalk"
+  },
+  "elastic_block_store": {
+   "category": "storage",
+   "shape": "mxgraph.aws4.elastic_block_store"
+  },
+  "elastic_file_system": {
+   "category": "storage",
+   "shape": "mxgraph.aws4.elastic_file_system"
+  },
+  "elastic_inference": {
+   "category": "default",
+   "shape": "mxgraph.aws4.elastic_inference"
+  },
+  "elastic_ip_address": {
+   "category": "default",
+   "shape": "mxgraph.aws4.elastic_ip_address"
+  },
+  "elastic_load_balancing": {
+   "category": "network",
+   "shape": "mxgraph.aws4.elastic_load_balancing"
+  },
+  "elastic_network_adapter": {
+   "category": "network",
+   "shape": "mxgraph.aws4.elastic_network_adapter"
+  },
+  "elastic_network_interface": {
+   "category": "network",
+   "shape": "mxgraph.aws4.elastic_network_interface"
+  },
+  "elastic_transcoder": {
+   "category": "default",
+   "shape": "mxgraph.aws4.elastic_transcoder"
+  },
+  "elasticache": {
+   "category": "database",
+   "shape": "mxgraph.aws4.elasticache"
+  },
+  "elasticache_for_memcached": {
+   "category": "database",
+   "shape": "mxgraph.aws4.elasticache_for_memcached"
+  },
+  "elasticache_for_redis": {
+   "category": "database",
+   "shape": "mxgraph.aws4.elasticache_for_redis"
+  },
+  "elasticsearch_service": {
+   "category": "analytics",
+   "shape": "mxgraph.aws4.elasticsearch_service"
+  },
+  "elemental": {
+   "category": "default",
+   "shape": "mxgraph.aws4.elemental"
+  },
+  "elemental_mediaconnect": {
+   "category": "default",
+   "shape": "mxgraph.aws4.elemental_mediaconnect"
+  },
+  "elemental_mediaconvert": {
+   "category": "default",
+   "shape": "mxgraph.aws4.elemental_mediaconvert"
+  },
+  "elemental_medialive": {
+   "category": "default",
+   "shape": "mxgraph.aws4.elemental_medialive"
+  },
+  "elemental_mediapackage": {
+   "category": "default",
+   "shape": "mxgraph.aws4.elemental_mediapackage"
+  },
+  "elemental_mediastore": {
+   "category": "default",
+   "shape": "mxgraph.aws4.elemental_mediastore"
+  },
+  "elemental_mediatailor": {
+   "category": "default",
+   "shape": "mxgraph.aws4.elemental_mediatailor"
+  },
+  "email": {
+   "category": "default",
+   "shape": "mxgraph.aws4.email"
+  },
+  "email_notification": {
+   "category": "default",
+   "shape": "mxgraph.aws4.email_notification"
+  },
+  "emr": {
+   "category": "analytics",
+   "shape": "mxgraph.aws4.emr"
+  },
+  "emr_engine": {
+   "category": "analytics",
+   "shape": "mxgraph.aws4.emr_engine"
+  },
+  "emr_engine_mapr_m3": {
+   "category": "analytics",
+   "shape": "mxgraph.aws4.emr_engine_mapr_m3"
+  },
+  "emr_engine_mapr_m5": {
+   "category": "analytics",
+   "shape": "mxgraph.aws4.emr_engine_mapr_m5"
+  },
+  "emr_engine_mapr_m7": {
+   "category": "analytics",
+   "shape": "mxgraph.aws4.emr_engine_mapr_m7"
+  },
+  "encrypted_data": {
+   "category": "default",
+   "shape": "mxgraph.aws4.encrypted_data"
+  },
+  "endpoint": {
+   "category": "default",
+   "shape": "mxgraph.aws4.endpoint"
+  },
+  "endpoints": {
+   "category": "network",
+   "shape": "mxgraph.aws4.endpoints"
+  },
+  "event_event_based": {
+   "category": "integration",
+   "shape": "mxgraph.aws4.event_event_based"
+  },
+  "event_time_based": {
+   "category": "integration",
+   "shape": "mxgraph.aws4.event_time_based"
+  },
+  "eventbridge": {
+   "category": "integration",
+   "shape": "mxgraph.aws4.eventbridge"
+  },
+  "external_sdk": {
+   "category": "default",
+   "shape": "mxgraph.aws4.external_sdk"
+  },
+  "external_toolkit": {
+   "category": "default",
+   "shape": "mxgraph.aws4.external_toolkit"
+  },
+  "f1_instance": {
+   "category": "default",
+   "shape": "mxgraph.aws4.f1_instance"
+  },
+  "factory": {
+   "category": "default",
+   "shape": "mxgraph.aws4.factory"
+  },
+  "fargate": {
+   "category": "compute",
+   "shape": "mxgraph.aws4.fargate"
+  },
+  "file_system": {
+   "category": "default",
+   "shape": "mxgraph.aws4.file_system"
+  },
+  "filtering_rule": {
+   "category": "default",
+   "shape": "mxgraph.aws4.filtering_rule"
+  },
+  "firetv": {
+   "category": "default",
+   "shape": "mxgraph.aws4.firetv"
+  },
+  "firetv_stick": {
+   "category": "default",
+   "shape": "mxgraph.aws4.firetv_stick"
+  },
+  "firewall_manager": {
+   "category": "security",
+   "shape": "mxgraph.aws4.firewall_manager"
+  },
+  "fleet_management": {
+   "category": "management",
+   "shape": "mxgraph.aws4.fleet_management"
+  },
+  "flow_logs": {
+   "category": "default",
+   "shape": "mxgraph.aws4.flow_logs"
+  },
+  "forecast": {
+   "category": "ml",
+   "shape": "mxgraph.aws4.forecast"
+  },
+  "forums": {
+   "category": "default",
+   "shape": "mxgraph.aws4.forums"
+  },
+  "freertos": {
+   "category": "default",
+   "shape": "mxgraph.aws4.freertos"
+  },
+  "fsx": {
+   "category": "storage",
+   "shape": "mxgraph.aws4.fsx"
+  },
+  "fsx_for_lustre": {
+   "category": "storage",
+   "shape": "mxgraph.aws4.fsx_for_lustre"
+  },
+  "fsx_for_windows_file_server": {
+   "category": "storage",
+   "shape": "mxgraph.aws4.fsx_for_windows_file_server"
+  },
+  "g3_instance": {
+   "category": "default",
+   "shape": "mxgraph.aws4.g3_instance"
+  },
+  "game_tech": {
+   "category": "default",
+   "shape": "mxgraph.aws4.game_tech"
+  },
+  "gamelift": {
+   "category": "default",
+   "shape": "mxgraph.aws4.gamelift"
+  },
+  "generic": {
+   "category": "default",
+   "shape": "mxgraph.aws4.generic"
+  },
+  "generic_database": {
+   "category": "database",
+   "shape": "mxgraph.aws4.generic_database"
+  },
+  "glacier": {
+   "category": "storage",
+   "shape": "mxgraph.aws4.glacier"
+  },
+  "global_accelerator": {
+   "category": "network",
+   "shape": "mxgraph.aws4.global_accelerator"
+  },
+  "global_secondary_index": {
+   "category": "default",
+   "shape": "mxgraph.aws4.global_secondary_index"
+  },
+  "glue": {
+   "category": "analytics",
+   "shape": "mxgraph.aws4.glue"
+  },
+  "glue_crawlers": {
+   "category": "analytics",
+   "shape": "mxgraph.aws4.glue_crawlers"
+  },
+  "glue_data_catalog": {
+   "category": "analytics",
+   "shape": "mxgraph.aws4.glue_data_catalog"
+  },
+  "greengrass": {
+   "category": "default",
+   "shape": "mxgraph.aws4.greengrass"
+  },
+  "ground_station": {
+   "category": "default",
+   "shape": "mxgraph.aws4.ground_station"
+  },
+  "guardduty": {
+   "category": "security",
+   "shape": "mxgraph.aws4.guardduty"
+  },
+  "h1_instance": {
+   "category": "default",
+   "shape": "mxgraph.aws4.h1_instance"
+  },
+  "hardware_board": {
+   "category": "default",
+   "shape": "mxgraph.aws4.hardware_board"
+  },
+  "high_memory_instance": {
+   "category": "default",
+   "shape": "mxgraph.aws4.high_memory_instance"
+  },
+  "hosted_zone": {
+   "category": "default",
+   "shape": "mxgraph.aws4.hosted_zone"
+  },
+  "house": {
+   "category": "default",
+   "shape": "mxgraph.aws4.house"
+  },
+  "http2_protocol": {
+   "category": "default",
+   "shape": "mxgraph.aws4.http2_protocol"
+  },
+  "http_notification": {
+   "category": "default",
+   "shape": "mxgraph.aws4.http_notification"
+  },
+  "http_protocol": {
+   "category": "default",
+   "shape": "mxgraph.aws4.http_protocol"
+  },
+  "i3_instance": {
+   "category": "default",
+   "shape": "mxgraph.aws4.i3_instance"
+  },
+  "identity_and_access_management": {
+   "category": "security",
+   "shape": "mxgraph.aws4.identity_and_access_management"
+  },
+  "import_export": {
+   "category": "default",
+   "shape": "mxgraph.aws4.import_export"
+  },
+  "inspector": {
+   "category": "security",
+   "shape": "mxgraph.aws4.inspector"
+  },
+  "instance2": {
+   "category": "default",
+   "shape": "mxgraph.aws4.instance2"
+  },
+  "instance_with_cloudwatch2": {
+   "category": "management",
+   "shape": "mxgraph.aws4.instance_with_cloudwatch2"
+  },
+  "instances": {
+   "category": "default",
+   "shape": "mxgraph.aws4.instances"
+  },
+  "instances_2": {
+   "category": "default",
+   "shape": "mxgraph.aws4.instances_2"
+  },
+  "internet": {
+   "category": "default",
+   "shape": "mxgraph.aws4.internet"
+  },
+  "internet_alt1": {
+   "category": "default",
+   "shape": "mxgraph.aws4.internet_alt1"
+  },
+  "internet_alt2": {
+   "category": "default",
+   "shape": "mxgraph.aws4.internet_alt2"
+  },
+  "internet_gateway": {
+   "category": "network",
+   "shape": "mxgraph.aws4.internet_gateway"
+  },
+  "internet_of_things": {
+   "category": "default",
+   "shape": "mxgraph.aws4.internet_of_things"
+  },
+  "inventory": {
+   "category": "default",
+   "shape": "mxgraph.aws4.inventory"
+  },
+  "iot_1click": {
+   "category": "default",
+   "shape": "mxgraph.aws4.iot_1click"
+  },
+  "iot_analytics": {
+   "category": "default",
+   "shape": "mxgraph.aws4.iot_analytics"
+  },
+  "iot_analytics_channel": {
+   "category": "default",
+   "shape": "mxgraph.aws4.iot_analytics_channel"
+  },
+  "iot_analytics_data_store": {
+   "category": "analytics",
+   "shape": "mxgraph.aws4.iot_analytics_data_store"
+  },
+  "iot_analytics_pipeline": {
+   "category": "default",
+   "shape": "mxgraph.aws4.iot_analytics_pipeline"
+  },
+  "iot_button": {
+   "category": "default",
+   "shape": "mxgraph.aws4.iot_button"
+  },
+  "iot_core": {
+   "category": "default",
+   "shape": "mxgraph.aws4.iot_core"
+  },
+  "iot_device_defender": {
+   "category": "default",
+   "shape": "mxgraph.aws4.iot_device_defender"
+  },
+  "iot_device_gateway": {
+   "category": "default",
+   "shape": "mxgraph.aws4.iot_device_gateway"
+  },
+  "iot_device_management": {
+   "category": "management",
+   "shape": "mxgraph.aws4.iot_device_management"
+  },
+  "iot_events": {
+   "category": "integration",
+   "shape": "mxgraph.aws4.iot_events"
+  },
+  "iot_over_the_air_update": {
+   "category": "default",
+   "shape": "mxgraph.aws4.iot_over_the_air_update"
+  },
+  "iot_sitewise": {
+   "category": "default",
+   "shape": "mxgraph.aws4.iot_sitewise"
+  },
+  "iot_things_graph": {
+   "category": "default",
+   "shape": "mxgraph.aws4.iot_things_graph"
+  },
+  "item": {
+   "category": "default",
+   "shape": "mxgraph.aws4.item"
+  },
+  "items": {
+   "category": "default",
+   "shape": "mxgraph.aws4.items"
+  },
+  "key_management_service": {
+   "category": "security",
+   "shape": "mxgraph.aws4.key_management_service"
+  },
+  "kinesis": {
+   "category": "analytics",
+   "shape": "mxgraph.aws4.kinesis"
+  },
+  "kinesis_data_analytics": {
+   "category": "analytics",
+   "shape": "mxgraph.aws4.kinesis_data_analytics"
+  },
+  "kinesis_data_firehose": {
+   "category": "analytics",
+   "shape": "mxgraph.aws4.kinesis_data_firehose"
+  },
+  "kinesis_data_streams": {
+   "category": "analytics",
+   "shape": "mxgraph.aws4.kinesis_data_streams"
+  },
+  "kinesis_video_streams": {
+   "category": "analytics",
+   "shape": "mxgraph.aws4.kinesis_video_streams"
+  },
+  "lake_formation": {
+   "category": "analytics",
+   "shape": "mxgraph.aws4.lake_formation"
+  },
+  "lambda": {
+   "category": "compute",
+   "shape": "mxgraph.aws4.lambda"
+  },
+  "lambda_function": {
+   "category": "compute",
+   "shape": "mxgraph.aws4.lambda_function"
+  },
+  "layers": {
+   "category": "default",
+   "shape": "mxgraph.aws4.layers"
+  },
+  "lex": {
+   "category": "default",
+   "shape": "mxgraph.aws4.lex"
+  },
+  "license_manager": {
+   "category": "management",
+   "shape": "mxgraph.aws4.license_manager"
+  },
+  "lightbulb": {
+   "category": "default",
+   "shape": "mxgraph.aws4.lightbulb"
+  },
+  "lightsail": {
+   "category": "compute",
+   "shape": "mxgraph.aws4.lightsail"
+  },
+  "long_term_security_credential": {
+   "category": "default",
+   "shape": "mxgraph.aws4.long_term_security_credential"
+  },
+  "m4_instance": {
+   "category": "default",
+   "shape": "mxgraph.aws4.m4_instance"
+  },
+  "m5_instance": {
+   "category": "default",
+   "shape": "mxgraph.aws4.m5_instance"
+  },
+  "m5a_instance": {
+   "category": "default",
+   "shape": "mxgraph.aws4.m5a_instance"
+  },
+  "machine_learning": {
+   "category": "default",
+   "shape": "mxgraph.aws4.machine_learning"
+  },
+  "macie": {
+   "category": "security",
+   "shape": "mxgraph.aws4.macie"
+  },
+  "maintenance_windows": {
+   "category": "default",
+   "shape": "mxgraph.aws4.maintenance_windows"
+  },
+  "managed_blockchain": {
+   "category": "default",
+   "shape": "mxgraph.aws4.managed_blockchain"
+  },
+  "managed_ms_ad": {
+   "category": "default",
+   "shape": "mxgraph.aws4.managed_ms_ad"
+  },
+  "managed_services": {
+   "category": "default",
+   "shape": "mxgraph.aws4.managed_services"
+  },
+  "managed_streaming_for_kafka": {
+   "category": "analytics",
+   "shape": "mxgraph.aws4.managed_streaming_for_kafka"
+  },
+  "management_and_governance": {
+   "category": "management",
+   "shape": "mxgraph.aws4.management_and_governance"
+  },
+  "management_console": {
+   "category": "management",
+   "shape": "mxgraph.aws4.management_console"
+  },
+  "marketplace": {
+   "category": "default",
+   "shape": "mxgraph.aws4.marketplace"
+  },
+  "media_services": {
+   "category": "default",
+   "shape": "mxgraph.aws4.media_services"
+  },
+  "medical_emergency": {
+   "category": "default",
+   "shape": "mxgraph.aws4.medical_emergency"
+  },
+  "message": {
+   "category": "default",
+   "shape": "mxgraph.aws4.message"
+  },
+  "mfa_token": {
+   "category": "default",
+   "shape": "mxgraph.aws4.mfa_token"
+  },
+  "migration_and_transfer": {
+   "category": "default",
+   "shape": "mxgraph.aws4.migration_and_transfer"
+  },
+  "migration_hub": {
+   "category": "default",
+   "shape": "mxgraph.aws4.migration_hub"
+  },
+  "mobile": {
+   "category": "default",
+   "shape": "mxgraph.aws4.mobile"
+  },
+  "mobile_client": {
+   "category": "default",
+   "shape": "mxgraph.aws4.mobile_client"
+  },
+  "monitoring": {
+   "category": "default",
+   "shape": "mxgraph.aws4.monitoring"
+  },
+  "mq": {
+   "category": "integration",
+   "shape": "mxgraph.aws4.mq"
+  },
+  "mqtt_protocol": {
+   "category": "integration",
+   "shape": "mxgraph.aws4.mqtt_protocol"
+  },
+  "multimedia": {
+   "category": "default",
+   "shape": "mxgraph.aws4.multimedia"
+  },
+  "nat_gateway": {
+   "category": "network",
+   "shape": "mxgraph.aws4.nat_gateway"
+  },
+  "neptune": {
+   "category": "database",
+   "shape": "mxgraph.aws4.neptune"
+  },
+  "network_access_control_list": {
+   "category": "network",
+   "shape": "mxgraph.aws4.network_access_control_list"
+  },
+  "network_load_balancer": {
+   "category": "network",
+   "shape": "mxgraph.aws4.network_load_balancer"
+  },
+  "networking_and_content_delivery": {
+   "category": "network",
+   "shape": "mxgraph.aws4.networking_and_content_delivery"
+  },
+  "non_cached_volume": {
+   "category": "default",
+   "shape": "mxgraph.aws4.non_cached_volume"
+  },
+  "notebook": {
+   "category": "default",
+   "shape": "mxgraph.aws4.notebook"
+  },
+  "object": {
+   "category": "default",
+   "shape": "mxgraph.aws4.object"
+  },
+  "office_building": {
+   "category": "default",
+   "shape": "mxgraph.aws4.office_building"
+  },
+  "opsworks": {
+   "category": "default",
+   "shape": "mxgraph.aws4.opsworks"
+  },
+  "opsworks_apps": {
+   "category": "default",
+   "shape": "mxgraph.aws4.opsworks_apps"
+  },
+  "opsworks_permissions": {
+   "category": "security",
+   "shape": "mxgraph.aws4.opsworks_permissions"
+  },
+  "optimized_instance": {
+   "category": "default",
+   "shape": "mxgraph.aws4.optimized_instance"
+  },
+  "organizations": {
+   "category": "management",
+   "shape": "mxgraph.aws4.organizations"
+  },
+  "organizations_account": {
+   "category": "management",
+   "shape": "mxgraph.aws4.organizations_account"
+  },
+  "organizations_organizational_unit": {
+   "category": "management",
+   "shape": "mxgraph.aws4.organizations_organizational_unit"
+  },
+  "outposts": {
+   "category": "compute",
+   "shape": "mxgraph.aws4.outposts"
+  },
+  "p2_instance": {
+   "category": "default",
+   "shape": "mxgraph.aws4.p2_instance"
+  },
+  "p3_instance": {
+   "category": "default",
+   "shape": "mxgraph.aws4.p3_instance"
+  },
+  "parameter_store": {
+   "category": "security",
+   "shape": "mxgraph.aws4.parameter_store"
+  },
+  "patch_manager": {
+   "category": "default",
+   "shape": "mxgraph.aws4.patch_manager"
+  },
+  "peering": {
+   "category": "default",
+   "shape": "mxgraph.aws4.peering"
+  },
+  "permissions": {
+   "category": "security",
+   "shape": "mxgraph.aws4.permissions"
+  },
+  "personal_health_dashboard": {
+   "category": "default",
+   "shape": "mxgraph.aws4.personal_health_dashboard"
+  },
+  "personalize": {
+   "category": "default",
+   "shape": "mxgraph.aws4.personalize"
+  },
+  "pinpoint": {
+   "category": "default",
+   "shape": "mxgraph.aws4.pinpoint"
+  },
+  "police_emergency": {
+   "category": "default",
+   "shape": "mxgraph.aws4.police_emergency"
+  },
+  "policy": {
+   "category": "default",
+   "shape": "mxgraph.aws4.policy"
+  },
+  "polly": {
+   "category": "ml",
+   "shape": "mxgraph.aws4.polly"
+  },
+  "product": {
+   "category": "default",
+   "shape": "mxgraph.aws4.product"
+  },
+  "quantum_ledger_database": {
+   "category": "database",
+   "shape": "mxgraph.aws4.quantum_ledger_database"
+  },
+  "queue": {
+   "category": "default",
+   "shape": "mxgraph.aws4.queue"
+  },
+  "quicksight": {
+   "category": "analytics",
+   "shape": "mxgraph.aws4.quicksight"
+  },
+  "r4_instance": {
+   "category": "default",
+   "shape": "mxgraph.aws4.r4_instance"
+  },
+  "r5_instance": {
+   "category": "default",
+   "shape": "mxgraph.aws4.r5_instance"
+  },
+  "r5a_instance": {
+   "category": "default",
+   "shape": "mxgraph.aws4.r5a_instance"
+  },
+  "rds": {
+   "category": "database",
+   "shape": "mxgraph.aws4.rds"
+  },
+  "rds_on_vmware": {
+   "category": "database",
+   "shape": "mxgraph.aws4.rds_on_vmware"
+  },
+  "redshift": {
+   "category": "database",
+   "shape": "mxgraph.aws4.redshift"
+  },
+  "registry": {
+   "category": "default",
+   "shape": "mxgraph.aws4.registry"
+  },
+  "rekognition": {
+   "category": "ml",
+   "shape": "mxgraph.aws4.rekognition"
+  },
+  "rekognition_image": {
+   "category": "ml",
+   "shape": "mxgraph.aws4.rekognition_image"
+  },
+  "rekognition_video": {
+   "category": "ml",
+   "shape": "mxgraph.aws4.rekognition_video"
+  },
+  "reported_state": {
+   "category": "default",
+   "shape": "mxgraph.aws4.reported_state"
+  },
+  "rescue": {
+   "category": "default",
+   "shape": "mxgraph.aws4.rescue"
+  },
+  "reserved_instance_reporting": {
+   "category": "default",
+   "shape": "mxgraph.aws4.reserved_instance_reporting"
+  },
+  "resource": {
+   "category": "default",
+   "shape": "mxgraph.aws4.resource"
+  },
+  "resource_access_manager": {
+   "category": "default",
+   "shape": "mxgraph.aws4.resource_access_manager"
+  },
+  "resources": {
+   "category": "default",
+   "shape": "mxgraph.aws4.resources"
+  },
+  "robotics": {
+   "category": "default",
+   "shape": "mxgraph.aws4.robotics"
+  },
+  "role": {
+   "category": "default",
+   "shape": "mxgraph.aws4.role"
+  },
+  "route_53": {
+   "category": "network",
+   "shape": "mxgraph.aws4.route_53"
+  },
+  "route_table": {
+   "category": "default",
+   "shape": "mxgraph.aws4.route_table"
+  },
+  "router": {
+   "category": "default",
+   "shape": "mxgraph.aws4.router"
+  },
+  "rule": {
+   "category": "default",
+   "shape": "mxgraph.aws4.rule"
+  },
+  "rule_2": {
+   "category": "default",
+   "shape": "mxgraph.aws4.rule_2"
+  },
+  "run_command": {
+   "category": "default",
+   "shape": "mxgraph.aws4.run_command"
+  },
+  "s3": {
+   "category": "storage",
+   "shape": "mxgraph.aws4.s3"
+  },
+  "sagemaker": {
+   "category": "ml",
+   "shape": "mxgraph.aws4.sagemaker"
+  },
+  "sagemaker_ground_truth": {
+   "category": "ml",
+   "shape": "mxgraph.aws4.sagemaker_ground_truth"
+  },
+  "sagemaker_model": {
+   "category": "ml",
+   "shape": "mxgraph.aws4.sagemaker_model"
+  },
+  "sagemaker_notebook": {
+   "category": "ml",
+   "shape": "mxgraph.aws4.sagemaker_notebook"
+  },
+  "sagemaker_train": {
+   "category": "ml",
+   "shape": "mxgraph.aws4.sagemaker_train"
+  },
+  "saml_token": {
+   "category": "default",
+   "shape": "mxgraph.aws4.saml_token"
+  },
+  "satellite": {
+   "category": "default",
+   "shape": "mxgraph.aws4.satellite"
+  },
+  "search_documents": {
+   "category": "default",
+   "shape": "mxgraph.aws4.search_documents"
+  },
+  "secrets_manager": {
+   "category": "security",
+   "shape": "mxgraph.aws4.secrets_manager"
+  },
+  "security_hub": {
+   "category": "security",
+   "shape": "mxgraph.aws4.security_hub"
+  },
+  "security_identity_and_compliance": {
+   "category": "security",
+   "shape": "mxgraph.aws4.security_identity_and_compliance"
+  },
+  "sensor": {
+   "category": "default",
+   "shape": "mxgraph.aws4.sensor"
+  },
+  "server_migration_service": {
+   "category": "default",
+   "shape": "mxgraph.aws4.server_migration_service"
+  },
+  "serverless_application_repository": {
+   "category": "default",
+   "shape": "mxgraph.aws4.serverless_application_repository"
+  },
+  "service_catalog": {
+   "category": "management",
+   "shape": "mxgraph.aws4.service_catalog"
+  },
+  "servo": {
+   "category": "default",
+   "shape": "mxgraph.aws4.servo"
+  },
+  "shadow": {
+   "category": "default",
+   "shape": "mxgraph.aws4.shadow"
+  },
+  "shield": {
+   "category": "security",
+   "shape": "mxgraph.aws4.shield"
+  },
+  "shield_shield_advanced": {
+   "category": "security",
+   "shape": "mxgraph.aws4.shield_shield_advanced"
+  },
+  "simple_ad": {
+   "category": "default",
+   "shape": "mxgraph.aws4.simple_ad"
+  },
+  "simple_email_service": {
+   "category": "default",
+   "shape": "mxgraph.aws4.simple_email_service"
+  },
+  "simulation": {
+   "category": "default",
+   "shape": "mxgraph.aws4.simulation"
+  },
+  "simulator": {
+   "category": "default",
+   "shape": "mxgraph.aws4.simulator"
+  },
+  "single_sign_on": {
+   "category": "default",
+   "shape": "mxgraph.aws4.single_sign_on"
+  },
+  "site_to_site_vpn": {
+   "category": "default",
+   "shape": "mxgraph.aws4.site_to_site_vpn"
+  },
+  "snapshot": {
+   "category": "default",
+   "shape": "mxgraph.aws4.snapshot"
+  },
+  "snowball": {
+   "category": "storage",
+   "shape": "mxgraph.aws4.snowball"
+  },
+  "snowball_edge": {
+   "category": "storage",
+   "shape": "mxgraph.aws4.snowball_edge"
+  },
+  "snowmobile": {
+   "category": "default",
+   "shape": "mxgraph.aws4.snowmobile"
+  },
+  "sns": {
+   "category": "integration",
+   "shape": "mxgraph.aws4.sns"
+  },
+  "spot_instance": {
+   "category": "default",
+   "shape": "mxgraph.aws4.spot_instance"
+  },
+  "sqs": {
+   "category": "integration",
+   "shape": "mxgraph.aws4.sqs"
+  },
+  "ssl_padlock": {
+   "category": "default",
+   "shape": "mxgraph.aws4.ssl_padlock"
+  },
+  "stack": {
+   "category": "default",
+   "shape": "mxgraph.aws4.stack"
+  },
+  "stack2": {
+   "category": "default",
+   "shape": "mxgraph.aws4.stack2"
+  },
+  "state_manager": {
+   "category": "default",
+   "shape": "mxgraph.aws4.state_manager"
+  },
+  "step_functions": {
+   "category": "integration",
+   "shape": "mxgraph.aws4.step_functions"
+  },
+  "storage": {
+   "category": "storage",
+   "shape": "mxgraph.aws4.storage"
+  },
+  "storage_gateway": {
+   "category": "storage",
+   "shape": "mxgraph.aws4.storage_gateway"
+  },
+  "streaming_distribution": {
+   "category": "default",
+   "shape": "mxgraph.aws4.streaming_distribution"
+  },
+  "sts": {
+   "category": "default",
+   "shape": "mxgraph.aws4.sts"
+  },
+  "sts_alternate": {
+   "category": "default",
+   "shape": "mxgraph.aws4.sts_alternate"
+  },
+  "sumerian": {
+   "category": "default",
+   "shape": "mxgraph.aws4.sumerian"
+  },
+  "systems_manager": {
+   "category": "management",
+   "shape": "mxgraph.aws4.systems_manager"
+  },
+  "systems_manager_opscenter": {
+   "category": "management",
+   "shape": "mxgraph.aws4.systems_manager_opscenter"
+  },
+  "t2_instance": {
+   "category": "default",
+   "shape": "mxgraph.aws4.t2_instance"
+  },
+  "t3_instance": {
+   "category": "default",
+   "shape": "mxgraph.aws4.t3_instance"
+  },
+  "t3a_instance": {
+   "category": "default",
+   "shape": "mxgraph.aws4.t3a_instance"
+  },
+  "table": {
+   "category": "default",
+   "shape": "mxgraph.aws4.table"
+  },
+  "tape_storage": {
+   "category": "storage",
+   "shape": "mxgraph.aws4.tape_storage"
+  },
+  "template": {
+   "category": "default",
+   "shape": "mxgraph.aws4.template"
+  },
+  "temporary_security_credential": {
+   "category": "default",
+   "shape": "mxgraph.aws4.temporary_security_credential"
+  },
+  "tensorflow_on_aws": {
+   "category": "default",
+   "shape": "mxgraph.aws4.tensorflow_on_aws"
+  },
+  "textract": {
+   "category": "ml",
+   "shape": "mxgraph.aws4.textract"
+  },
+  "thermostat": {
+   "category": "default",
+   "shape": "mxgraph.aws4.thermostat"
+  },
+  "thinkbox_deadline": {
+   "category": "default",
+   "shape": "mxgraph.aws4.thinkbox_deadline"
+  },
+  "thinkbox_draft": {
+   "category": "default",
+   "shape": "mxgraph.aws4.thinkbox_draft"
+  },
+  "thinkbox_frost": {
+   "category": "default",
+   "shape": "mxgraph.aws4.thinkbox_frost"
+  },
+  "thinkbox_krakatoa": {
+   "category": "default",
+   "shape": "mxgraph.aws4.thinkbox_krakatoa"
+  },
+  "thinkbox_sequoia": {
+   "category": "default",
+   "shape": "mxgraph.aws4.thinkbox_sequoia"
+  },
+  "thinkbox_stoke": {
+   "category": "default",
+   "shape": "mxgraph.aws4.thinkbox_stoke"
+  },
+  "thinkbox_xmesh": {
+   "category": "default",
+   "shape": "mxgraph.aws4.thinkbox_xmesh"
+  },
+  "timestream": {
+   "category": "database",
+   "shape": "mxgraph.aws4.timestream"
+  },
+  "tools_and_sdks": {
+   "category": "default",
+   "shape": "mxgraph.aws4.tools_and_sdks"
+  },
+  "topic": {
+   "category": "default",
+   "shape": "mxgraph.aws4.topic"
+  },
+  "topic_2": {
+   "category": "default",
+   "shape": "mxgraph.aws4.topic_2"
+  },
+  "traditional_server": {
+   "category": "default",
+   "shape": "mxgraph.aws4.traditional_server"
+  },
+  "transcribe": {
+   "category": "ml",
+   "shape": "mxgraph.aws4.transcribe"
+  },
+  "transfer_for_sftp": {
+   "category": "default",
+   "shape": "mxgraph.aws4.transfer_for_sftp"
+  },
+  "transit_gateway": {
+   "category": "network",
+   "shape": "mxgraph.aws4.transit_gateway"
+  },
+  "translate": {
+   "category": "default",
+   "shape": "mxgraph.aws4.translate"
+  },
+  "travel": {
+   "category": "default",
+   "shape": "mxgraph.aws4.travel"
+  },
+  "trusted_advisor": {
+   "category": "management",
+   "shape": "mxgraph.aws4.trusted_advisor"
+  },
+  "user": {
+   "category": "default",
+   "shape": "mxgraph.aws4.user"
+  },
+  "users": {
+   "category": "default",
+   "shape": "mxgraph.aws4.users"
+  },
+  "utility": {
+   "category": "default",
+   "shape": "mxgraph.aws4.utility"
+  },
+  "vault": {
+   "category": "default",
+   "shape": "mxgraph.aws4.vault"
+  },
+  "virtual_private_cloud": {
+   "category": "default",
+   "shape": "mxgraph.aws4.virtual_private_cloud"
+  },
+  "virtual_tape_library": {
+   "category": "default",
+   "shape": "mxgraph.aws4.virtual_tape_library"
+  },
+  "vmware_cloud_on_aws": {
+   "category": "default",
+   "shape": "mxgraph.aws4.vmware_cloud_on_aws"
+  },
+  "volume": {
+   "category": "default",
+   "shape": "mxgraph.aws4.volume"
+  },
+  "vpc": {
+   "category": "network",
+   "shape": "mxgraph.aws4.vpc"
+  },
+  "vpc_privatelink": {
+   "category": "network",
+   "shape": "mxgraph.aws4.vpc_privatelink"
+  },
+  "vpc_traffic_mirroring": {
+   "category": "network",
+   "shape": "mxgraph.aws4.vpc_traffic_mirroring"
+  },
+  "vpn_connection": {
+   "category": "default",
+   "shape": "mxgraph.aws4.vpn_connection"
+  },
+  "vpn_gateway": {
+   "category": "default",
+   "shape": "mxgraph.aws4.vpn_gateway"
+  },
+  "waf": {
+   "category": "security",
+   "shape": "mxgraph.aws4.waf"
+  },
+  "well_architected_tool": {
+   "category": "management",
+   "shape": "mxgraph.aws4.well_architected_tool"
+  },
+  "windfarm": {
+   "category": "default",
+   "shape": "mxgraph.aws4.windfarm"
+  },
+  "workdocs": {
+   "category": "default",
+   "shape": "mxgraph.aws4.workdocs"
+  },
+  "worklink": {
+   "category": "default",
+   "shape": "mxgraph.aws4.worklink"
+  },
+  "workmail": {
+   "category": "default",
+   "shape": "mxgraph.aws4.workmail"
+  },
+  "workspaces": {
+   "category": "default",
+   "shape": "mxgraph.aws4.workspaces"
+  },
+  "x1_instance2": {
+   "category": "default",
+   "shape": "mxgraph.aws4.x1_instance2"
+  },
+  "x1e_instance": {
+   "category": "default",
+   "shape": "mxgraph.aws4.x1e_instance"
+  },
+  "xray": {
+   "category": "default",
+   "shape": "mxgraph.aws4.xray"
+  },
+  "z1d_instance": {
+   "category": "default",
+   "shape": "mxgraph.aws4.z1d_instance"
+  }
+ },
+ "azure": {
+  "15": {
+   "shape": "mxgraph.azure.15",
+   "category": "default"
+  },
+  "7": {
+   "shape": "mxgraph.azure.7",
+   "category": "default"
+  },
+  "access": {
+   "shape": "mxgraph.mscae.other.access",
+   "category": "default"
+  },
+  "access_control": {
+   "shape": "mxgraph.azure.access_control",
+   "category": "default"
+  },
+  "account_portal": {
+   "shape": "mxgraph.mscae.intune.account_portal",
+   "category": "default"
+  },
+  "active_directory": {
+   "shape": "mxgraph.mscae.cloud.active_directory",
+   "category": "default"
+  },
+  "active_directory_b2b": {
+   "shape": "mxgraph.mscae.cloud.active_directory_b2b",
+   "category": "default"
+  },
+  "active_directory_b2c": {
+   "shape": "mxgraph.mscae.cloud.active_directory_b2c",
+   "category": "default"
+  },
+  "active_directory_domain_services": {
+   "shape": "mxgraph.mscae.cloud.active_directory_domain_services",
+   "category": "default"
+  },
+  "active_directory_health_monitoring": {
+   "shape": "mxgraph.mscae.cloud.active_directory_health_monitoring",
+   "category": "default"
+  },
+  "active_directory_multi": {
+   "shape": "mxgraph.mscae.vm.active_directory_multi",
+   "category": "default"
+  },
+  "ad_fs": {
+   "shape": "mxgraph.mscae.enterprise.ad_fs",
+   "category": "default"
+  },
+  "admin_console": {
+   "shape": "mxgraph.mscae.system_center.admin_console",
+   "category": "default"
+  },
+  "administration": {
+   "shape": "mxgraph.mscae.intune.administration",
+   "category": "default"
+  },
+  "advanced_group_policy_management": {
+   "shape": "mxgraph.mscae.opsmanager.advanced_group_policy_management",
+   "category": "default"
+  },
+  "advisor": {
+   "shape": "mxgraph.mscae.cloud.advisor",
+   "category": "default"
+  },
+  "alerts": {
+   "shape": "mxgraph.mscae.intune.alerts",
+   "category": "default"
+  },
+  "analysis_service": {
+   "shape": "mxgraph.mscae.cloud.analysis_service",
+   "category": "default"
+  },
+  "android_phone": {
+   "shape": "mxgraph.mscae.enterprise.android_phone",
+   "category": "default"
+  },
+  "api_app": {
+   "shape": "mxgraph.mscae.cloud.api_app",
+   "category": "default"
+  },
+  "api_management": {
+   "shape": "mxgraph.mscae.cloud.api_management",
+   "category": "default"
+  },
+  "app_controller": {
+   "shape": "mxgraph.mscae.opsmanager.app_controller",
+   "category": "default"
+  },
+  "app_generic": {
+   "shape": "mxgraph.mscae.enterprise.app_generic",
+   "category": "default"
+  },
+  "app_service": {
+   "shape": "mxgraph.mscae.cloud.app_service",
+   "category": "default"
+  },
+  "app_with_changes": {
+   "shape": "mxgraph.mscae.oms.app_with_changes",
+   "category": "default"
+  },
+  "application": {
+   "shape": "mxgraph.mscae.deprecated.application",
+   "category": "default"
+  },
+  "application_blank": {
+   "shape": "mxgraph.mscae.enterprise.application_blank",
+   "category": "default"
+  },
+  "application_gateway": {
+   "shape": "mxgraph.mscae.cloud.application_gateway",
+   "category": "default"
+  },
+  "application_insights": {
+   "shape": "mxgraph.mscae.cloud.application_insights",
+   "category": "default"
+  },
+  "application_server": {
+   "shape": "mxgraph.mscae.enterprise.application_server",
+   "category": "default"
+  },
+  "application_server2": {
+   "shape": "mxgraph.mscae.enterprise.application_server2",
+   "category": "default"
+  },
+  "application_server_multi": {
+   "shape": "mxgraph.mscae.vm.application_server_multi",
+   "category": "default"
+  },
+  "application_virtualization": {
+   "shape": "mxgraph.mscae.opsmanager.application_virtualization",
+   "category": "default"
+  },
+  "applications": {
+   "shape": "mxgraph.mscae.opsmanager.applications",
+   "category": "default"
+  },
+  "apps": {
+   "shape": "mxgraph.mscae.intune.apps",
+   "category": "default"
+  },
+  "assessments": {
+   "shape": "mxgraph.mscae.oms.assessments",
+   "category": "default"
+  },
+  "attachments": {
+   "shape": "mxgraph.mscae.general_symbols.attachments",
+   "category": "default"
+  },
+  "audio": {
+   "shape": "mxgraph.mscae.general.audio",
+   "category": "default"
+  },
+  "automation": {
+   "shape": "mxgraph.azure.automation",
+   "category": "default"
+  },
+  "autoscale": {
+   "shape": "mxgraph.azure.autoscale",
+   "category": "default"
+  },
+  "azure": {
+   "shape": "mxgraph.mscae.cloud.azure",
+   "category": "default"
+  },
+  "azure_active_directory": {
+   "shape": "mxgraph.azure.azure_active_directory",
+   "category": "default"
+  },
+  "azure_alert": {
+   "shape": "mxgraph.azure.azure_alert",
+   "category": "default"
+  },
+  "azure_automatic_load_balancer": {
+   "shape": "mxgraph.mscae.cloud.azure_automatic_load_balancer",
+   "category": "default"
+  },
+  "azure_batch": {
+   "shape": "mxgraph.mscae.cloud.azure_batch",
+   "category": "default"
+  },
+  "azure_cache": {
+   "shape": "mxgraph.azure.azure_cache",
+   "category": "default"
+  },
+  "azure_dns": {
+   "shape": "mxgraph.mscae.cloud.azure_dns",
+   "category": "default"
+  },
+  "azure_files_service": {
+   "shape": "mxgraph.mscae.cloud.azure_files_service",
+   "category": "default"
+  },
+  "azure_instance": {
+   "shape": "mxgraph.azure.azure_instance",
+   "category": "default"
+  },
+  "azure_load_balancer": {
+   "shape": "mxgraph.azure.azure_load_balancer",
+   "category": "default"
+  },
+  "azure_load_balancer_feature": {
+   "shape": "mxgraph.mscae.cloud.azure_load_balancer_feature",
+   "category": "default"
+  },
+  "azure_logo": {
+   "shape": "mxgraph.mscae.cloud.azure_logo",
+   "category": "default"
+  },
+  "azure_marketplace": {
+   "shape": "mxgraph.azure.azure_marketplace",
+   "category": "default"
+  },
+  "azure_rights_management_rms": {
+   "shape": "mxgraph.mscae.cloud.azure_rights_management_rms",
+   "category": "default"
+  },
+  "azure_sdk": {
+   "shape": "mxgraph.azure.azure_sdk",
+   "category": "default"
+  },
+  "azure_search": {
+   "shape": "mxgraph.mscae.cloud.azure_search",
+   "category": "default"
+  },
+  "azure_storage": {
+   "shape": "mxgraph.mscae.cloud.azure_storage",
+   "category": "default"
+  },
+  "azure_subscription": {
+   "shape": "mxgraph.azure.azure_subscription",
+   "category": "default"
+  },
+  "azure_website": {
+   "shape": "mxgraph.azure.azure_website",
+   "category": "default"
+  },
+  "backup_local": {
+   "shape": "mxgraph.mscae.enterprise.backup_local",
+   "category": "default"
+  },
+  "backup_online": {
+   "shape": "mxgraph.mscae.enterprise.backup_online",
+   "category": "default"
+  },
+  "backup_service": {
+   "shape": "mxgraph.azure.backup_service",
+   "category": "default"
+  },
+  "batch": {
+   "shape": "mxgraph.mscae.cloud.batch",
+   "category": "default"
+  },
+  "bi_product_icon": {
+   "shape": "mxgraph.mscae.other.bi_product_icon",
+   "category": "default"
+  },
+  "bitbucket_code_source": {
+   "shape": "mxgraph.azure.bitbucket_code_source",
+   "category": "default"
+  },
+  "biztalk_services": {
+   "shape": "mxgraph.azure.biztalk_services",
+   "category": "default"
+  },
+  "blockchain": {
+   "shape": "mxgraph.mscae.cloud.blockchain",
+   "category": "default"
+  },
+  "bot": {
+   "shape": "mxgraph.mscae.deprecated.bot",
+   "category": "default"
+  },
+  "bot_services": {
+   "shape": "mxgraph.mscae.cloud.bot_services",
+   "category": "default"
+  },
+  "bug": {
+   "shape": "mxgraph.mscae.general.bug",
+   "category": "default"
+  },
+  "building_block": {
+   "shape": "mxgraph.mscae.cloud.building_block",
+   "category": "default"
+  },
+  "c_series": {
+   "shape": "mxgraph.mscae.cloud.c_series",
+   "category": "default"
+  },
+  "cable_settop_tv_box": {
+   "shape": "mxgraph.mscae.general.cable_settop_tv_box",
+   "category": "default"
+  },
+  "calendar": {
+   "shape": "mxgraph.mscae.enterprise.calendar",
+   "category": "default"
+  },
+  "capacity": {
+   "shape": "mxgraph.mscae.oms.capacity",
+   "category": "default"
+  },
+  "central": {
+   "shape": "mxgraph.mscae.cloud.central",
+   "category": "default"
+  },
+  "central_administration_site_sql": {
+   "shape": "mxgraph.mscae.system_center.central_administration_site_sql",
+   "category": "default"
+  },
+  "certificate": {
+   "shape": "mxgraph.azure.certificate",
+   "category": "default"
+  },
+  "chart": {
+   "shape": "mxgraph.mscae.general.chart",
+   "category": "default"
+  },
+  "checkmark": {
+   "shape": "mxgraph.mscae.general.checkmark",
+   "category": "default"
+  },
+  "client_application": {
+   "shape": "mxgraph.mscae.enterprise.client_application",
+   "category": "default"
+  },
+  "client_software": {
+   "shape": "mxgraph.mscae.intune.client_software",
+   "category": "default"
+  },
+  "clock_time": {
+   "shape": "mxgraph.mscae.general_symbols.clock_time",
+   "category": "default"
+  },
+  "cloud": {
+   "shape": "mxgraph.azure.cloud",
+   "category": "default"
+  },
+  "cloud_distribution_point": {
+   "shape": "mxgraph.mscae.system_center.cloud_distribution_point",
+   "category": "default"
+  },
+  "cloud_office_365": {
+   "shape": "mxgraph.mscae.cloud.cloud_office_365",
+   "category": "default"
+  },
+  "cloud_service": {
+   "shape": "mxgraph.azure.cloud_service",
+   "category": "default"
+  },
+  "cloud_service_package_file": {
+   "shape": "mxgraph.azure.cloud_service_package_file",
+   "category": "default"
+  },
+  "cloud_services_configuration_file": {
+   "shape": "mxgraph.azure.cloud_services_configuration_file",
+   "category": "default"
+  },
+  "cluster_server": {
+   "shape": "mxgraph.mscae.enterprise.cluster_server",
+   "category": "default"
+  },
+  "code_file": {
+   "shape": "mxgraph.azure.code_file",
+   "category": "default"
+  },
+  "codeplex_code_source": {
+   "shape": "mxgraph.azure.codeplex_code_source",
+   "category": "default"
+  },
+  "cognitive_services": {
+   "shape": "mxgraph.mscae.cloud.cognitive_services",
+   "category": "default"
+  },
+  "company_portal": {
+   "shape": "mxgraph.mscae.intune.company_portal",
+   "category": "default"
+  },
+  "compute": {
+   "shape": "mxgraph.mscae.deprecated.compute",
+   "category": "default"
+  },
+  "computer": {
+   "shape": "mxgraph.azure.computer",
+   "category": "default"
+  },
+  "computer_inventory": {
+   "shape": "mxgraph.mscae.intune.computer_inventory",
+   "category": "default"
+  },
+  "conditional_access_exchange": {
+   "shape": "mxgraph.mscae.intune.conditional_access_exchange",
+   "category": "default"
+  },
+  "conditional_access_sharepoint": {
+   "shape": "mxgraph.mscae.intune.conditional_access_sharepoint",
+   "category": "default"
+  },
+  "config_assessment": {
+   "shape": "mxgraph.mscae.oms.config_assessment",
+   "category": "default"
+  },
+  "configuration_manager": {
+   "shape": "mxgraph.mscae.opsmanager.configuration_manager",
+   "category": "default"
+  },
+  "connector": {
+   "shape": "mxgraph.mscae.intune.connector",
+   "category": "default"
+  },
+  "connectors": {
+   "shape": "mxgraph.mscae.enterprise.connectors",
+   "category": "default"
+  },
+  "container_registry": {
+   "shape": "mxgraph.mscae.cloud.container_registry",
+   "category": "default"
+  },
+  "container_service": {
+   "shape": "mxgraph.mscae.cloud.container_service",
+   "category": "default"
+  },
+  "content_delivery_network": {
+   "shape": "mxgraph.azure.content_delivery_network",
+   "category": "default"
+  },
+  "content_delivery_network2": {
+   "shape": "mxgraph.mscae.cloud.content_delivery_network2",
+   "category": "default"
+  },
+  "continuous_cycle": {
+   "shape": "mxgraph.mscae.general.continuous_cycle",
+   "category": "default"
+  },
+  "cortana": {
+   "shape": "mxgraph.mscae.other.cortana",
+   "category": "default"
+  },
+  "cortona_management_suite": {
+   "shape": "mxgraph.mscae.cloud.cortona_management_suite",
+   "category": "default"
+  },
+  "cosmos_db": {
+   "shape": "mxgraph.mscae.cloud.cosmos_db",
+   "category": "default"
+  },
+  "crossout": {
+   "shape": "mxgraph.mscae.general.crossout",
+   "category": "default"
+  },
+  "customer_insights": {
+   "shape": "mxgraph.mscae.cloud.customer_insights",
+   "category": "default"
+  },
+  "cut_and_paste": {
+   "shape": "mxgraph.mscae.general.cut_and_paste",
+   "category": "default"
+  },
+  "d": {
+   "shape": "mxgraph.mscae.enterprise.d",
+   "category": "default"
+  },
+  "dashboard": {
+   "shape": "mxgraph.mscae.intune.dashboard",
+   "category": "default"
+  },
+  "data_bricks": {
+   "shape": "mxgraph.mscae.cloud.data_bricks",
+   "category": "default"
+  },
+  "data_catalog": {
+   "shape": "mxgraph.mscae.cloud.data_catalog",
+   "category": "default"
+  },
+  "data_factory": {
+   "shape": "mxgraph.mscae.cloud.data_factory",
+   "category": "default"
+  },
+  "data_lake": {
+   "shape": "mxgraph.mscae.cloud.data_lake",
+   "category": "default"
+  },
+  "data_lake_analytics": {
+   "shape": "mxgraph.mscae.cloud.data_lake_analytics",
+   "category": "default"
+  },
+  "data_lake_store": {
+   "shape": "mxgraph.mscae.cloud.data_lake_store",
+   "category": "default"
+  },
+  "data_migration_wizard": {
+   "shape": "mxgraph.mscae.intune.data_migration_wizard",
+   "category": "default"
+  },
+  "data_protection_manager": {
+   "shape": "mxgraph.mscae.opsmanager.data_protection_manager",
+   "category": "default"
+  },
+  "data_services": {
+   "shape": "mxgraph.mscae.deprecated.data_services",
+   "category": "default"
+  },
+  "data_warehouse": {
+   "shape": "mxgraph.mscae.cloud.data_warehouse",
+   "category": "default"
+  },
+  "database": {
+   "shape": "mxgraph.azure.database",
+   "category": "default"
+  },
+  "database_generic": {
+   "shape": "mxgraph.mscae.enterprise.database_generic",
+   "category": "default"
+  },
+  "database_server": {
+   "shape": "mxgraph.mscae.enterprise.database_server",
+   "category": "default"
+  },
+  "database_server_multi": {
+   "shape": "mxgraph.mscae.vm.database_server_multi",
+   "category": "default"
+  },
+  "database_synchronization": {
+   "shape": "mxgraph.mscae.enterprise.database_synchronization",
+   "category": "default"
+  },
+  "dependency_monitor": {
+   "shape": "mxgraph.mscae.oms.dependency_monitor",
+   "category": "default"
+  },
+  "detected_software": {
+   "shape": "mxgraph.mscae.intune.detected_software",
+   "category": "default"
+  },
+  "device": {
+   "shape": "mxgraph.mscae.enterprise.device",
+   "category": "default"
+  },
+  "device_group": {
+   "shape": "mxgraph.mscae.intune.device_group",
+   "category": "default"
+  },
+  "device_health": {
+   "shape": "mxgraph.mscae.intune.device_health",
+   "category": "default"
+  },
+  "device_history": {
+   "shape": "mxgraph.mscae.intune.device_history",
+   "category": "default"
+  },
+  "device_os": {
+   "shape": "mxgraph.mscae.intune.device_os",
+   "category": "default"
+  },
+  "devtest_labs": {
+   "shape": "mxgraph.mscae.cloud.devtest_labs",
+   "category": "default"
+  },
+  "diagnostics": {
+   "shape": "mxgraph.mscae.oms.diagnostics",
+   "category": "default"
+  },
+  "direct_access_feature": {
+   "shape": "mxgraph.mscae.enterprise.direct_access_feature",
+   "category": "default"
+  },
+  "directory_server": {
+   "shape": "mxgraph.mscae.vm.directory_server",
+   "category": "default"
+  },
+  "directory_server_multi": {
+   "shape": "mxgraph.mscae.vm.directory_server_multi",
+   "category": "default"
+  },
+  "distribution_point": {
+   "shape": "mxgraph.mscae.system_center.distribution_point",
+   "category": "default"
+  },
+  "docdb_account": {
+   "shape": "mxgraph.mscae.cloud.docdb_account",
+   "category": "default"
+  },
+  "docdb_collections": {
+   "shape": "mxgraph.mscae.cloud.docdb_collections",
+   "category": "default"
+  },
+  "document": {
+   "shape": "mxgraph.mscae.cloud.document",
+   "category": "default"
+  },
+  "documentdb": {
+   "shape": "mxgraph.mscae.cloud.documentdb",
+   "category": "default"
+  },
+  "domain_controller": {
+   "shape": "mxgraph.mscae.enterprise.domain_controller",
+   "category": "default"
+  },
+  "domain_server": {
+   "shape": "mxgraph.mscae.vm.domain_server",
+   "category": "default"
+  },
+  "domain_server_multi": {
+   "shape": "mxgraph.mscae.vm.domain_server_multi",
+   "category": "default"
+  },
+  "dps": {
+   "shape": "mxgraph.mscae.cloud.dps",
+   "category": "default"
+  },
+  "dropbox_code_source": {
+   "shape": "mxgraph.azure.dropbox_code_source",
+   "category": "default"
+  },
+  "ellipses": {
+   "shape": "mxgraph.mscae.general_symbols.ellipses",
+   "category": "default"
+  },
+  "end_protection": {
+   "shape": "mxgraph.mscae.intune.end_protection",
+   "category": "default"
+  },
+  "enterprise": {
+   "shape": "mxgraph.azure.enterprise",
+   "category": "default"
+  },
+  "enterprise_building": {
+   "shape": "mxgraph.mscae.enterprise.enterprise_building",
+   "category": "default"
+  },
+  "event_grid": {
+   "shape": "mxgraph.mscae.cloud.event_grid",
+   "category": "default"
+  },
+  "event_hubs": {
+   "shape": "mxgraph.mscae.cloud.event_hubs",
+   "category": "default"
+  },
+  "excel": {
+   "shape": "mxgraph.mscae.other.excel",
+   "category": "default"
+  },
+  "exchange": {
+   "shape": "mxgraph.mscae.other.exchange",
+   "category": "default"
+  },
+  "exchange_connector": {
+   "shape": "mxgraph.mscae.intune.exchange_connector",
+   "category": "default"
+  },
+  "express_route": {
+   "shape": "mxgraph.azure.express_route",
+   "category": "default"
+  },
+  "expressroute": {
+   "shape": "mxgraph.mscae.cloud.expressroute",
+   "category": "default"
+  },
+  "favorite": {
+   "shape": "mxgraph.mscae.general_symbols.favorite",
+   "category": "default"
+  },
+  "file": {
+   "shape": "mxgraph.azure.file",
+   "category": "default"
+  },
+  "file_2": {
+   "shape": "mxgraph.azure.file_2",
+   "category": "default"
+  },
+  "file_server": {
+   "shape": "mxgraph.mscae.vm.file_server",
+   "category": "default"
+  },
+  "file_server2": {
+   "shape": "mxgraph.mscae.vm.file_server2",
+   "category": "default"
+  },
+  "file_server_multi": {
+   "shape": "mxgraph.mscae.vm.file_server_multi",
+   "category": "default"
+  },
+  "filter": {
+   "shape": "mxgraph.mscae.enterprise.filter",
+   "category": "default"
+  },
+  "firewall": {
+   "shape": "mxgraph.mscae.enterprise.firewall",
+   "category": "default"
+  },
+  "folder": {
+   "shape": "mxgraph.mscae.enterprise.folder",
+   "category": "default"
+  },
+  "functions": {
+   "shape": "mxgraph.mscae.cloud.functions",
+   "category": "default"
+  },
+  "game_controller": {
+   "shape": "mxgraph.mscae.general.game_controller",
+   "category": "default"
+  },
+  "gateway": {
+   "shape": "mxgraph.mscae.cloud.gateway",
+   "category": "default"
+  },
+  "gears": {
+   "shape": "mxgraph.mscae.general.gears",
+   "category": "default"
+  },
+  "generic_app": {
+   "shape": "mxgraph.mscae.enterprise.generic_app",
+   "category": "default"
+  },
+  "git_repository": {
+   "shape": "mxgraph.azure.git_repository",
+   "category": "default"
+  },
+  "github_code": {
+   "shape": "mxgraph.azure.github_code",
+   "category": "default"
+  },
+  "graph": {
+   "shape": "mxgraph.mscae.general.graph",
+   "category": "default"
+  },
+  "groups": {
+   "shape": "mxgraph.mscae.intune.groups",
+   "category": "default"
+  },
+  "hdinsight": {
+   "shape": "mxgraph.azure.hdinsight",
+   "category": "default"
+  },
+  "health_monitoring": {
+   "shape": "mxgraph.azure.health_monitoring",
+   "category": "default"
+  },
+  "healthy": {
+   "shape": "mxgraph.azure.healthy",
+   "category": "default"
+  },
+  "hockeyapp": {
+   "shape": "mxgraph.mscae.cloud.hockeyapp",
+   "category": "default"
+  },
+  "hybrid": {
+   "shape": "mxgraph.mscae.intune.hybrid",
+   "category": "default"
+  },
+  "hybrid_connection_manager": {
+   "shape": "mxgraph.mscae.cloud.hybrid_connection_manager",
+   "category": "default"
+  },
+  "hybrid_connections": {
+   "shape": "mxgraph.mscae.cloud.hybrid_connections",
+   "category": "default"
+  },
+  "hyper_v_recovery_manager": {
+   "shape": "mxgraph.azure.hyper_v_recovery_manager",
+   "category": "default"
+  },
+  "import_generic": {
+   "shape": "mxgraph.mscae.enterprise.import_generic",
+   "category": "default"
+  },
+  "internet": {
+   "shape": "mxgraph.mscae.enterprise.internet",
+   "category": "default"
+  },
+  "internet_hollow": {
+   "shape": "mxgraph.mscae.enterprise.internet_hollow",
+   "category": "default"
+  },
+  "intune_certificate_profiles": {
+   "shape": "mxgraph.mscae.intune.intune_certificate_profiles",
+   "category": "default"
+  },
+  "intune_connector": {
+   "shape": "mxgraph.mscae.intune.intune_connector",
+   "category": "default"
+  },
+  "intune_email_profiles": {
+   "shape": "mxgraph.mscae.intune.intune_email_profiles",
+   "category": "default"
+  },
+  "intune_managed_app": {
+   "shape": "mxgraph.mscae.intune.intune_managed_app",
+   "category": "default"
+  },
+  "intune_mobile_application_management": {
+   "shape": "mxgraph.mscae.intune.intune_mobile_application_management",
+   "category": "default"
+  },
+  "intune_vpn_profiles": {
+   "shape": "mxgraph.mscae.intune.intune_vpn_profiles",
+   "category": "default"
+  },
+  "intune_wifi_profiles": {
+   "shape": "mxgraph.mscae.intune.intune_wifi_profiles",
+   "category": "default"
+  },
+  "inventory_license": {
+   "shape": "mxgraph.mscae.intune.inventory_license",
+   "category": "default"
+  },
+  "inventory_software": {
+   "shape": "mxgraph.mscae.intune.inventory_software",
+   "category": "default"
+  },
+  "iot": {
+   "shape": "mxgraph.mscae.cloud.iot",
+   "category": "default"
+  },
+  "iot_edge": {
+   "shape": "mxgraph.mscae.cloud.iot_edge",
+   "category": "default"
+  },
+  "iphone": {
+   "shape": "mxgraph.mscae.enterprise.iphone",
+   "category": "default"
+  },
+  "jobs": {
+   "shape": "mxgraph.mscae.oms.jobs",
+   "category": "default"
+  },
+  "key_permissions": {
+   "shape": "mxgraph.mscae.enterprise.key_permissions",
+   "category": "default"
+  },
+  "key_vault": {
+   "shape": "mxgraph.mscae.cloud.key_vault",
+   "category": "default"
+  },
+  "keyboard": {
+   "shape": "mxgraph.mscae.enterprise.keyboard",
+   "category": "default"
+  },
+  "laptop": {
+   "shape": "mxgraph.azure.laptop",
+   "category": "default"
+  },
+  "license_group": {
+   "shape": "mxgraph.mscae.intune.license_group",
+   "category": "default"
+  },
+  "license_installation": {
+   "shape": "mxgraph.mscae.intune.license_installation",
+   "category": "default"
+  },
+  "like": {
+   "shape": "mxgraph.mscae.general.like",
+   "category": "default"
+  },
+  "load_balancer_generic": {
+   "shape": "mxgraph.azure.load_balancer_generic",
+   "category": "default"
+  },
+  "load_testing": {
+   "shape": "mxgraph.mscae.enterprise.load_testing",
+   "category": "default"
+  },
+  "lock": {
+   "shape": "mxgraph.mscae.enterprise.lock",
+   "category": "default"
+  },
+  "lock_unlocked": {
+   "shape": "mxgraph.mscae.enterprise.lock_unlocked",
+   "category": "default"
+  },
+  "log_management": {
+   "shape": "mxgraph.mscae.oms.log_management",
+   "category": "default"
+  },
+  "log_search": {
+   "shape": "mxgraph.mscae.oms.log_search",
+   "category": "default"
+  },
+  "logic_app": {
+   "shape": "mxgraph.mscae.cloud.logic_app",
+   "category": "default"
+  },
+  "logic_apps": {
+   "shape": "mxgraph.mscae.cloud.logic_apps",
+   "category": "default"
+  },
+  "lync": {
+   "shape": "mxgraph.mscae.other.lync",
+   "category": "default"
+  },
+  "machine_learning": {
+   "shape": "mxgraph.mscae.cloud.machine_learning",
+   "category": "default"
+  },
+  "machine_learning2": {
+   "shape": "mxgraph.mscae.cloud.machine_learning2",
+   "category": "default"
+  },
+  "machine_learning_service_plans": {
+   "shape": "mxgraph.mscae.cloud.machine_learning_service_plans",
+   "category": "default"
+  },
+  "machine_learning_web_services": {
+   "shape": "mxgraph.mscae.cloud.machine_learning_web_services",
+   "category": "default"
+  },
+  "machine_learning_work_spaces": {
+   "shape": "mxgraph.mscae.cloud.machine_learning_work_spaces",
+   "category": "default"
+  },
+  "maintenance": {
+   "shape": "mxgraph.mscae.enterprise.maintenance",
+   "category": "default"
+  },
+  "malware_assessment": {
+   "shape": "mxgraph.mscae.oms.malware_assessment",
+   "category": "default"
+  },
+  "managed_applications": {
+   "shape": "mxgraph.mscae.cloud.managed_applications",
+   "category": "default"
+  },
+  "managed_discs": {
+   "shape": "mxgraph.mscae.cloud.managed_discs",
+   "category": "default"
+  },
+  "management_console": {
+   "shape": "mxgraph.mscae.enterprise.management_console",
+   "category": "default"
+  },
+  "management_point": {
+   "shape": "mxgraph.mscae.system_center.management_point",
+   "category": "default"
+  },
+  "management_portal": {
+   "shape": "mxgraph.mscae.cloud.management_portal",
+   "category": "default"
+  },
+  "media_service": {
+   "shape": "mxgraph.azure.media_service",
+   "category": "default"
+  },
+  "message": {
+   "shape": "mxgraph.azure.message",
+   "category": "default"
+  },
+  "message2": {
+   "shape": "mxgraph.azure.message2",
+   "category": "default"
+  },
+  "microsoft": {
+   "shape": "mxgraph.mscae.other.microsoft",
+   "category": "default"
+  },
+  "microsoft_account": {
+   "shape": "mxgraph.mscae.cloud.microsoft_account",
+   "category": "default"
+  },
+  "microsoft_azure": {
+   "shape": "mxgraph.mscae.cloud.microsoft_azure",
+   "category": "default"
+  },
+  "microsoft_intune": {
+   "shape": "mxgraph.mscae.intune.microsoft_intune",
+   "category": "default"
+  },
+  "middleware": {
+   "shape": "mxgraph.mscae.opsmanager.middleware",
+   "category": "default"
+  },
+  "mobile": {
+   "shape": "mxgraph.azure.mobile",
+   "category": "default"
+  },
+  "mobile_app": {
+   "shape": "mxgraph.mscae.cloud.mobile_app",
+   "category": "default"
+  },
+  "mobile_engagement": {
+   "shape": "mxgraph.mscae.cloud.mobile_engagement",
+   "category": "default"
+  },
+  "mobile_inventory": {
+   "shape": "mxgraph.mscae.intune.mobile_inventory",
+   "category": "default"
+  },
+  "mobile_services": {
+   "shape": "mxgraph.azure.mobile_services",
+   "category": "default"
+  },
+  "monitor": {
+   "shape": "mxgraph.mscae.cloud.monitor",
+   "category": "default"
+  },
+  "monitor_running_apps": {
+   "shape": "mxgraph.mscae.enterprise.monitor_running_apps",
+   "category": "default"
+  },
+  "mouse": {
+   "shape": "mxgraph.mscae.enterprise.mouse",
+   "category": "default"
+  },
+  "ms_bitlocker_administration_and_management": {
+   "shape": "mxgraph.mscae.opsmanager.ms_bitlocker_administration_and_management",
+   "category": "default"
+  },
+  "ms_diagnostics_and_recovery_toolset": {
+   "shape": "mxgraph.mscae.opsmanager.ms_diagnostics_and_recovery_toolset",
+   "category": "default"
+  },
+  "ms_enterprise_desktop_virtualization": {
+   "shape": "mxgraph.mscae.opsmanager.ms_enterprise_desktop_virtualization",
+   "category": "default"
+  },
+  "ms_user_experience_virtualization": {
+   "shape": "mxgraph.mscae.opsmanager.ms_user_experience_virtualization",
+   "category": "default"
+  },
+  "multi_factor_authentication": {
+   "shape": "mxgraph.azure.multi_factor_authentication",
+   "category": "default"
+  },
+  "mysql_database": {
+   "shape": "mxgraph.azure.mysql_database",
+   "category": "default"
+  },
+  "network_card": {
+   "shape": "mxgraph.mscae.enterprise.network_card",
+   "category": "default"
+  },
+  "network_watcher": {
+   "shape": "mxgraph.mscae.cloud.network_watcher",
+   "category": "default"
+  },
+  "noncompliant_apps": {
+   "shape": "mxgraph.mscae.intune.noncompliant_apps",
+   "category": "default"
+  },
+  "not_allowed": {
+   "shape": "mxgraph.mscae.enterprise.not_allowed",
+   "category": "default"
+  },
+  "notification_hub": {
+   "shape": "mxgraph.azure.notification_hub",
+   "category": "default"
+  },
+  "notification_topic": {
+   "shape": "mxgraph.azure.notification_topic",
+   "category": "default"
+  },
+  "nsg": {
+   "shape": "mxgraph.mscae.cloud.nsg",
+   "category": "default"
+  },
+  "num_label_rotate": {
+   "shape": "mxgraph.mscae.general_symbols.num_label_rotate",
+   "category": "default"
+  },
+  "office_365": {
+   "shape": "mxgraph.mscae.cloud.office_365",
+   "category": "default"
+  },
+  "office_365_subscription": {
+   "shape": "mxgraph.mscae.cloud.office_365_subscription",
+   "category": "default"
+  },
+  "oms_log_analytics": {
+   "shape": "mxgraph.mscae.cloud.oms_log_analytics",
+   "category": "default"
+  },
+  "operating_system_image": {
+   "shape": "mxgraph.azure.operating_system_image",
+   "category": "default"
+  },
+  "operational_insights": {
+   "shape": "mxgraph.mscae.cloud.operational_insights",
+   "category": "default"
+  },
+  "operations_manager": {
+   "shape": "mxgraph.mscae.opsmanager.operations_manager",
+   "category": "default"
+  },
+  "orchestrator": {
+   "shape": "mxgraph.mscae.opsmanager.orchestrator",
+   "category": "default"
+  },
+  "outlook": {
+   "shape": "mxgraph.mscae.other.outlook",
+   "category": "default"
+  },
+  "overview": {
+   "shape": "mxgraph.mscae.oms.overview",
+   "category": "default"
+  },
+  "pack": {
+   "shape": "mxgraph.mscae.enterprise.pack",
+   "category": "default"
+  },
+  "performance": {
+   "shape": "mxgraph.mscae.enterprise.performance",
+   "category": "default"
+  },
+  "performance_monitor": {
+   "shape": "mxgraph.mscae.enterprise.performance_monitor",
+   "category": "default"
+  },
+  "plug_and_play": {
+   "shape": "mxgraph.mscae.enterprise.plug_and_play",
+   "category": "default"
+  },
+  "pointer": {
+   "shape": "mxgraph.mscae.general.pointer",
+   "category": "default"
+  },
+  "policy": {
+   "shape": "mxgraph.mscae.intune.policy",
+   "category": "default"
+  },
+  "poster_arrow": {
+   "shape": "mxgraph.mscae.deprecated.poster_arrow",
+   "category": "default"
+  },
+  "power_bi_embedded": {
+   "shape": "mxgraph.mscae.cloud.power_bi_embedded",
+   "category": "default"
+  },
+  "powerappsicon": {
+   "shape": "mxgraph.mscae.other.powerappsicon",
+   "category": "default"
+  },
+  "powerpoint": {
+   "shape": "mxgraph.mscae.other.powerpoint",
+   "category": "default"
+  },
+  "powershell_file": {
+   "shape": "mxgraph.azure.powershell_file",
+   "category": "default"
+  },
+  "premium_star": {
+   "shape": "mxgraph.mscae.general_symbols.premium_star",
+   "category": "default"
+  },
+  "primary_site": {
+   "shape": "mxgraph.mscae.system_center.primary_site",
+   "category": "default"
+  },
+  "protection": {
+   "shape": "mxgraph.mscae.intune.protection",
+   "category": "default"
+  },
+  "protocol_stack": {
+   "shape": "mxgraph.mscae.enterprise.protocol_stack",
+   "category": "default"
+  },
+  "queue_generic": {
+   "shape": "mxgraph.azure.queue_generic",
+   "category": "default"
+  },
+  "rdp_remoting_file": {
+   "shape": "mxgraph.azure.rdp_remoting_file",
+   "category": "default"
+  },
+  "recovery_vault": {
+   "shape": "mxgraph.mscae.cloud.recovery_vault",
+   "category": "default"
+  },
+  "remoteapp": {
+   "shape": "mxgraph.mscae.cloud.remoteapp",
+   "category": "default"
+  },
+  "reports": {
+   "shape": "mxgraph.mscae.intune.reports",
+   "category": "default"
+  },
+  "resource_group": {
+   "shape": "mxgraph.mscae.cloud.resource_group",
+   "category": "default"
+  },
+  "rms_connector": {
+   "shape": "mxgraph.mscae.enterprise.rms_connector",
+   "category": "default"
+  },
+  "roles": {
+   "shape": "mxgraph.mscae.system_center.roles",
+   "category": "default"
+  },
+  "route_filters": {
+   "shape": "mxgraph.mscae.cloud.route_filters",
+   "category": "default"
+  },
+  "router": {
+   "shape": "mxgraph.mscae.enterprise.router",
+   "category": "default"
+  },
+  "runbooks": {
+   "shape": "mxgraph.mscae.cloud.runbooks",
+   "category": "default"
+  },
+  "runtime": {
+   "shape": "mxgraph.mscae.opsmanager.runtime",
+   "category": "default"
+  },
+  "scheduler": {
+   "shape": "mxgraph.azure.scheduler",
+   "category": "default"
+  },
+  "scheduler_2": {
+   "shape": "mxgraph.azure.scheduler_2",
+   "category": "default"
+  },
+  "script_file": {
+   "shape": "mxgraph.azure.script_file",
+   "category": "default"
+  },
+  "secondary_site": {
+   "shape": "mxgraph.mscae.enterprise.secondary_site",
+   "category": "default"
+  },
+  "secure_virtual_machine": {
+   "shape": "mxgraph.mscae.enterprise.secure_virtual_machine",
+   "category": "default"
+  },
+  "security": {
+   "shape": "mxgraph.mscae.oms.security",
+   "category": "default"
+  },
+  "security_center": {
+   "shape": "mxgraph.mscae.cloud.security_center",
+   "category": "default"
+  },
+  "server": {
+   "shape": "mxgraph.azure.server",
+   "category": "default"
+  },
+  "server_directory": {
+   "shape": "mxgraph.mscae.enterprise.server_directory",
+   "category": "default"
+  },
+  "server_farm": {
+   "shape": "mxgraph.mscae.enterprise.server_farm",
+   "category": "default"
+  },
+  "server_generic": {
+   "shape": "mxgraph.mscae.enterprise.server_generic",
+   "category": "default"
+  },
+  "server_rack": {
+   "shape": "mxgraph.azure.server_rack",
+   "category": "default"
+  },
+  "server_width_changes": {
+   "shape": "mxgraph.mscae.oms.server_width_changes",
+   "category": "default"
+  },
+  "service_bus": {
+   "shape": "mxgraph.azure.service_bus",
+   "category": "default"
+  },
+  "service_bus2": {
+   "shape": "mxgraph.mscae.cloud.service_bus2",
+   "category": "default"
+  },
+  "service_bus_queues": {
+   "shape": "mxgraph.azure.service_bus_queues",
+   "category": "default"
+  },
+  "service_bus_relay": {
+   "shape": "mxgraph.azure.service_bus_relay",
+   "category": "default"
+  },
+  "service_bus_relay2": {
+   "shape": "mxgraph.mscae.cloud.service_bus_relay2",
+   "category": "default"
+  },
+  "service_bus_topics": {
+   "shape": "mxgraph.mscae.cloud.service_bus_topics",
+   "category": "default"
+  },
+  "service_bus_topics_and_subscriptions": {
+   "shape": "mxgraph.azure.service_bus_topics_and_subscriptions",
+   "category": "default"
+  },
+  "service_endpoint": {
+   "shape": "mxgraph.azure.service_endpoint",
+   "category": "default"
+  },
+  "service_endpoint2": {
+   "shape": "mxgraph.mscae.cloud.service_endpoint2",
+   "category": "default"
+  },
+  "service_fabric": {
+   "shape": "mxgraph.mscae.cloud.service_fabric",
+   "category": "default"
+  },
+  "service_manager": {
+   "shape": "mxgraph.mscae.opsmanager.service_manager",
+   "category": "default"
+  },
+  "service_package": {
+   "shape": "mxgraph.mscae.cloud.service_package",
+   "category": "default"
+  },
+  "services": {
+   "shape": "mxgraph.mscae.oms.services",
+   "category": "default"
+  },
+  "settings": {
+   "shape": "mxgraph.mscae.enterprise.settings",
+   "category": "default"
+  },
+  "shared_folder": {
+   "shape": "mxgraph.mscae.enterprise.shared_folder",
+   "category": "default"
+  },
+  "sharepoint": {
+   "shape": "mxgraph.mscae.other.sharepoint",
+   "category": "default"
+  },
+  "site_recovery": {
+   "shape": "mxgraph.mscae.cloud.site_recovery",
+   "category": "default"
+  },
+  "skype": {
+   "shape": "mxgraph.mscae.other.skype",
+   "category": "default"
+  },
+  "slider_bar_horizontal": {
+   "shape": "mxgraph.mscae.general.slider_bar_horizontal",
+   "category": "default"
+  },
+  "slider_bar_horz": {
+   "shape": "mxgraph.mscae.general_symbols.slider_bar_horz",
+   "category": "default"
+  },
+  "slider_bar_vert": {
+   "shape": "mxgraph.mscae.general_symbols.slider_bar_vert",
+   "category": "default"
+  },
+  "slider_bar_vertical": {
+   "shape": "mxgraph.mscae.general.slider_bar_vertical",
+   "category": "default"
+  },
+  "smartcard": {
+   "shape": "mxgraph.mscae.enterprise.smartcard",
+   "category": "default"
+  },
+  "snapshot": {
+   "shape": "mxgraph.mscae.cloud.snapshot",
+   "category": "default"
+  },
+  "software_update_point": {
+   "shape": "mxgraph.mscae.system_center.software_update_point",
+   "category": "default"
+  },
+  "solutions": {
+   "shape": "mxgraph.mscae.oms.solutions",
+   "category": "default"
+  },
+  "sql_data_warehouse": {
+   "shape": "mxgraph.mscae.deprecated.sql_data_warehouse",
+   "category": "default"
+  },
+  "sql_database": {
+   "shape": "mxgraph.azure.sql_database",
+   "category": "default"
+  },
+  "sql_database_premium": {
+   "shape": "mxgraph.mscae.cloud.sql_database_premium",
+   "category": "default"
+  },
+  "sql_database_sql_azure": {
+   "shape": "mxgraph.azure.sql_database_sql_azure",
+   "category": "default"
+  },
+  "sql_datasync": {
+   "shape": "mxgraph.azure.sql_datasync",
+   "category": "default"
+  },
+  "sql_datawarehouse": {
+   "shape": "mxgraph.mscae.cloud.sql_datawarehouse",
+   "category": "default"
+  },
+  "sql_elastic_database_pools": {
+   "shape": "mxgraph.mscae.cloud.sql_elastic_database_pools",
+   "category": "default"
+  },
+  "sql_reporting": {
+   "shape": "mxgraph.azure.sql_reporting",
+   "category": "default"
+  },
+  "sql_server_stretch_db": {
+   "shape": "mxgraph.mscae.deprecated.sql_server_stretch_db",
+   "category": "default"
+  },
+  "sql_stretch_database": {
+   "shape": "mxgraph.mscae.cloud.sql_stretch_database",
+   "category": "default"
+  },
+  "ssd": {
+   "shape": "mxgraph.mscae.opsmanager.ssd",
+   "category": "default"
+  },
+  "stack": {
+   "shape": "mxgraph.mscae.cloud.stack",
+   "category": "default"
+  },
+  "startup_task": {
+   "shape": "mxgraph.azure.startup_task",
+   "category": "default"
+  },
+  "storage": {
+   "shape": "mxgraph.azure.storage",
+   "category": "default"
+  },
+  "storage_blob": {
+   "shape": "mxgraph.azure.storage_blob",
+   "category": "default"
+  },
+  "storage_cs": {
+   "shape": "mxgraph.mscae.cloud.storage_cs",
+   "category": "default"
+  },
+  "storage_files": {
+   "shape": "mxgraph.mscae.cloud.storage_files",
+   "category": "default"
+  },
+  "storage_queue": {
+   "shape": "mxgraph.azure.storage_queue",
+   "category": "default"
+  },
+  "storage_sync_services": {
+   "shape": "mxgraph.mscae.cloud.storage_sync_services",
+   "category": "default"
+  },
+  "storage_table": {
+   "shape": "mxgraph.azure.storage_table",
+   "category": "default"
+  },
+  "stored_procedures": {
+   "shape": "mxgraph.mscae.enterprise.stored_procedures",
+   "category": "default"
+  },
+  "storsimple": {
+   "shape": "mxgraph.azure.storsimple",
+   "category": "default"
+  },
+  "stream_analytics": {
+   "shape": "mxgraph.mscae.cloud.stream_analytics",
+   "category": "default"
+  },
+  "subscription_portal": {
+   "shape": "mxgraph.mscae.intune.subscription_portal",
+   "category": "default"
+  },
+  "system_update": {
+   "shape": "mxgraph.mscae.oms.system_update",
+   "category": "default"
+  },
+  "table": {
+   "shape": "mxgraph.mscae.enterprise.table",
+   "category": "default"
+  },
+  "tablet": {
+   "shape": "mxgraph.azure.tablet",
+   "category": "default"
+  },
+  "tags": {
+   "shape": "mxgraph.mscae.cloud.tags",
+   "category": "default"
+  },
+  "task_list": {
+   "shape": "mxgraph.mscae.general.task_list",
+   "category": "default"
+  },
+  "tasks": {
+   "shape": "mxgraph.mscae.general.tasks",
+   "category": "default"
+  },
+  "team_foundation_service": {
+   "shape": "mxgraph.azure.team_foundation_service",
+   "category": "default"
+  },
+  "terms_and_conditions": {
+   "shape": "mxgraph.mscae.intune.terms_and_conditions",
+   "category": "default"
+  },
+  "time_series_insights": {
+   "shape": "mxgraph.mscae.cloud.time_series_insights",
+   "category": "default"
+  },
+  "tool": {
+   "shape": "mxgraph.mscae.enterprise.tool",
+   "category": "default"
+  },
+  "track_changes": {
+   "shape": "mxgraph.mscae.oms.track_changes",
+   "category": "default"
+  },
+  "traffic_manager": {
+   "shape": "mxgraph.azure.traffic_manager",
+   "category": "default"
+  },
+  "triggers": {
+   "shape": "mxgraph.mscae.enterprise.triggers",
+   "category": "default"
+  },
+  "tunnel": {
+   "shape": "mxgraph.mscae.general.tunnel",
+   "category": "default"
+  },
+  "udf_function": {
+   "shape": "mxgraph.mscae.enterprise.udf_function",
+   "category": "default"
+  },
+  "unhealthy": {
+   "shape": "mxgraph.mscae.enterprise.unhealthy",
+   "category": "default"
+  },
+  "unidentified_code_object": {
+   "shape": "mxgraph.azure.unidentified_code_object",
+   "category": "default"
+  },
+  "update": {
+   "shape": "mxgraph.mscae.intune.update",
+   "category": "default"
+  },
+  "usb": {
+   "shape": "mxgraph.mscae.enterprise.usb",
+   "category": "default"
+  },
+  "user": {
+   "shape": "mxgraph.azure.user",
+   "category": "default"
+  },
+  "user_group": {
+   "shape": "mxgraph.mscae.intune.user_group",
+   "category": "default"
+  },
+  "user_management": {
+   "shape": "mxgraph.mscae.intune.user_management",
+   "category": "default"
+  },
+  "user_permissions": {
+   "shape": "mxgraph.mscae.enterprise.user_permissions",
+   "category": "default"
+  },
+  "vhd": {
+   "shape": "mxgraph.azure.vhd",
+   "category": "default"
+  },
+  "vhd_data_disk": {
+   "shape": "mxgraph.azure.vhd_data_disk",
+   "category": "default"
+  },
+  "video": {
+   "shape": "mxgraph.mscae.general.video",
+   "category": "default"
+  },
+  "virtual_machine": {
+   "shape": "mxgraph.azure.virtual_machine",
+   "category": "default"
+  },
+  "virtual_machine_container": {
+   "shape": "mxgraph.mscae.cloud.virtual_machine_container",
+   "category": "default"
+  },
+  "virtual_machine_feature": {
+   "shape": "mxgraph.azure.virtual_machine_feature",
+   "category": "default"
+  },
+  "virtual_machine_manager": {
+   "shape": "mxgraph.mscae.opsmanager.virtual_machine_manager",
+   "category": "default"
+  },
+  "virtual_machines_availability_set": {
+   "shape": "mxgraph.mscae.cloud.virtual_machines_availability_set",
+   "category": "default"
+  },
+  "virtual_network": {
+   "shape": "mxgraph.azure.virtual_network",
+   "category": "default"
+  },
+  "visual_studio_online": {
+   "shape": "mxgraph.azure.visual_studio_online",
+   "category": "default"
+  },
+  "vm_scale_set": {
+   "shape": "mxgraph.mscae.cloud.vm_scale_set",
+   "category": "default"
+  },
+  "vpn_gateway": {
+   "shape": "mxgraph.mscae.cloud.vpn_gateway",
+   "category": "default"
+  },
+  "vpn_gateway2": {
+   "shape": "mxgraph.mscae.cloud.vpn_gateway2",
+   "category": "default"
+  },
+  "wadcfg_diagnostics_file": {
+   "shape": "mxgraph.azure.wadcfg_diagnostics_file",
+   "category": "default"
+  },
+  "waiting": {
+   "shape": "mxgraph.mscae.general_symbols.waiting",
+   "category": "default"
+  },
+  "web": {
+   "shape": "mxgraph.mscae.enterprise.web",
+   "category": "default"
+  },
+  "web_role": {
+   "shape": "mxgraph.azure.web_role",
+   "category": "default"
+  },
+  "web_roles": {
+   "shape": "mxgraph.azure.web_roles",
+   "category": "default"
+  },
+  "web_server": {
+   "shape": "mxgraph.mscae.enterprise.web_server",
+   "category": "default"
+  },
+  "web_server_multi": {
+   "shape": "mxgraph.mscae.vm.web_server_multi",
+   "category": "default"
+  },
+  "webhooks": {
+   "shape": "mxgraph.mscae.cloud.webhooks",
+   "category": "default"
+  },
+  "webjobs": {
+   "shape": "mxgraph.mscae.cloud.webjobs",
+   "category": "default"
+  },
+  "website_generic": {
+   "shape": "mxgraph.azure.website_generic",
+   "category": "default"
+  },
+  "windows": {
+   "shape": "mxgraph.mscae.other.windows",
+   "category": "default"
+  },
+  "windows_server": {
+   "shape": "mxgraph.mscae.enterprise.windows_server",
+   "category": "default"
+  },
+  "windows_server_multi": {
+   "shape": "mxgraph.mscae.vm.windows_server_multi",
+   "category": "default"
+  },
+  "wire_data": {
+   "shape": "mxgraph.mscae.oms.wire_data",
+   "category": "default"
+  },
+  "wireless_connection": {
+   "shape": "mxgraph.mscae.enterprise.wireless_connection",
+   "category": "default"
+  },
+  "word": {
+   "shape": "mxgraph.mscae.other.word",
+   "category": "default"
+  },
+  "work_account": {
+   "shape": "mxgraph.mscae.cloud.work_account",
+   "category": "default"
+  },
+  "worker_pools": {
+   "shape": "mxgraph.mscae.cloud.worker_pools",
+   "category": "default"
+  },
+  "worker_role": {
+   "shape": "mxgraph.azure.worker_role",
+   "category": "default"
+  },
+  "worker_roles": {
+   "shape": "mxgraph.azure.worker_roles",
+   "category": "default"
+  },
+  "workstation_client": {
+   "shape": "mxgraph.mscae.enterprise.workstation_client",
+   "category": "default"
+  },
+  "xbox": {
+   "shape": "mxgraph.mscae.other.xbox",
+   "category": "default"
+  },
+  "xbox_one": {
+   "shape": "mxgraph.mscae.other.xbox_one",
+   "category": "default"
+  },
+  "xml_web_service": {
+   "shape": "mxgraph.mscae.enterprise.xml_web_service",
+   "category": "default"
+  }
+ },
+ "gcp": {
+  "a7_power": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.a7_power"
+  },
+  "admin_connected": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.admin_connected"
+  },
+  "advanced_solutions_lab": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.advanced_solutions_lab"
+  },
+  "agents": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.agents"
+  },
+  "aihypercomputer": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.aihypercomputer"
+  },
+  "aimachinelearning": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.aimachinelearning"
+  },
+  "alloydb": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.alloydb"
+  },
+  "anomaly_detection": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.anomaly_detection"
+  },
+  "anthos": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.anthos"
+  },
+  "api_analytics": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.api_analytics"
+  },
+  "api_monetization": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.api_monetization"
+  },
+  "apigee": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.apigee"
+  },
+  "apigee_api_platform": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.apigee_api_platform"
+  },
+  "apigee_sense": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.apigee_sense"
+  },
+  "app_engine": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.app_engine"
+  },
+  "application": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.application"
+  },
+  "arrow_cycle": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.arrow_cycle"
+  },
+  "arrows_system": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.arrows_system"
+  },
+  "aspect_ratio": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.aspect_ratio"
+  },
+  "avere": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.avere"
+  },
+  "beacon": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.beacon"
+  },
+  "beyondcorp": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.beyondcorp"
+  },
+  "big_query": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.big_query"
+  },
+  "bigquery": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.bigquery"
+  },
+  "biomedical_beaker": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.biomedical_beaker"
+  },
+  "biomedical_test_tube": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.biomedical_test_tube"
+  },
+  "biomedical_trio": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.biomedical_trio"
+  },
+  "blue_hexagon": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.blue_hexagon"
+  },
+  "bucket_scale": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.bucket_scale"
+  },
+  "businessintelligence": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.businessintelligence"
+  },
+  "calculator": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.calculator"
+  },
+  "campaign_manager": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.campaign_manager"
+  },
+  "capabilities": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.capabilities"
+  },
+  "certified_industry_standard": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.certified_industry_standard"
+  },
+  "check": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.check"
+  },
+  "check_2": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.check_2"
+  },
+  "check_available": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.check_available"
+  },
+  "check_scale": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.check_scale"
+  },
+  "clock": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.clock"
+  },
+  "cloud": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud"
+  },
+  "cloud_apis": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_apis"
+  },
+  "cloud_armor": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_armor"
+  },
+  "cloud_automl": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_automl"
+  },
+  "cloud_bigtable": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_bigtable"
+  },
+  "cloud_cdn": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_cdn"
+  },
+  "cloud_checkmark": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_checkmark"
+  },
+  "cloud_composer": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_composer"
+  },
+  "cloud_computer": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_computer"
+  },
+  "cloud_connected_insight": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_connected_insight"
+  },
+  "cloud_dataflow": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_dataflow"
+  },
+  "cloud_datalab": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_datalab"
+  },
+  "cloud_dataprep": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_dataprep"
+  },
+  "cloud_dataproc": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_dataproc"
+  },
+  "cloud_datastore": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_datastore"
+  },
+  "cloud_deployment_manager": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_deployment_manager"
+  },
+  "cloud_dns": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_dns"
+  },
+  "cloud_endpoints": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_endpoints"
+  },
+  "cloud_external_ip_addresses": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_external_ip_addresses"
+  },
+  "cloud_filestore": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_filestore"
+  },
+  "cloud_firewall_rules": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_firewall_rules"
+  },
+  "cloud_functions": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_functions"
+  },
+  "cloud_iam": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_iam"
+  },
+  "cloud_information": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_information"
+  },
+  "cloud_iot_core": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_iot_core"
+  },
+  "cloud_jobs_api": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_jobs_api"
+  },
+  "cloud_load_balancing": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_load_balancing"
+  },
+  "cloud_machine_learning": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_machine_learning"
+  },
+  "cloud_memorystore": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_memorystore"
+  },
+  "cloud_messaging": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_messaging"
+  },
+  "cloud_monitoring": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_monitoring"
+  },
+  "cloud_natural_language_api": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_natural_language_api"
+  },
+  "cloud_network": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_network"
+  },
+  "cloud_pubsub": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_pubsub"
+  },
+  "cloud_router": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_router"
+  },
+  "cloud_routes": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_routes"
+  },
+  "cloud_security": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_security"
+  },
+  "cloud_security_command_center": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_security_command_center"
+  },
+  "cloud_security_scanner": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_security_scanner"
+  },
+  "cloud_server": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_server"
+  },
+  "cloud_spanner": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_spanner"
+  },
+  "cloud_speech_api": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_speech_api"
+  },
+  "cloud_sql": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_sql"
+  },
+  "cloud_storage": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.cloud_storage"
+  },
+  "cloud_text_to_speech": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_text_to_speech"
+  },
+  "cloud_tools_for_powershell": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_tools_for_powershell"
+  },
+  "cloud_tpu": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_tpu"
+  },
+  "cloud_translation_api": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_translation_api"
+  },
+  "cloud_video_intelligence_api": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_video_intelligence_api"
+  },
+  "cloud_vision_api": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_vision_api"
+  },
+  "cloud_vpn": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cloud_vpn"
+  },
+  "cloudrun": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.cloudrun"
+  },
+  "cloudspanner": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.cloudspanner"
+  },
+  "cloudsql": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.cloudsql"
+  },
+  "collaboration": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.collaboration"
+  },
+  "compute": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.compute"
+  },
+  "compute_engine": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.compute_engine"
+  },
+  "compute_engine_2": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.compute_engine_2"
+  },
+  "compute_engine_icon": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.compute_engine_icon"
+  },
+  "computeengine": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.computeengine"
+  },
+  "connected": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.connected"
+  },
+  "container_builder": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.container_builder"
+  },
+  "container_engine": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.container_engine"
+  },
+  "container_optimized_os": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.container_optimized_os"
+  },
+  "container_registry": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.container_registry"
+  },
+  "containers": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.containers"
+  },
+  "cost": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cost"
+  },
+  "cost_arrows": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cost_arrows"
+  },
+  "cost_savings": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.cost_savings"
+  },
+  "data_access": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.data_access"
+  },
+  "data_increase": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.data_increase"
+  },
+  "data_loss_prevention_api": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.data_loss_prevention_api"
+  },
+  "data_storage_cost": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.data_storage_cost"
+  },
+  "data_studio": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.data_studio"
+  },
+  "dataanalytics": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.dataanalytics"
+  },
+  "database": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.database"
+  },
+  "database_2": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.database_2"
+  },
+  "database_3": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.database_3"
+  },
+  "database_cycle": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.database_cycle"
+  },
+  "database_speed": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.database_speed"
+  },
+  "database_uploading": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.database_uploading"
+  },
+  "databases": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.databases"
+  },
+  "debugger": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.debugger"
+  },
+  "dedicated_game_server": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.dedicated_game_server"
+  },
+  "dedicated_interconnect": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.dedicated_interconnect"
+  },
+  "desktop_and_mobile": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.desktop_and_mobile"
+  },
+  "developer_portal": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.developer_portal"
+  },
+  "developer_tools": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.developer_tools"
+  },
+  "devops": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.devops"
+  },
+  "dialogflow_enterprise_edition": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.dialogflow_enterprise_edition"
+  },
+  "distributedcloud": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.distributedcloud"
+  },
+  "double": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.double"
+  },
+  "enhance_ui": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.enhance_ui"
+  },
+  "enhance_ui_2": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.enhance_ui_2"
+  },
+  "error_reporting": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.error_reporting"
+  },
+  "external_data_center": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.external_data_center"
+  },
+  "external_data_resource": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.external_data_resource"
+  },
+  "files": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.files"
+  },
+  "folders": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.folders"
+  },
+  "frontend_platform_services": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.frontend_platform_services"
+  },
+  "gateway": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.gateway"
+  },
+  "gateway_icon": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.gateway_icon"
+  },
+  "gear": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.gear"
+  },
+  "gear_arrow": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.gear_arrow"
+  },
+  "gear_chain": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.gear_chain"
+  },
+  "gear_load": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.gear_load"
+  },
+  "genomics": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.genomics"
+  },
+  "gke": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.gke"
+  },
+  "globe_world": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.globe_world"
+  },
+  "google_analytics": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.google_analytics"
+  },
+  "google_cloud_platform": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.google_cloud_platform"
+  },
+  "google_network": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.google_network"
+  },
+  "google_network_edge_cache": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.google_network_edge_cache"
+  },
+  "gpu": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.gpu"
+  },
+  "half_cloud": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.half_cloud"
+  },
+  "hex": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.hex"
+  },
+  "hybridmulticloud": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.hybridmulticloud"
+  },
+  "hyperdisk": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.hyperdisk"
+  },
+  "identity_aware_proxy": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.identity_aware_proxy"
+  },
+  "increase_cost_arrows": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.increase_cost_arrows"
+  },
+  "integrationservices": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.integrationservices"
+  },
+  "internet_connection": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.internet_connection"
+  },
+  "key": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.key"
+  },
+  "key_management_service": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.key_management_service"
+  },
+  "laptop": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.laptop"
+  },
+  "legacy_cloud": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.legacy_cloud"
+  },
+  "legacy_cloud_2": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.legacy_cloud_2"
+  },
+  "lifecycle": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.lifecycle"
+  },
+  "list": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.list"
+  },
+  "load_balancing": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.load_balancing"
+  },
+  "loading": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.loading"
+  },
+  "loading_2": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.loading_2"
+  },
+  "loading_3": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.loading_3"
+  },
+  "lock": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.lock"
+  },
+  "logging": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.logging"
+  },
+  "looker": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.looker"
+  },
+  "management_security": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.management_security"
+  },
+  "managementtools": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.managementtools"
+  },
+  "mandiant": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.mandiant"
+  },
+  "maps_api": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.maps_api"
+  },
+  "mapsgeospatial": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.mapsgeospatial"
+  },
+  "marketplace": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.marketplace"
+  },
+  "mediaservices": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.mediaservices"
+  },
+  "mem_instances": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.mem_instances"
+  },
+  "memory_card": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.memory_card"
+  },
+  "migration": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.migration"
+  },
+  "mixedreality": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.mixedreality"
+  },
+  "mobile_devices": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.mobile_devices"
+  },
+  "modifiers_autoscaling": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.modifiers_autoscaling"
+  },
+  "modifiers_custom_virtual_machine": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.modifiers_custom_virtual_machine"
+  },
+  "modifiers_high_cpu_machine": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.modifiers_high_cpu_machine"
+  },
+  "modifiers_high_memory_machine": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.modifiers_high_memory_machine"
+  },
+  "modifiers_preemptable_vm": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.modifiers_preemptable_vm"
+  },
+  "modifiers_shared_core_machine_f1": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.modifiers_shared_core_machine_f1"
+  },
+  "modifiers_shared_core_machine_g1": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.modifiers_shared_core_machine_g1"
+  },
+  "modifiers_standard_machine": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.modifiers_standard_machine"
+  },
+  "modifiers_storage": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.modifiers_storage"
+  },
+  "monitor": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.monitor"
+  },
+  "monitor_2": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.monitor_2"
+  },
+  "network": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.network"
+  },
+  "networking": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.networking"
+  },
+  "node": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.node"
+  },
+  "observability": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.observability"
+  },
+  "operations": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.operations"
+  },
+  "outline_blank_1": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.outline_blank_1"
+  },
+  "outline_blank_2": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.outline_blank_2"
+  },
+  "outline_blank_3": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.outline_blank_3"
+  },
+  "outline_highcomp": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.outline_highcomp"
+  },
+  "outline_highmem": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.outline_highmem"
+  },
+  "partner_interconnect": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.partner_interconnect"
+  },
+  "people_security_management": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.people_security_management"
+  },
+  "persistent_disk": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.persistent_disk"
+  },
+  "phone": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.phone"
+  },
+  "phone_android": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.phone_android"
+  },
+  "placeholder": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.placeholder"
+  },
+  "play_gear": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.play_gear"
+  },
+  "play_start": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.play_start"
+  },
+  "prediction_api": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.prediction_api"
+  },
+  "premium_network_tier": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.premium_network_tier"
+  },
+  "primary": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.primary"
+  },
+  "process": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.process"
+  },
+  "replication_controller": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.replication_controller"
+  },
+  "replication_controller_2": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.replication_controller_2"
+  },
+  "replication_controller_3": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.replication_controller_3"
+  },
+  "report": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.report"
+  },
+  "repository": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.repository"
+  },
+  "repository_2": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.repository_2"
+  },
+  "repository_3": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.repository_3"
+  },
+  "repository_primary": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.repository_primary"
+  },
+  "retail": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.retail"
+  },
+  "safety": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.safety"
+  },
+  "save": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.save"
+  },
+  "scale": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.scale"
+  },
+  "search": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.search"
+  },
+  "search_api": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.search_api"
+  },
+  "secops": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.secops"
+  },
+  "security_key_enforcement": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.security_key_enforcement"
+  },
+  "securitycommandcenter": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.securitycommandcenter"
+  },
+  "securityidentity": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.securityidentity"
+  },
+  "segments": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.segments"
+  },
+  "segments_2": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.segments_2"
+  },
+  "segments_overlap": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.segments_overlap"
+  },
+  "serverlesscomputing": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.serverlesscomputing"
+  },
+  "servers_stacked": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.servers_stacked"
+  },
+  "service": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.service"
+  },
+  "social_media_time": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.social_media_time"
+  },
+  "solution": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.solution"
+  },
+  "speed": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.speed"
+  },
+  "stackdriver": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.stackdriver"
+  },
+  "stacked_ownership": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.stacked_ownership"
+  },
+  "standard_network_tier": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.standard_network_tier"
+  },
+  "storage": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.storage"
+  },
+  "swap": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.swap"
+  },
+  "systems_check": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.systems_check"
+  },
+  "tape_record": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.tape_record"
+  },
+  "task_queues_2": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.task_queues_2"
+  },
+  "threatintelligence": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.threatintelligence"
+  },
+  "thumbs_up": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.thumbs_up"
+  },
+  "time_clock": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.time_clock"
+  },
+  "trace": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.trace"
+  },
+  "transfer_appliance": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.transfer_appliance"
+  },
+  "users": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.users"
+  },
+  "vertexai": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.vertexai"
+  },
+  "view_list": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.view_list"
+  },
+  "virtual_private_cloud": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.virtual_private_cloud"
+  },
+  "visibility": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.visibility"
+  },
+  "vpn": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.vpn"
+  },
+  "web3": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.web3"
+  },
+  "webmobile": {
+   "category": "default",
+   "shape": "mxgraph.gcp3.webmobile"
+  },
+  "website": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.website"
+  },
+  "zones": {
+   "category": "default",
+   "shape": "mxgraph.gcp2.zones"
+  }
+ },
+ "groups": {
+  "group": {
+   "shape": "mxgraph.aws4.group"
+  },
+  "group2": {
+   "shape": "mxgraph.aws4.group2"
+  },
+  "group_auto_scaling_group": {
+   "shape": "mxgraph.aws4.group_auto_scaling_group"
+  },
+  "group_aws_cloud": {
+   "shape": "mxgraph.aws4.group_aws_cloud"
+  },
+  "group_aws_cloud_alt": {
+   "shape": "mxgraph.aws4.group_aws_cloud_alt"
+  },
+  "group_aws_step_functions_workflow": {
+   "shape": "mxgraph.aws4.group_aws_step_functions_workflow"
+  },
+  "group_corporate_data_center": {
+   "shape": "mxgraph.aws4.group_corporate_data_center"
+  },
+  "group_ec2_instance_contents": {
+   "shape": "mxgraph.aws4.group_ec2_instance_contents"
+  },
+  "group_elastic_beanstalk": {
+   "shape": "mxgraph.aws4.group_elastic_beanstalk"
+  },
+  "group_on_premise": {
+   "shape": "mxgraph.aws4.group_on_premise"
+  },
+  "group_region": {
+   "shape": "mxgraph.aws4.group_region"
+  },
+  "group_security_group": {
+   "shape": "mxgraph.aws4.group_security_group"
+  },
+  "group_spot_fleet": {
+   "shape": "mxgraph.aws4.group_spot_fleet"
+  },
+  "group_vpc": {
+   "shape": "mxgraph.aws4.group_vpc"
+  }
+ }
+}

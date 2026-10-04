@@ -1,0 +1,316 @@
+---
+description: Pipeline for Google Workspace Admin SDK Reports API audit events (login, admin, token, saml)
+
+processors:
+  # Drop non-JSON messages
+  - drop:
+      when:
+        not:
+          starts_with:
+            raw: "{"
+  - json:
+      field: raw
+  - drop:
+      when:
+        not:
+          has_fields: ["raw.id"]
+
+  # Base envelope constants
+  - set:
+      field: vendor
+      value: Google
+  - set:
+      field: product
+      value: "Google Workspace"
+  - set:
+      field: cloud.provider
+      value: Google
+  - set:
+      field: type
+      value: event
+  - set:
+      field: event.kind
+      value: event
+  - set:
+      field: event.dataset
+      value: google_workspace.audit
+  - set:
+      field: event.provider
+      value: reports_api
+  - set:
+      field: event.module
+      value: google_workspace
+
+  # Event timestamp: from Reports API id.time
+  - date:
+      field: raw.id.time
+      target_field: "@timestamp"
+      timezone: UTC
+      formats:
+        - ISO8601
+      ignore_failure: true
+      ignore_missing: true
+  - date:
+      field: raw.time
+      target_field: "@timestamp"
+      timezone: UTC
+      formats:
+        - ISO8601
+      ignore_failure: true
+      ignore_missing: true
+      when:
+        not:
+          has_fields: ["@timestamp"]
+
+  # Normalization script: actor, network, application event dispatch (login, admin, token, saml)
+  - script:
+      lang: js
+      description: Normalize Workspace audit event, actor identity, network attributes, application-specific parameters, and target entities
+      ignore_failure: true
+      source: >-
+        function process(event) {
+            var rawId = event.Get("raw.id") || {};
+            var actor = event.Get("raw.actor") || {};
+            var ip = event.Get("raw.ipAddress") || "";
+            var domain = event.Get("raw.ownerDomain") || "";
+            var time = rawId.time || event.Get("raw.time") || "";
+            var app = rawId.applicationName || event.Get("raw.applicationName") || "";
+            var customerId = rawId.customerId || "";
+            var uniqueQualifier = rawId.uniqueQualifier || "";
+
+            // 1. Customer & Organization ID
+            if (customerId) {
+                event.Put("customer_id", customerId);
+                event.Put("organization.id", customerId);
+            }
+
+            // 2. Application & Service Name
+            if (app) {
+                event.Put("service.name", app);
+                event.Put("ext.workspace_application", app);
+            }
+
+            // 3. User Identity (Actor)
+            var actorEmail = actor.email || "";
+            if (actorEmail) {
+                event.Put("user.email", actorEmail);
+                event.Put("user_name", actorEmail);
+            }
+            if (actor.profileId) {
+                event.Put("user.id", actor.profileId);
+                event.Put("user_id", actor.profileId);
+            }
+            if (actor.callerType) {
+                event.Put("user.credential_type", actor.callerType);
+            }
+            if (domain) {
+                event.Put("user.domain", domain);
+            }
+
+            // 4. Client / Network IP
+            var isIpv4 = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(ip);
+            if (ip) {
+                event.Put("client.ip", ip);
+                event.Put("source_address", ip);
+                if (isIpv4) {
+                    event.Put("source_ipv4", ip);
+                } else if (ip.indexOf(":") !== -1) {
+                    event.Put("source_ipv6", ip);
+                }
+            }
+
+            // 5. Event ID
+            var eventId = uniqueQualifier ? uniqueQualifier : (time && actorEmail ? (time + "@" + actorEmail) : "");
+            if (eventId) event.Put("event.id", eventId);
+
+            // 6. Rollups setup
+            var users = [];
+            function addUser(u) {
+                if (u && users.indexOf(u) === -1) users.push(u);
+            }
+            if (actorEmail) addUser(actorEmail);
+
+            if (ip && isIpv4) {
+                event.Put("related.ipv4", [ip]);
+            }
+
+            // 7. Parse Events array & flatten Parameters
+            var rawEvents = event.Get("raw.events");
+            var firstEvent = (rawEvents instanceof Array && rawEvents.length > 0) ? rawEvents[0] : null;
+            var eventName = firstEvent ? (firstEvent.name || "") : "";
+            var eventType = firstEvent ? (firstEvent.type || "") : "";
+
+            var params = {};
+            if (firstEvent && firstEvent.parameters instanceof Array) {
+                for (var i = 0; i < firstEvent.parameters.length; i++) {
+                    var p = firstEvent.parameters[i];
+                    if (!p || !p.name) continue;
+                    var val = p.value;
+                    if (val === undefined && p.boolValue !== undefined) val = p.boolValue;
+                    if (val === undefined && p.intValue !== undefined) val = p.intValue;
+                    if (val === undefined && p.multiValue !== undefined) val = p.multiValue;
+                    params[p.name] = val;
+                }
+            }
+
+            // Default categories & outcome
+            var category = "configuration";
+            var outcome = "success";
+            var action = eventName || app + "_event";
+            var message = "Google Workspace " + (app || "audit") + ": " + (eventName || "activity");
+
+            var appLower = String(app).toLowerCase();
+
+            // 8. Application-Specific Normalization
+            if (appLower === "login") {
+                category = "authentication";
+                action = eventName;
+                var eventNameLower = String(eventName).toLowerCase();
+
+                if (eventNameLower.indexOf("fail") !== -1 || eventNameLower.indexOf("rejected") !== -1) {
+                    outcome = "failure";
+                } else if (eventNameLower.indexOf("challenge") !== -1) {
+                    outcome = "unknown";
+                } else {
+                    outcome = "success";
+                }
+
+                if (params.is_suspicious === true || eventNameLower.indexOf("suspicious") !== -1) {
+                    event.Put("ext.is_suspicious", true);
+                    event.Put("severity", "high");
+                    event.Put("event.risk_score", 80);
+                }
+
+                if (params.login_type) {
+                    event.Put("ext.login_type", params.login_type);
+                    event.Put("user.credential_type", params.login_type);
+                }
+                if (params.login_challenge_method) {
+                    event.Put("ext.login_challenge_method", params.login_challenge_method);
+                }
+                if (params.login_challenge_status) {
+                    event.Put("ext.login_challenge_status", params.login_challenge_status);
+                }
+                if (params.failure_type) {
+                    event.Put("event.reason", params.failure_type);
+                }
+
+                message = "Workspace user " + (actorEmail || "unknown") + " login " + eventName + (ip ? " from " + ip : "");
+
+            } else if (appLower === "admin") {
+                action = eventName;
+                var actionUpper = String(eventName).toUpperCase();
+
+                // Determine category: IAM for user/role/privilege/group/2sv; configuration otherwise
+                if (actionUpper.indexOf("USER") !== -1 || actionUpper.indexOf("ROLE") !== -1 ||
+                    actionUpper.indexOf("PRIVILEGE") !== -1 || actionUpper.indexOf("GROUP") !== -1 ||
+                    actionUpper.indexOf("PASSWORD") !== -1 || actionUpper.indexOf("2SV") !== -1 ||
+                    actionUpper.indexOf("MFA") !== -1) {
+                    category = "iam";
+                } else {
+                    category = "configuration";
+                }
+
+                var targetUser = params.USER_EMAIL || params.TARGET_USER || "";
+                if (targetUser) {
+                    event.Put("user.target.email", targetUser);
+                    event.Put("user.target.name", targetUser);
+                    addUser(targetUser);
+                }
+
+                var roleName = params.ROLE_NAME || "";
+                if (roleName) {
+                    event.Put("user.target.roles", [roleName]);
+                }
+
+                var groupEmail = params.GROUP_EMAIL || "";
+                if (groupEmail) {
+                    event.Put("user.target.group.name", groupEmail);
+                }
+
+                if (params.NEW_VALUE !== undefined) event.Put("ext.new_value", String(params.NEW_VALUE));
+                if (params.OLD_VALUE !== undefined) event.Put("ext.old_value", String(params.OLD_VALUE));
+
+                message = "Admin " + (actorEmail || "unknown") + " performed " + eventName + (targetUser ? " on " + targetUser : "");
+
+            } else if (appLower === "token") {
+                category = "iam";
+                var tokenAction = String(eventName).toLowerCase();
+                action = "token_" + tokenAction;
+
+                var oauthApp = params.app_name || "";
+                if (oauthApp) {
+                    event.Put("ext.oauth_app_name", oauthApp);
+                    event.Put("service.name", oauthApp);
+                }
+                if (params.client_id) {
+                    event.Put("ext.oauth_client_id", params.client_id);
+                }
+                if (params.scope) {
+                    event.Put("ext.oauth_scopes", params.scope);
+                }
+
+                message = "User " + (actorEmail || "unknown") + " " + tokenAction + " OAuth app " + (oauthApp || params.client_id || "unknown");
+
+            } else if (appLower === "saml") {
+                category = "authentication";
+                var samlAction = String(eventName).toLowerCase();
+                action = "saml_" + samlAction;
+
+                if (samlAction.indexOf("fail") !== -1) {
+                    outcome = "failure";
+                } else {
+                    outcome = "success";
+                }
+
+                var samlApp = params.saml_application_name || "";
+                if (samlApp) {
+                    event.Put("service.name", samlApp);
+                    event.Put("ext.saml_application_name", samlApp);
+                }
+                if (params.saml_app_id) {
+                    event.Put("ext.saml_app_id", params.saml_app_id);
+                }
+                if (params.saml_status_code) {
+                    event.Put("event.code", params.saml_status_code);
+                }
+
+                message = "SAML login " + samlAction + " for " + (actorEmail || "unknown") + (samlApp ? " on " + samlApp : "");
+
+            } else if (appLower === "user_accounts" || appLower.indexOf("group") === 0) {
+                category = "iam";
+                action = eventName || app + "_event";
+                message = "Workspace " + app + ": " + action + " by " + (actorEmail || "unknown");
+
+            } else if (appLower === "context_aware_access") {
+                category = "network";
+                action = eventName || "access_evaluation";
+                message = "Context-Aware Access: " + action + " for " + (actorEmail || "unknown");
+
+            } else if (appLower === "drive") {
+                category = "file";
+                action = eventName || "drive_action";
+                if (params.doc_title) event.Put("file.name", params.doc_title);
+                if (params.doc_id) event.Put("file.id", params.doc_id);
+                message = "Drive " + action + " by " + (actorEmail || "unknown") + (params.doc_title ? " on " + params.doc_title : "");
+
+            } else {
+                action = eventName || (app + "_event");
+                message = "Workspace " + app + ": " + action + " by " + (actorEmail || "unknown");
+            }
+
+            event.Put("event.action", action);
+            event.Put("event.category", category);
+            event.Put("event.outcome", outcome);
+            event.Put("message", message);
+
+            if (users.length > 0) {
+                event.Put("related.user", users);
+            }
+        }
+
+  # Preserve raw event under labels
+  - rename:
+      field: raw
+      target_field: labels
+      ignore_missing: true

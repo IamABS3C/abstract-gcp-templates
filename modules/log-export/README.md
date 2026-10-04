@@ -84,12 +84,10 @@ No modules.
 | <a name="output_abstract_onboarding"></a> [abstract\_onboarding](#output\_abstract\_onboarding) | Everything needed to configure the Abstract GCP Pub/Sub Source, in one object. |
 | <a name="output_abstract_project_id"></a> [abstract\_project\_id](#output\_abstract\_project\_id) | Goes in the Abstract integration's Project ID field. NOTE: this is the project holding the SUBSCRIPTION, not the projects generating logs. With an org sink the logs come from dozens of projects and this field still names one — the field people fill in wrong most often. |
 | <a name="output_effective_filter"></a> [effective\_filter](#output\_effective\_filter) | The filter actually applied. Read it before applying: routing is write-time and there is NO backfill, so anything this filter misses is permanently lost. |
-| <a name="output_obj_probe"></a> [obj\_probe](#output\_obj\_probe) | n/a |
 | <a name="output_selected_log_sources"></a> [selected\_log\_sources](#output\_selected\_log\_sources) | Resolved categories with their volume tier — read this before applying. |
 | <a name="output_service_account_email"></a> [service\_account\_email](#output\_service\_account\_email) | Identity Abstract authenticates as. Holds subscriber on one subscription only. |
 | <a name="output_service_account_key"></a> [service\_account\_key](#output\_service\_account\_key) | Base64 service-account key, only when create\_service\_account\_key = true. Prefer creating it out of band — this value lands in Terraform state. |
 | <a name="output_sink_writer_identity"></a> [sink\_writer\_identity](#output\_sink\_writer\_identity) | The sink's own service identity. It holds NO permissions until granted pubsub.publisher on the topic — which this module does. If you ever rebuild the sink by hand, this is the grant to remember. |
-| <a name="output_str_probe"></a> [str\_probe](#output\_str\_probe) | n/a |
 | <a name="output_subscription_id"></a> [subscription\_id](#output\_subscription\_id) | Short subscription name. This is what goes in the Abstract integration's Subscription ID field. |
 | <a name="output_topic_id"></a> [topic\_id](#output\_topic\_id) | Pub/Sub topic the sink publishes to. |
 | <a name="output_volume_profile"></a> [volume\_profile](#output\_volume\_profile) | Count of selected sources by volume tier. Any 'extreme' entry needs a measured baseline before you quote a number. |

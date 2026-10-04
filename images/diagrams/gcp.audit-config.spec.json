@@ -1,0 +1,202 @@
+{
+  "title": "Configure Data Access audit logs",
+  "theme": "dark",
+  "animate": true,
+  "pages": [
+    {
+      "name": "Audit Config",
+      "banner": {
+        "title": "Data Access Audit Logging & Cost Optimization",
+        "subtitle": "The Two-Switch Rule \u00b7 sensitive data plane auditing \u00b7 exfiltration & impersonation detection",
+        "w": 1000
+      },
+      "groups": [
+        {
+          "id": "org",
+          "label": "GCP Organization Scope",
+          "x": 50,
+          "y": 80,
+          "w": 880,
+          "h": 680,
+          "color": "#2e9bf0"
+        },
+        {
+          "id": "sw1",
+          "label": "Switch 1: IAM Audit Config (Generate)",
+          "x": 80,
+          "y": 60,
+          "w": 380,
+          "h": 560,
+          "color": "#f5c61e",
+          "parent": "org"
+        },
+        {
+          "id": "sw2",
+          "label": "Switch 2: Log Router Sink Filter (Route)",
+          "x": 520,
+          "y": 60,
+          "w": 380,
+          "h": 560,
+          "color": "#01e69d",
+          "parent": "org"
+        },
+        {
+          "id": "abs",
+          "label": "Abstract Security Platform",
+          "x": 970,
+          "y": 80,
+          "w": 350,
+          "h": 680,
+          "color": "#FF216B"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "bq",
+          "label": "BigQuery",
+          "sublabel": "DATA_READ + DATA_WRITE",
+          "icon": "gcp:bigquery",
+          "parent": "sw1",
+          "x": 50,
+          "y": 60
+        },
+        {
+          "id": "gcs",
+          "label": "Cloud Storage",
+          "sublabel": "DATA_WRITE (and scoped READ)",
+          "icon": "gcp:cloud_storage",
+          "parent": "sw1",
+          "x": 50,
+          "y": 180
+        },
+        {
+          "id": "kms",
+          "label": "Cloud KMS",
+          "sublabel": "DATA_READ (crypto operations)",
+          "icon": "gcp:security_key_enforcement",
+          "parent": "sw1",
+          "x": 50,
+          "y": 300
+        },
+        {
+          "id": "iam_cred",
+          "label": "IAM Credentials & STS",
+          "sublabel": "DATA_READ (impersonation & WIF)",
+          "icon": "gcp:cloud_iam",
+          "parent": "sw1",
+          "x": 50,
+          "y": 420
+        },
+        {
+          "id": "router",
+          "label": "Log Router Sink",
+          "sublabel": "matches cloudaudit.../data_access",
+          "icon": "gcp:logging",
+          "parent": "sw2",
+          "x": 130,
+          "y": 120
+        },
+        {
+          "id": "topic",
+          "label": "Pub/Sub Topic",
+          "sublabel": "abstract-audit-logs",
+          "icon": "gcp:cloud_pubsub",
+          "fill": "#FF216B",
+          "parent": "sw2",
+          "x": 130,
+          "y": 360
+        },
+        {
+          "id": "plat",
+          "label": "Abstract SIEM",
+          "sublabel": "exfiltration & token abuse alerts",
+          "icon": "img:brand/abstract-logo-mark.svg",
+          "parent": "abs",
+          "x": 130,
+          "y": 260
+        }
+      ],
+      "edges": [
+        {
+          "from": "bq",
+          "to": "router",
+          "tone": "amber"
+        },
+        {
+          "from": "gcs",
+          "to": "router",
+          "tone": "amber"
+        },
+        {
+          "from": "kms",
+          "to": "router",
+          "tone": "amber"
+        },
+        {
+          "from": "iam_cred",
+          "to": "router",
+          "tone": "amber"
+        },
+        {
+          "from": "router",
+          "to": "topic",
+          "label": "routes matching data_access",
+          "tone": "teal",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "topic",
+          "to": "plat",
+          "label": "pull",
+          "tone": "brand"
+        }
+      ],
+      "badges": [
+        {
+          "id": "b1",
+          "text": "SWITCH 1: google_organization_iam_audit_config (Generates logs)",
+          "x": 90,
+          "y": 90,
+          "w": 400,
+          "h": 26,
+          "tone": "amber"
+        },
+        {
+          "id": "b2",
+          "text": "SWITCH 2: log_categories = [\"data_access\"] in sink filter (Routes logs)",
+          "x": 530,
+          "y": 90,
+          "w": 410,
+          "h": 26,
+          "tone": "teal"
+        },
+        {
+          "id": "b3",
+          "text": "COST WARNING: NEVER set allServices for DATA_READ (100x cost explosion)",
+          "x": 100,
+          "y": 670,
+          "w": 450,
+          "h": 26,
+          "tone": "brand"
+        }
+      ],
+      "notes": [
+        {
+          "id": "n1",
+          "text": "THE TWO-SWITCH RULE: Data Access audit logging is OFF by default. Switch 1 generates the log records; Switch 2 routes them to the sink. Either switch alone does nothing. Auditing specific high-value services keeps costs bounded.",
+          "x": 50,
+          "y": 780,
+          "w": 1000,
+          "h": 50
+        }
+      ]
+    }
+  ]
+}

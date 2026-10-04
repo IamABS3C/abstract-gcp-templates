@@ -1,0 +1,310 @@
+{
+  "title": "Configure Data Access audit logs",
+  "theme": "dark",
+  "grid": false,
+  "animate": true,
+  "pages": [
+    {
+      "name": "Data Access Interlock",
+      "banner": {
+        "title": "Data Access Audit Logging & Two-Switch Interlock",
+        "subtitle": "The Two-Switch Rule \u00b7 sensitive data plane auditing \u00b7 exfiltration & impersonation detection",
+        "x": 40,
+        "y": 20,
+        "w": 1050,
+        "h": 56
+      },
+      "groups": [
+        {
+          "id": "sw1",
+          "label": "Switch 1: IAM Audit Config (Generates Logs)",
+          "kind": "plain",
+          "x": 40,
+          "y": 120,
+          "w": 420,
+          "h": 660,
+          "color": "#F5C61E"
+        },
+        {
+          "id": "sw2",
+          "label": "Switch 2: Log Router Sink Filter (Routes Logs)",
+          "kind": "plain",
+          "x": 490,
+          "y": 120,
+          "w": 480,
+          "h": 660,
+          "color": "#01E69D"
+        },
+        {
+          "id": "abs",
+          "label": "Abstract Security Platform",
+          "kind": "plain",
+          "x": 1010,
+          "y": 120,
+          "w": 460,
+          "h": 660,
+          "color": "#FF216B"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "bq",
+          "label": "BigQuery",
+          "icon": "gcp:bigquery",
+          "parent": "sw1",
+          "x": 60,
+          "y": 80,
+          "sublabel": "DATA_READ + DATA_WRITE"
+        },
+        {
+          "id": "gcs",
+          "label": "Cloud Storage",
+          "icon": "gcp:cloud_storage",
+          "parent": "sw1",
+          "x": 60,
+          "y": 220,
+          "sublabel": "DATA_WRITE (and scoped READ)"
+        },
+        {
+          "id": "kms",
+          "label": "Cloud KMS",
+          "icon": "gcp:key_management_service",
+          "parent": "sw1",
+          "x": 60,
+          "y": 360,
+          "sublabel": "DATA_READ (crypto operations)"
+        },
+        {
+          "id": "iam_sts",
+          "label": "IAM Credentials & STS",
+          "icon": "gcp:cloud_iam",
+          "parent": "sw1",
+          "x": 60,
+          "y": 500,
+          "sublabel": "DATA_READ (impersonation & WIF)"
+        },
+        {
+          "id": "sink",
+          "label": "Log Router Sink",
+          "icon": "gcp:logging",
+          "parent": "sw2",
+          "x": 190,
+          "y": 150,
+          "sublabel": "matches cloudaudit.../data_access"
+        },
+        {
+          "id": "topic",
+          "label": "Pub/Sub Topic",
+          "icon": "gcp:cloud_pubsub",
+          "parent": "sw2",
+          "x": 190,
+          "y": 420,
+          "sublabel": "abstract-audit-logs",
+          "fill": "#FF216B"
+        },
+        {
+          "id": "03-data-access_pipe",
+          "label": "Pipelines (COLLECT)",
+          "icon": "img:../brand/abstract-logo-mark.svg",
+          "parent": "abs",
+          "x": 50,
+          "y": 110,
+          "sublabel": "streaming normalizer \u00b7 -80% drop"
+        },
+        {
+          "id": "03-data-access_det",
+          "label": "Detections (DETECT)",
+          "icon": "gcp:anomaly_detection",
+          "parent": "abs",
+          "x": 260,
+          "y": 110,
+          "sublabel": "ASTRO real-time MITRE engine",
+          "fill": "#F5C61E"
+        },
+        {
+          "id": "03-data-access_lake",
+          "label": "LakeVilla (RETAIN)",
+          "icon": "gcp:dataanalytics",
+          "parent": "abs",
+          "x": 50,
+          "y": 360,
+          "sublabel": "security data lake \u00b7 search",
+          "fill": "#2E9BF0"
+        },
+        {
+          "id": "03-data-access_sec",
+          "label": "AI-SecOps (OPERATE)",
+          "icon": "gcp:threatintelligence",
+          "parent": "abs",
+          "x": 260,
+          "y": 360,
+          "sublabel": "ASTRO triage & response",
+          "fill": "#01E69D"
+        }
+      ],
+      "edges": [
+        {
+          "from": "bq",
+          "to": "sink",
+          "tone": "amber",
+          "dashed": true
+        },
+        {
+          "from": "gcs",
+          "to": "sink",
+          "tone": "amber",
+          "dashed": true
+        },
+        {
+          "from": "kms",
+          "to": "sink",
+          "tone": "amber",
+          "dashed": true
+        },
+        {
+          "from": "iam_sts",
+          "to": "sink",
+          "tone": "amber",
+          "dashed": true
+        },
+        {
+          "from": "sink",
+          "to": "topic",
+          "label": "routes matching data_access",
+          "tone": "teal",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "topic",
+          "to": "03-data-access_pipe",
+          "label": "pull stream",
+          "tone": "brand",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        },
+        {
+          "from": "03-data-access_pipe",
+          "to": "03-data-access_det",
+          "tone": "amber",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        },
+        {
+          "from": "03-data-access_pipe",
+          "to": "03-data-access_lake",
+          "tone": "brand",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "03-data-access_det",
+          "to": "03-data-access_sec",
+          "tone": "teal",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "03-data-access_lake",
+          "to": "03-data-access_sec",
+          "tone": "muted",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        }
+      ],
+      "badges": [
+        {
+          "id": "b1",
+          "text": "SWITCH 1: google_organization_iam_audit_config (Generates logs)",
+          "x": 40,
+          "y": 80,
+          "w": 420,
+          "h": 26,
+          "tone": "amber"
+        },
+        {
+          "id": "b2",
+          "text": "SWITCH 2: log_categories = ['data_access'] in sink filter (Routes logs)",
+          "x": 490,
+          "y": 80,
+          "w": 480,
+          "h": 26,
+          "tone": "teal"
+        },
+        {
+          "id": "b3",
+          "text": "COST WARNING: NEVER set allServices for DATA_READ (100x cost explosion)",
+          "x": 40,
+          "y": 795,
+          "w": 520,
+          "h": 26,
+          "tone": "brand"
+        },
+        {
+          "id": "03-data-access_b_abs1",
+          "text": "COMPOSABLE SIEM: Decoupled ingest, in-stream detect & LakeVilla",
+          "x": 1030,
+          "y": 155,
+          "w": 420,
+          "h": 26,
+          "tone": "brand"
+        },
+        {
+          "id": "03-data-access_b_abs2",
+          "text": "DATA REDUCTION: Drops up to 80% volume before storage tier",
+          "x": 1030,
+          "y": 735,
+          "w": 420,
+          "h": 26,
+          "tone": "teal"
+        }
+      ],
+      "notes": [
+        {
+          "id": "n1",
+          "text": "THE TWO-SWITCH RULE: Data Access audit logging is OFF by default. Switch 1 generates the log records; Switch 2 routes them to the sink. Either switch alone does nothing. Auditing specific high-value services keeps costs bounded.",
+          "x": 40,
+          "y": 835,
+          "w": 1350,
+          "h": 50
+        }
+      ]
+    }
+  ]
+}

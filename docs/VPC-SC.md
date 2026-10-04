@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="../brand/abstract-logo-white.svg">
+  <img alt="Abstract Security" src="../brand/abstract-logo-black.svg" width="180">
+</picture>
+
 # VPC Service Controls
 
 If the customer runs VPC Service Controls — common in regulated environments and near
@@ -134,3 +139,12 @@ gcloud logging read \
 
 That query names the service, the method and the identity that was denied, which is the
 whole diagnosis.
+
+---
+
+## Related Documentation & Diagnostics
+
+* 🛠️ **Troubleshooting Runbooks**: [Master Troubleshooting Guide: Step 1 & Scenario 02](TROUBLESHOOTING-GUIDE.md)
+* 📘 **Master Telemetry Reference**: [Master GCP Telemetry Dataflow Reference](DATAFLOW-AND-ARCHITECTURE-REFERENCE.md)
+* 🌐 **Interactive Diagram Explorer**: [Architecture Explorer Web Viewer](architecture-explorer.html)
+* 📋 **Permissions Matrix**: [Permissions Reference Across All Scopes](PERMISSIONS.md)

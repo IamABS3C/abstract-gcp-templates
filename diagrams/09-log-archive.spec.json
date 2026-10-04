@@ -1,0 +1,347 @@
+{
+  "title": "Tamper-Evident Long-Term Log Archive Bucket",
+  "theme": "dark",
+  "grid": false,
+  "animate": true,
+  "pages": [
+    {
+      "name": "Archive Pipeline",
+      "banner": {
+        "title": "Tamper-Evident Long-Term Log Archive Bucket",
+        "subtitle": "WORM Compliance \u00b7 Object Retention Lock \u00b7 Automated Multi-Tier Storage Lifecycle",
+        "x": 40,
+        "y": 20,
+        "w": 1050,
+        "h": 56
+      },
+      "groups": [
+        {
+          "id": "org",
+          "label": "GCP Organization (Source)",
+          "kind": "plain",
+          "x": 40,
+          "y": 110,
+          "w": 380,
+          "h": 660,
+          "color": "#2E9BF0"
+        },
+        {
+          "id": "lp",
+          "label": "Logging Project Infrastructure",
+          "kind": "plain",
+          "x": 450,
+          "y": 110,
+          "w": 550,
+          "h": 660,
+          "color": "#01E69D"
+        },
+        {
+          "id": "abs",
+          "label": "Abstract SIEM Platform",
+          "kind": "plain",
+          "x": 1030,
+          "y": 110,
+          "w": 460,
+          "h": 660,
+          "color": "#FF216B"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "sink",
+          "label": "Log Router Org Sink",
+          "icon": "gcp:logging",
+          "parent": "org",
+          "x": 140,
+          "y": 160,
+          "sublabel": "parallel destination routing"
+        },
+        {
+          "id": "sa_writer",
+          "label": "Sink Writer Identity",
+          "icon": "gcp:cloud_iam",
+          "parent": "org",
+          "x": 140,
+          "y": 440,
+          "sublabel": "roles/storage.objectCreator",
+          "fill": "#01E69D"
+        },
+        {
+          "id": "t1",
+          "label": "Standard Tier (0-30d)",
+          "icon": "gcp:cloud_storage",
+          "parent": "lp",
+          "x": 80,
+          "y": 80,
+          "sublabel": "hot forensic analysis"
+        },
+        {
+          "id": "t2",
+          "label": "Nearline Tier (30-90d)",
+          "icon": "gcp:cloud_storage",
+          "parent": "lp",
+          "x": 80,
+          "y": 220,
+          "sublabel": "infrequent inspection"
+        },
+        {
+          "id": "t3",
+          "label": "Coldline Tier (90-365d)",
+          "icon": "gcp:cloud_storage",
+          "parent": "lp",
+          "x": 80,
+          "y": 360,
+          "sublabel": "cold compliance store"
+        },
+        {
+          "id": "t4",
+          "label": "Archive Tier (365d+)",
+          "icon": "gcp:cloud_storage",
+          "parent": "lp",
+          "x": 80,
+          "y": 500,
+          "sublabel": "lowest-cost long-term archive"
+        },
+        {
+          "id": "lock",
+          "label": "Bucket Lock Policy",
+          "icon": "gcp:security_key_enforcement",
+          "parent": "lp",
+          "x": 340,
+          "y": 220,
+          "sublabel": "LOCKED retention (365d) \u00b7 WORM"
+        },
+        {
+          "id": "topic",
+          "label": "Parallel Pub/Sub Topic",
+          "icon": "gcp:cloud_pubsub",
+          "parent": "lp",
+          "x": 340,
+          "y": 80,
+          "sublabel": "real-time SIEM ingestion",
+          "fill": "#FF216B"
+        },
+        {
+          "id": "09-log-archive_pipe",
+          "label": "Pipelines (COLLECT)",
+          "icon": "img:../brand/abstract-logo-mark.svg",
+          "parent": "abs",
+          "x": 50,
+          "y": 110,
+          "sublabel": "streaming normalizer \u00b7 -80% drop"
+        },
+        {
+          "id": "09-log-archive_det",
+          "label": "Detections (DETECT)",
+          "icon": "gcp:anomaly_detection",
+          "parent": "abs",
+          "x": 260,
+          "y": 110,
+          "sublabel": "ASTRO real-time MITRE engine",
+          "fill": "#F5C61E"
+        },
+        {
+          "id": "09-log-archive_lake",
+          "label": "LakeVilla (RETAIN)",
+          "icon": "gcp:dataanalytics",
+          "parent": "abs",
+          "x": 50,
+          "y": 360,
+          "sublabel": "security data lake \u00b7 search",
+          "fill": "#2E9BF0"
+        },
+        {
+          "id": "09-log-archive_sec",
+          "label": "AI-SecOps (OPERATE)",
+          "icon": "gcp:threatintelligence",
+          "parent": "abs",
+          "x": 260,
+          "y": 360,
+          "sublabel": "ASTRO triage & response",
+          "fill": "#01E69D"
+        }
+      ],
+      "edges": [
+        {
+          "from": "sink",
+          "to": "t1",
+          "tone": "teal",
+          "label": "archive sink"
+        },
+        {
+          "from": "sink",
+          "to": "topic",
+          "tone": "brand",
+          "label": "SIEM sink"
+        },
+        {
+          "from": "sa_writer",
+          "to": "t1",
+          "tone": "teal",
+          "dashed": true,
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        },
+        {
+          "from": "t1",
+          "to": "t2",
+          "tone": "muted",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "t2",
+          "to": "t3",
+          "tone": "muted",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "t3",
+          "to": "t4",
+          "tone": "muted",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "topic",
+          "to": "09-log-archive_pipe",
+          "label": "pull",
+          "tone": "brand",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        },
+        {
+          "from": "09-log-archive_pipe",
+          "to": "09-log-archive_det",
+          "tone": "amber",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        },
+        {
+          "from": "09-log-archive_pipe",
+          "to": "09-log-archive_lake",
+          "tone": "brand",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "09-log-archive_det",
+          "to": "09-log-archive_sec",
+          "tone": "teal",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "09-log-archive_lake",
+          "to": "09-log-archive_sec",
+          "tone": "muted",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        }
+      ],
+      "badges": [
+        {
+          "id": "b1",
+          "text": "DUAL PIPELINE: Real-time SIEM analytics + immutable regulatory archive",
+          "x": 50,
+          "y": 75,
+          "w": 440,
+          "h": 26,
+          "tone": "brand"
+        },
+        {
+          "id": "b2",
+          "text": "WORM COMPLIANCE: Locked retention prevents modification even by Org Owner",
+          "x": 520,
+          "y": 75,
+          "w": 460,
+          "h": 26,
+          "tone": "teal"
+        },
+        {
+          "id": "09-log-archive_b_abs1",
+          "text": "COMPOSABLE SIEM: Decoupled ingest, in-stream detect & LakeVilla",
+          "x": 1050,
+          "y": 145,
+          "w": 420,
+          "h": 26,
+          "tone": "brand"
+        },
+        {
+          "id": "09-log-archive_b_abs2",
+          "text": "DATA REDUCTION: Drops up to 80% volume before storage tier",
+          "x": 1050,
+          "y": 725,
+          "w": 420,
+          "h": 26,
+          "tone": "teal"
+        }
+      ],
+      "notes": [
+        {
+          "id": "n1",
+          "text": "WORM IMMUTABILITY: Regulatory frameworks (PCI-DSS 10.5, HIPAA, SOC 2) require tamper-evident retention. When Bucket Lock is placed in LOCKED state, the retention period cannot be shortened and no object can be deleted until retention expires.",
+          "x": 40,
+          "y": 790,
+          "w": 1380,
+          "h": 50
+        }
+      ]
+    }
+  ]
+}

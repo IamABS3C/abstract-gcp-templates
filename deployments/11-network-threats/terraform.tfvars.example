@@ -1,0 +1,50 @@
+# Network Threat Telemetry Export configuration
+#
+# Defaults route:
+#   - Firewall rule decisions (log_categories = ["firewall"])
+#   - DNS queries (log_categories = ["dns_queries"])
+#   - Cloud Armor WAF decisions (log_categories = ["load_balancer"])
+#   - Cloud IDS threat logs (platform_log_filters = ["ids.googleapis.com%2Fthreat"])
+
+sink_scope  = "organization"
+org_id      = "123456789012"        # gcloud organizations list
+log_project = "acme-security-logging" # gcloud projects list
+
+# If using folder or project scope instead:
+# sink_scope   = "folder"
+# folder_id    = "123456789012"
+#
+# sink_scope              = "project"
+# sink_project            = "my-workload-project"
+# acknowledge_pilot_scope = true
+
+# Category toggles (default: firewall, dns_queries, load_balancer)
+# log_categories = ["firewall", "dns_queries", "load_balancer"]
+
+# Cloud IDS threat logs filter (default: ids.googleapis.com%2Fthreat)
+# platform_log_filters = ["ids.googleapis.com%2Fthreat"]
+
+# Acknowledge high volume log ingestion (default: true)
+# acknowledge_high_volume = true
+
+# Custom resource naming
+# topic_name         = "abstract-network-threats"
+# subscription_name  = "abstract-network-threats-sub"
+# sink_name          = "abstract-network-threats-sink"
+# service_account_id = "abstract-net-threat-reader"
+
+# Operational settings
+# retention_days       = 7
+# ack_deadline_seconds = 60
+# enable_dead_letter   = false
+
+# Drop known noise at the sink (filtering is free)
+# exclusions = [
+#   {
+#     name        = "exclude-health-checks"
+#     description = "GCP health-check prober traffic. High volume, zero security signal."
+#     filter      = "protoPayload.requestMetadata.callerSuppliedUserAgent=~\"GoogleHC\""
+#   },
+# ]
+
+# labels = { environment = "security", managed_by = "terraform" }

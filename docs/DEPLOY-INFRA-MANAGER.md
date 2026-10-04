@@ -1,277 +1,438 @@
-# Deploying with Infrastructure Manager
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="../brand/abstract-logo-white.svg">
+  <img alt="Abstract Security" src="../brand/abstract-logo-black.svg" width="180">
+</picture>
 
-Infrastructure Manager ("Infra Manager") is Google's managed Terraform. You hand it a
-config; it runs Terraform on Cloud Build and **holds the state for you** in a
-Google-managed bucket.
+# Deploying with Google Cloud Infrastructure Manager
 
-Use it when you want the deployment auditable and repeatable without standing up your own
-Terraform backend and CI.
+Google Cloud Infrastructure Manager ("Infra Manager") is Google's fully managed service for provisioning and managing Terraform configurations. You supply a Terraform module or configuration; Infra Manager executes the plan and apply phases within **Google-managed Cloud Build workers** and **maintains the remote state automatically** in secure, Google-managed Cloud Storage buckets.
 
-> **Do not reach for Deployment Manager.** It reached **end of support on 31 March 2026**.
-> It keeps running until 30 June 2027, but Google will not answer support tickets and
-> states that continued use is at your own risk. Infra Manager is the documented successor,
-> and it is Terraform underneath — so the modules in this repo work unchanged.
+Use Infra Manager when you need auditable, API-driven, declarative deployments without configuring or operating an external CI/CD pipeline or self-managed Terraform state backend.
 
----
-
-## Prerequisites — check these before you start
-
-> ### Billing MUST be enabled on the project
->
-> **This is a hard blocker and it is not documented anywhere obvious.** Infra Manager runs
-> Terraform on **Cloud Build**, and Cloud Build cannot be enabled on a project without an
-> open billing account.
->
-> Verified 2026-08-26 against a live organization: `gcloud services enable
-> config.googleapis.com cloudbuild.googleapis.com` returned
->
-> ```
-> reason: UREQ_PROJECT_BILLING_NOT_OPEN
-> services: cloudbuild.googleapis.com, artifactregistry.googleapis.com, ...
-> ```
->
-> Neither `config.googleapis.com` nor `cloudbuild.googleapis.com` enabled. **Note the API
-> enable call reports success at the CLI level** — you have to check afterwards.
->
-> ```bash
-> gcloud billing projects describe YOUR_PROJECT --format='value(billingEnabled)'
-> gcloud billing accounts list --format='value(name,displayName,open)'
-> ```
->
-> Both must be true. A billing account that exists but is **closed** (`open: False`) fails
-> exactly the same way as none at all.
-
-**Worth knowing, because it changes which path you recommend:** the plain
-Terraform / Cloud Shell path in this repo **works fine on a project with billing
-disabled** — verified end to end, sink created and audit events delivered. Pub/Sub and
-Cloud Logging both have free tiers that cover it. So for a customer in a sandbox, a trial,
-or an unfunded project, **Cloud Shell works and Infra Manager does not.**
-
-| | Needs billing? |
-|---|---|
-| Cloud Shell button / local Terraform | **No** — verified working without it |
-| Infrastructure Manager | **Yes** — Cloud Build dependency |
-
-### The other prerequisites
-
-| | Check |
-|---|---|
-| Infra Manager API | `gcloud services list --enabled --filter=config.googleapis.com` |
-| Cloud Build API | `gcloud services list --enabled --filter=cloudbuild.googleapis.com` |
-| A service account to run as | Step 2 below |
-| `roles/logging.configWriter` **at the org** | `scripts/preflight.sh` |
+> [!WARNING]
+> **Do not use Google Cloud Deployment Manager.**
+> Deployment Manager reached **end of support on 31 March 2026** and will be permanently shut down. Infrastructure Manager is Google's modern, supported successor. Because Infra Manager runs native HashiCorp Terraform underneath, all templates in this repository work without modification.
 
 ---
 
-## The constraint that shapes everything
+## Architectural Flow
 
-**An Infra Manager deployment is a project-scoped resource. Our sink is an org-scoped one.**
+Infra Manager operates as a project-level orchestrator that drives Terraform execution inside isolated Cloud Build runners. For org-level and billing-level sinks, the deployment's service account acts across distinct GCP administrative boundaries.
 
-So the service account running the deployment needs grants *above* the project the
-deployment lives in. This is the step that gets missed, and it fails at apply — after
-Terraform has already created the topic and subscription.
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│                     Developer Machine / CI/CD Automation Pipeline                       │
+│                                                                                         │
+│   gcloud infra-manager deployments apply projects/.../deployments/abstract-sink         │
+└────────────────────────────────────────────┬────────────────────────────────────────────┘
+                                             │ API Call (config.googleapis.com)
+                                             ▼
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│                       Dedicated Logging Project (log_project)                           │
+│                                                                                         │
+│   ┌─────────────────────────────────────────────────────────────────────────────────┐   │
+│   │                 Infrastructure Manager Engine & Cloud Build Runner              │   │
+│   │                                                                                 │   │
+│   │   Service Account: infra-manager-abstract@log_project.iam.gserviceaccount.com   │   │
+│   │   Terraform Engine (>= 1.5)  ───>  State Storage (Google-Managed Bucket)        │   │
+│   └────────────────────────┬──────────────────────────┬─────────────────────────────┘   │
+│                            │                          │                                 │
+│                            │ Provisions Topics/Subs   │ Bound to Sinks                  │
+│                            ▼                          ▼                                 │
+│   ┌─────────────────────────────────────────────────────────────────────────────────┐   │
+│   │ Pub/Sub Topic: abstract-audit-logs  ───>  Subscription: abstract-audit-logs-sub │   │
+│   └───────────────────────────────────────────────────────────────────────┬─────────┘   │
+└───────────────────────────────────────────────────────────────────────────┼─────────────┘
+                                 │                                          │
+       Organization Scope        │ Billing Scope                            │ Authenticated Pull
+       (roles/logging.configWriter) (roles/logging.configWriter)            │
+                                 │                                          ▼
+┌────────────────────────────────┴──────────┐  ┌──────────────────────────────────────────┐
+│   Google Cloud Organization               │  │   Cloud Billing Account                  │
+│                                           │  │                                          │
+│   • 02-audit-logs-organization (Org Sink) │  │   • 10-billing-account (Billing Sink)    │
+│   • 03-data-access (IAM Audit Config)     │  └──────────────────────────────────────────┘
+│   • 11-network-threats (Network Sink)     │                               ▲
+└───────────────────────────────────────────┘                               │
+                                                                            │
+┌───────────────────────────────────────────────────────────────────────────┴─────────────┐
+│                                Abstract Security Platform                               │
+│                                                                                         │
+│   Streams high-fidelity GCP telemetry into Abstract SIEM via Cloud Pub/Sub (#FF216B)     │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+```
 
-Run [`scripts/preflight.sh`](../scripts/preflight.sh) first.
+```mermaid
+flowchart TD
+    subgraph Client["Deployment Trigger"]
+        CLI["gcloud infra-manager deployments apply"]
+    end
+
+    subgraph Project["Dedicated Logging Project (log_project)"]
+        IM["Infrastructure Manager API<br/>(config.googleapis.com)"]
+        CB["Cloud Build Worker Runner<br/>(Runs Terraform)"]
+        State[("Google-Managed<br/>State Bucket")]
+        SA["Service Account<br/>infra-manager-abstract"]
+        Topic["Pub/Sub Topic<br/>(e.g., abstract-audit-logs)"]
+        Sub["Pub/Sub Pull Subscription<br/>(e.g., abstract-audit-logs-sub)"]
+    end
+
+    subgraph OrgScope["Organization Resource Scope"]
+        OrgSink["02-audit-logs-organization<br/>(Aggregated Org Sink)"]
+        OrgAudit["03-data-access<br/>(Org IAM Audit Config)"]
+        NetSink["11-network-threats<br/>(Threat Telemetry Sink)"]
+    end
+
+    subgraph BillingScope["Billing Account Scope"]
+        BillingSink["10-billing-account<br/>(Billing Account Sink)"]
+    end
+
+    subgraph Abstract["Abstract Security Platform"]
+        AbstractSIEM["Abstract Security Data Engine"]
+    end
+
+    CLI --> IM
+    IM --> CB
+    CB <--> State
+    SA -.->|Executes as| CB
+
+    CB -->|Creates| Topic
+    Topic --> Sub
+    Sub --> AbstractSIEM
+
+    CB -->|Requires roles/logging.configWriter| OrgSink
+    CB -->|Requires roles/resourcemanager.organizationAdmin| OrgAudit
+    CB -->|Requires roles/logging.configWriter| NetSink
+    CB -->|Requires roles/logging.configWriter on Billing| BillingSink
+
+    OrgSink --> Topic
+    NetSink --> Topic
+    BillingSink --> Topic
+
+    style Abstract fill:#FF216B15,stroke:#FF216B,stroke-width:2px
+    style AbstractSIEM fill:#FF216B,color:#ffffff,stroke:#FF216B,stroke-width:2px
+    classDef gcpBox fill:#f8f9fa,stroke:#4285F4,stroke-width:1.5px;
+    class Project,OrgScope,BillingScope gcpBox;
+```
 
 ---
 
-## Step 1 — Enable the APIs
+## Critical Prerequisites
 
+### Billing MUST Be Enabled on the Logging Project
+Infra Manager executes Terraform recipes on **Cloud Build**. Cloud Build cannot run in any project where billing is disabled. If you attempt to enable the required APIs on an unfunded project:
+```
+reason: UREQ_PROJECT_BILLING_NOT_OPEN
+services: cloudbuild.googleapis.com, artifactregistry.googleapis.com
+```
+
+Confirm that billing is active and open before proceeding:
 ```bash
-export LOG_PROJECT=acme-security-logging
-export ORG_ID=123456789012
-export LOCATION=us-central1        # a standard GCP region
+gcloud billing projects describe "$LOG_PROJECT" --format='value(billingEnabled)'
+gcloud billing accounts list --format='table(name,displayName,open)'
+```
 
-# NOTE: `gcloud infra-manager locations list` does NOT exist — an earlier draft of
-# this document said to run it. Use a standard region; check the Infra Manager
-# locations page if you need the authoritative list.
-export SA=infra-manager-abstract
+> [!NOTE]
+> For sandbox or trial environments without an active billing account, use the **Open in Cloud Shell** or local OpenTofu/Terraform workflows instead. Cloud Logging and Pub/Sub operate within generous free tiers and do not strictly require Cloud Build.
+
+### Prerequisite APIs
+Enable the required APIs in the dedicated logging project:
+```bash
+export LOG_PROJECT="acme-security-logging"
+export ORG_ID="123456789012"
+export LOCATION="us-central1"
+export SA_NAME="infra-manager-abstract"
 
 gcloud config set project "$LOG_PROJECT"
+
 gcloud services enable \
   config.googleapis.com \
   cloudbuild.googleapis.com \
   pubsub.googleapis.com \
-  logging.googleapis.com
+  logging.googleapis.com \
+  iam.googleapis.com \
+  serviceusage.googleapis.com
 ```
 
-`config.googleapis.com` **is** the Infrastructure Manager API — the naming is not obvious,
-and it is why the agent role is called `roles/config.agent`.
+---
 
-## Step 2 — Create the service account
+## Unified Service Account Setup
 
+Infra Manager executes actions under the identity of a dedicated service account. Because our deployments manage resources across **Project**, **Organization**, and **Billing Account** scopes, the service account must receive permissions at the corresponding levels.
+
+### 1. Create the Service Account
 ```bash
-gcloud iam service-accounts create "$SA" \
-  --display-name="Infra Manager — Abstract log export"
+gcloud iam service-accounts create "$SA_NAME" \
+  --display-name="Infrastructure Manager - Abstract Deployments" \
+  --project="$LOG_PROJECT"
 
-export SA_EMAIL="$SA@$LOG_PROJECT.iam.gserviceaccount.com"
+export SA_EMAIL="$SA_NAME@$LOG_PROJECT.iam.gserviceaccount.com"
 ```
 
-## Step 3 — Grant it, at the project
-
+### 2. Grant Project-Level Permissions
+The service account needs permissions to orchestrate builds and create Pub/Sub resources in `log_project`:
 ```bash
-# Infra Manager itself
+# Infrastructure Manager Agent
 gcloud projects add-iam-policy-binding "$LOG_PROJECT" \
-  --member="serviceAccount:$SA_EMAIL" --role="roles/config.agent"
+  --member="serviceAccount:$SA_EMAIL" \
+  --role="roles/config.agent"
 
-# What the module creates in this project
+# Pub/Sub Administration
 gcloud projects add-iam-policy-binding "$LOG_PROJECT" \
-  --member="serviceAccount:$SA_EMAIL" --role="roles/pubsub.admin"
+  --member="serviceAccount:$SA_EMAIL" \
+  --role="roles/pubsub.admin"
+
+# Service Account & Key Management
 gcloud projects add-iam-policy-binding "$LOG_PROJECT" \
-  --member="serviceAccount:$SA_EMAIL" --role="roles/iam.serviceAccountAdmin"
+  --member="serviceAccount:$SA_EMAIL" \
+  --role="roles/iam.serviceAccountAdmin"
+
+# API Enablement
+gcloud projects add-iam-policy-binding "$LOG_PROJECT" \
+  --member="serviceAccount:$SA_EMAIL" \
+  --role="roles/serviceusage.serviceUsageAdmin"
 ```
 
-## Step 4 — Grant it at the ORGANIZATION
-
-**This is the step that gets missed.**
-
+### 3. Grant Organization-Level Permissions
+To create organization aggregated log sinks and configure organization audit logging:
 ```bash
+# Required for 02-audit-logs-organization and 11-network-threats
 gcloud organizations add-iam-policy-binding "$ORG_ID" \
+  --member="serviceAccount:$SA_EMAIL" \
+  --role="roles/logging.configWriter"
+
+# Required ONLY if deploying 03-data-access (authoritative audit configuration)
+gcloud organizations add-iam-policy-binding "$ORG_ID" \
+  --member="serviceAccount:$SA_EMAIL" \
+  --role="roles/resourcemanager.organizationAdmin"
+```
+
+### 4. Grant Billing Account Permissions (For `10-billing-account`)
+Because billing accounts sit outside the organization resource hierarchy, `roles/logging.configWriter` must be bound directly to the billing account:
+```bash
+export BILLING_ACCOUNT_ID="012345-567890-ABCDEF"
+
+gcloud billing accounts add-iam-policy-binding "$BILLING_ACCOUNT_ID" \
   --member="serviceAccount:$SA_EMAIL" \
   --role="roles/logging.configWriter"
 ```
 
-Add `roles/resourcemanager.organizationAdmin` **only** if you are also deploying
-`03-data-access`, which changes the org IAM policy.
-
-## Step 5 — Let yourself act as the service account
-
+### 5. Allow Yourself to Impersonate the Service Account
 ```bash
 gcloud iam service-accounts add-iam-policy-binding "$SA_EMAIL" \
   --member="user:$(gcloud config get-value account)" \
-  --role="roles/iam.serviceAccountUser"
+  --role="roles/iam.serviceAccountUser" \
+  --project="$LOG_PROJECT"
 ```
 
-### If the service account lives in a different project from the resources
+---
 
-Google documents two extra grants for cross-project use:
+## Important: List Variables & `--input-values` Limitation
 
-- the Infra Manager **service agent** needs `roles/iam.serviceAccountUser`
-- the **Cloud Build service agent** needs `roles/iam.serviceAccountTokenCreator`
-- the org policy `iam.disableCrossProjectServiceAccountUsage` must not be enforced
+> [!IMPORTANT]
+> The `gcloud infra-manager` CLI flag `--input-values` **only supports scalar strings and numbers**. It cannot pass lists, tuples, or complex maps.
+>
+> If your deployment specifies list variables (such as `log_categories`, `data_access_services`, `services`, or `exclusions`), **commit a `terraform.tfvars` file directly into the deployment directory**. Terraform automatically loads `terraform.tfvars` from the module root, and `--input-values` safely overrides scalar variables on top.
 
-Simplest avoidance: put the service account in the logging project, as above.
+---
 
-## Step 6 — Preview (this is `terraform plan`)
+## Deployment Recipes
+
+### 1. Deploying `deployments/01-logging-project` (Logging Project Bootstrap)
+
+Used to provision a greenfield logging project or configure APIs on an existing project.
 
 ```bash
+# Preview
 gcloud infra-manager previews create \
-  "projects/$LOG_PROJECT/locations/$LOCATION/previews/abstract-preview" \
+  "projects/$LOG_PROJECT/locations/$LOCATION/previews/preview-01-bootstrap" \
   --service-account="projects/$LOG_PROJECT/serviceAccounts/$SA_EMAIL" \
-  --local-source="./deployments/02-audit-logs-organization" \
-  --input-values="org_id=$ORG_ID,log_project=$LOG_PROJECT"
-```
+  --local-source="./deployments/01-logging-project" \
+  --input-values="project_id=$LOG_PROJECT,project_name=Abstract-Logging-Project"
 
-**Read it.** Confirm the sink is org-scoped with `include_children = true`, and that
-`effective_filter` is what you expect. That filter decides both coverage and bill.
-
-## Step 7 — Apply
-
-```bash
+# Apply
 gcloud infra-manager deployments apply \
-  "projects/$LOG_PROJECT/locations/$LOCATION/deployments/abstract-log-export" \
+  "projects/$LOG_PROJECT/locations/$LOCATION/deployments/abstract-01-bootstrap" \
+  --service-account="projects/$LOG_PROJECT/serviceAccounts/$SA_EMAIL" \
+  --local-source="./deployments/01-logging-project" \
+  --input-values="project_id=$LOG_PROJECT,project_name=Abstract-Logging-Project"
+```
+
+---
+
+### 2. Deploying `deployments/02-audit-logs-organization` (Org-Wide Audit Logs)
+
+Exports Cloud Audit Logs from every project and folder across the entire GCP organization, including native Google Workspace audit events (when Workspace sharing is active).
+
+#### Step A — Create `terraform.tfvars` for list variables
+```bash
+cat > deployments/02-audit-logs-organization/terraform.tfvars <<EOF
+log_categories       = ["admin_activity", "system_event", "policy_denied", "identity_access"]
+data_access_services = ["bigquery.googleapis.com", "storage.googleapis.com", "cloudkms.googleapis.com"]
+EOF
+```
+
+#### Step B — Preview and Apply
+```bash
+# Preview
+gcloud infra-manager previews create \
+  "projects/$LOG_PROJECT/locations/$LOCATION/previews/preview-02-org-audit" \
+  --service-account="projects/$LOG_PROJECT/serviceAccounts/$SA_EMAIL" \
+  --local-source="./deployments/02-audit-logs-organization" \
+  --input-values="org_id=$ORG_ID,log_project=$LOG_PROJECT"
+
+# Apply
+gcloud infra-manager deployments apply \
+  "projects/$LOG_PROJECT/locations/$LOCATION/deployments/abstract-02-org-audit" \
   --service-account="projects/$LOG_PROJECT/serviceAccounts/$SA_EMAIL" \
   --local-source="./deployments/02-audit-logs-organization" \
   --input-values="org_id=$ORG_ID,log_project=$LOG_PROJECT"
 ```
 
-## Step 8 — Read the outputs
-
+#### Step C — Inspect Outputs
 ```bash
 gcloud infra-manager deployments describe \
-  "projects/$LOG_PROJECT/locations/$LOCATION/deployments/abstract-log-export"
-
-gcloud infra-manager revisions list \
-  --deployment="projects/$LOG_PROJECT/locations/$LOCATION/deployments/abstract-log-export"
+  "projects/$LOG_PROJECT/locations/$LOCATION/deployments/abstract-02-org-audit"
 ```
-
-`abstract_onboarding` carries the `project_id` / `subscription_id` pair for the Abstract
-integration. `sink_writer_identity` confirms the publisher binding landed.
 
 ---
 
-## List variables: `--input-values` cannot carry them
+### 3. Deploying `deployments/03-data-access` (Data Access Audit Policy)
 
-**`--input-values` accepts scalars only.** Google's reference: *"It only accepts (key,
-value) pairs where value is a scalar value."* There is no `--inputs-file` flag.
+Enables Data Access audit logging (DATA_WRITE and ADMIN_READ) for high-value services across the organization.
 
-So `log_categories`, `data_access_services`, `workspace_app_groups` and `exclusions`
-**cannot** be passed on the command line.
+> [!CAUTION]
+> This deployment manages the authoritative `google_organization_iam_audit_config`. It is kept in a dedicated deployment state so that destroying a collector sink can **never** accidentally strip organization audit policies.
 
-**Commit a `terraform.tfvars` into the deployment directory instead.** Terraform
-auto-loads it from the working directory, and `--input-values` still overrides scalars on
-top. Verified working against these modules.
-
-```hcl
-# deployments/02-audit-logs-organization/terraform.tfvars
-log_categories       = ["admin_activity", "system_event", "firewall", "dns_queries"]
-data_access_services = ["bigquery.googleapis.com", "storage.googleapis.com"]
+#### Step A — Create `terraform.tfvars`
+```bash
+cat > deployments/03-data-access/terraform.tfvars <<EOF
+services              = ["bigquery.googleapis.com", "storage.googleapis.com", "cloudkms.googleapis.com"]
+log_types             = ["ADMIN_READ", "DATA_WRITE"]
+acknowledge_data_read = false
+EOF
 ```
+
+#### Step B — Preview and Apply
+```bash
+# Preview
+gcloud infra-manager previews create \
+  "projects/$LOG_PROJECT/locations/$LOCATION/previews/preview-03-data-access" \
+  --service-account="projects/$LOG_PROJECT/serviceAccounts/$SA_EMAIL" \
+  --local-source="./deployments/03-data-access" \
+  --input-values="scope=organization,org_id=$ORG_ID"
+
+# Apply
+gcloud infra-manager deployments apply \
+  "projects/$LOG_PROJECT/locations/$LOCATION/deployments/abstract-03-data-access" \
+  --service-account="projects/$LOG_PROJECT/serviceAccounts/$SA_EMAIL" \
+  --local-source="./deployments/03-data-access" \
+  --input-values="scope=organization,org_id=$ORG_ID"
+```
+
+---
+
+### 4. Deploying `deployments/10-billing-account` (Billing Account Audit Export)
+
+Billing accounts sit outside the resource hierarchy. This creates a dedicated billing sink routing `admin_activity` and `system_event` logs directly to Pub/Sub.
 
 ```bash
-gcloud infra-manager deployments apply ... \
-  --input-values="org_id=$ORG_ID,log_project=$LOG_PROJECT"
-```
+# Preview
+gcloud infra-manager previews create \
+  "projects/$LOG_PROJECT/locations/$LOCATION/previews/preview-10-billing" \
+  --service-account="projects/$LOG_PROJECT/serviceAccounts/$SA_EMAIL" \
+  --local-source="./deployments/10-billing-account" \
+  --input-values="billing_account_id=$BILLING_ACCOUNT_ID,log_project=$LOG_PROJECT"
 
-Note the repo `.gitignore` excludes `terraform.tfvars` by default — deliberately, so
-nobody commits a customer's values by accident. For a git-source deployment you must
-either commit it intentionally (`git add -f`) or keep the defaults.
+# Apply
+gcloud infra-manager deployments apply \
+  "projects/$LOG_PROJECT/locations/$LOCATION/deployments/abstract-10-billing" \
+  --service-account="projects/$LOG_PROJECT/serviceAccounts/$SA_EMAIL" \
+  --local-source="./deployments/10-billing-account" \
+  --input-values="billing_account_id=$BILLING_ACCOUNT_ID,log_project=$LOG_PROJECT"
+```
 
 ---
 
-## Deploying from git instead of local
+### 5. Deploying `deployments/11-network-threats` (Unified Threat Telemetry)
 
-`--local-source` uploads whatever is on your laptop, which is a one-shot. Point at the
-repo to make it a controlled pipeline:
+Exports Cloud Armor WAF decisions, Cloud IDS threat detections, VPC DNS queries, and Firewall rule evaluations in a single aggregated pipeline.
+
+#### Step A — Create `terraform.tfvars`
+```bash
+cat > deployments/11-network-threats/terraform.tfvars <<EOF
+log_categories          = ["load_balancer", "dns_queries", "firewall"]
+platform_log_filters    = ["ids.googleapis.com%2Fthreat"]
+acknowledge_high_volume = false
+EOF
+```
+
+#### Step B — Preview and Apply
+```bash
+# Preview
+gcloud infra-manager previews create \
+  "projects/$LOG_PROJECT/locations/$LOCATION/previews/preview-11-network" \
+  --service-account="projects/$LOG_PROJECT/serviceAccounts/$SA_EMAIL" \
+  --local-source="./deployments/11-network-threats" \
+  --input-values="org_id=$ORG_ID,log_project=$LOG_PROJECT,sink_scope=organization"
+
+# Apply
+gcloud infra-manager deployments apply \
+  "projects/$LOG_PROJECT/locations/$LOCATION/deployments/abstract-11-network" \
+  --service-account="projects/$LOG_PROJECT/serviceAccounts/$SA_EMAIL" \
+  --local-source="./deployments/11-network-threats" \
+  --input-values="org_id=$ORG_ID,log_project=$LOG_PROJECT,sink_scope=organization"
+```
+
+---
+
+## Deploying from Git Repositories
+
+Using `--local-source` uploads local filesystem content. For production pipelines, configure Infra Manager to fetch directly from your version-controlled Git repository:
 
 ```bash
 gcloud infra-manager deployments apply \
-  "projects/$LOG_PROJECT/locations/$LOCATION/deployments/abstract-log-export" \
+  "projects/$LOG_PROJECT/locations/$LOCATION/deployments/abstract-02-org-audit" \
   --service-account="projects/$LOG_PROJECT/serviceAccounts/$SA_EMAIL" \
   --git-source-repo="https://github.com/IamABS3C/abstract-gcp-templates" \
   --git-source-directory="deployments/02-audit-logs-organization" \
-  --git-source-ref="<tag>" \
+  --git-source-ref="v1.2.0" \
   --input-values="org_id=$ORG_ID,log_project=$LOG_PROJECT"
 ```
 
-> **Pin `--git-source-ref` to a TAG, not a branch.** With a branch, the deployment's
-> content changes whenever somebody merges — and the next apply silently deploys code
-> nobody reviewed against that environment.
-
-The repo layout is designed for this: `--git-source-directory` points at a deployment
-root, and the local `../../modules/...` references resolve inside the clone.
+> [!TIP]
+> Always pin `--git-source-ref` to an immutable **release tag** rather than a mutable branch. This guarantees that applies are reproducible and prevents accidental rollout of unapproved changes.
 
 ---
 
-## Pinning the Terraform version
+## Useful Flags & Operational Commands
 
-```bash
---tf-version-constraint="=1.5.7"
-```
-
-Infra Manager runs **Terraform**, not OpenTofu. These modules are validated under OpenTofu
-locally and declare `required_version = ">= 1.5"`. Treat the first preview as the real
-compatibility test.
-
----
-
-## Other flags worth knowing
-
-| Flag | Use |
+| Command / Flag | Purpose |
 |---|---|
-| `--labels` | Labels on the deployment. Existing values are overwritten |
-| `--worker-pool` | Run the Cloud Build job in a private pool — needed if your build must sit inside a VPC |
-| `--tf-version-constraint` | Pin Terraform |
+| `--tf-version-constraint=">=1.5.0"` | Pin the Terraform binary version executed by Cloud Build |
+| `--worker-pool` | Execute builds inside a private Cloud Build worker pool (required for VPC-SC) |
+| `gcloud infra-manager revisions list` | View full history of revisions and state snapshots |
+| `gcloud infra-manager deployments export-statefile` | Download the current Terraform `.tfstate` JSON file for inspection |
 
 ---
 
-## Teardown
+## Teardown and Cleanup
+
+To safely tear down an Infra Manager deployment and destroy its managed infrastructure:
 
 ```bash
 gcloud infra-manager deployments delete \
-  "projects/$LOG_PROJECT/locations/$LOCATION/deployments/abstract-log-export"
+  "projects/$LOG_PROJECT/locations/$LOCATION/deployments/abstract-02-org-audit"
 ```
 
-This destroys the resources it created. It **cannot** touch `03-data-access`, which is a
-separate deployment with separate state — that separation exists precisely so that
-deleting a collector can never strip an organization's Data Access audit logging.
+> [!NOTE]
+> Deleting `abstract-02-org-audit` or `abstract-11-network` only destroys the logging sinks and Pub/Sub resources managed by that specific deployment. It **never modifies** your organization's Data Access audit configuration (`abstract-03-data-access`), guaranteeing state safety and isolation.
+
+---
+
+## Related Documentation & Diagnostics
+
+* 🛠️ **Troubleshooting Runbooks**: [Master Troubleshooting Guide](TROUBLESHOOTING-GUIDE.md)
+* 📘 **Master Telemetry Reference**: [Master GCP Telemetry Dataflow Reference](DATAFLOW-AND-ARCHITECTURE-REFERENCE.md)
+* 📋 **Permissions Matrix**: [Permissions Reference Across All Scopes](PERMISSIONS.md)
+* 🌐 **Interactive Diagram Explorer**: [Architecture Explorer Web UI](architecture-explorer.html)

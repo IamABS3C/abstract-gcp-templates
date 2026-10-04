@@ -1,0 +1,186 @@
+{
+  "title": "Asset and IAM change feeds to Abstract",
+  "theme": "dark",
+  "animate": true,
+  "pages": [
+    {
+      "name": "Asset Feeds",
+      "banner": {
+        "title": "Cloud Asset Inventory Real-Time Change & IAM Feed",
+        "subtitle": "Configuration drift tracking \u00b7 IAM policy diffs \u00b7 continuous resource governance",
+        "w": 1000
+      },
+      "groups": [
+        {
+          "id": "cai",
+          "label": "Cloud Asset Inventory (Org Level)",
+          "x": 50,
+          "y": 80,
+          "w": 460,
+          "h": 660,
+          "color": "#2e9bf0"
+        },
+        {
+          "id": "lp",
+          "label": "Dedicated Logging Project",
+          "x": 550,
+          "y": 80,
+          "w": 460,
+          "h": 660,
+          "color": "#01e69d"
+        },
+        {
+          "id": "abs",
+          "label": "Abstract Security Platform",
+          "x": 1050,
+          "y": 80,
+          "w": 360,
+          "h": 660,
+          "color": "#FF216B"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "res_f",
+          "label": "Resource Drift Feed",
+          "sublabel": "RESOURCE content type",
+          "icon": "gcp:folders",
+          "parent": "cai",
+          "x": 70,
+          "y": 120
+        },
+        {
+          "id": "iam_f",
+          "label": "IAM Policy Diff Feed",
+          "sublabel": "IAM_POLICY content type",
+          "icon": "gcp:cloud_iam",
+          "parent": "cai",
+          "x": 70,
+          "y": 340
+        },
+        {
+          "id": "feed_pub",
+          "label": "Asset Feed Engine",
+          "sublabel": "google_cloud_asset_organization_feed",
+          "icon": "gcp:cloud_pubsub",
+          "parent": "cai",
+          "x": 300,
+          "y": 230
+        },
+        {
+          "id": "cai_sa",
+          "label": "Asset Service Agent",
+          "sublabel": "service-$NUM@gcp-sa-cloudasset...",
+          "icon": "gcp:cloud_iam",
+          "fill": "#01e69d",
+          "parent": "lp",
+          "x": 80,
+          "y": 140
+        },
+        {
+          "id": "topic",
+          "label": "Pub/Sub Topic",
+          "sublabel": "abstract-asset-inventory",
+          "icon": "gcp:cloud_pubsub",
+          "fill": "#FF216B",
+          "parent": "lp",
+          "x": 280,
+          "y": 230
+        },
+        {
+          "id": "sub",
+          "label": "Pull Subscription",
+          "sublabel": "abstract-asset-inventory-sub",
+          "icon": "gcp:cloud_pubsub",
+          "fill": "#FF216B",
+          "parent": "lp",
+          "x": 280,
+          "y": 440
+        },
+        {
+          "id": "plat",
+          "label": "Abstract SIEM",
+          "sublabel": "parsers/cloud-asset-inventory.yml",
+          "icon": "img:brand/abstract-logo-mark.svg",
+          "parent": "abs",
+          "x": 130,
+          "y": 320
+        }
+      ],
+      "edges": [
+        {
+          "from": "res_f",
+          "to": "feed_pub",
+          "tone": "muted"
+        },
+        {
+          "from": "iam_f",
+          "to": "feed_pub",
+          "tone": "muted"
+        },
+        {
+          "from": "feed_pub",
+          "to": "topic",
+          "label": "publishes real-time diffs",
+          "tone": "brand"
+        },
+        {
+          "from": "cai_sa",
+          "to": "topic",
+          "label": "roles/pubsub.publisher",
+          "tone": "teal",
+          "dashed": true
+        },
+        {
+          "from": "topic",
+          "to": "sub",
+          "tone": "brand",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "sub",
+          "to": "plat",
+          "label": "pull",
+          "tone": "brand"
+        }
+      ],
+      "badges": [
+        {
+          "id": "b1",
+          "text": "AUDIT LOGS VS ASSET FEEDS: Logs show who called; feeds show resulting state",
+          "x": 70,
+          "y": 100,
+          "w": 430,
+          "h": 26,
+          "tone": "teal"
+        },
+        {
+          "id": "b2",
+          "text": "ORGANIZATION PERMISSION: Deployer requires roles/cloudasset.owner at Org scope",
+          "x": 570,
+          "y": 100,
+          "w": 430,
+          "h": 26,
+          "tone": "amber"
+        }
+      ],
+      "notes": [
+        {
+          "id": "n1",
+          "text": "ASSET AGENT IDENTITY: Cloud Asset Inventory publishes using the service agent of the project where the feed is registered: service-<PROJECT_NUM>@gcp-sa-cloudasset.iam.gserviceaccount.com. The template automatically grants roles/pubsub.publisher on the topic.",
+          "x": 50,
+          "y": 760,
+          "w": 960,
+          "h": 50
+        }
+      ]
+    }
+  ]
+}

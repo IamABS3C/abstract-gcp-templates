@@ -1,15 +1,29 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="../brand/abstract-logo-white.svg">
+  <img alt="Abstract Security" src="../brand/abstract-logo-black.svg" width="180">
+</picture>
+
 # Filters — inclusion, exclusion, and what each one costs
+
+<p align="center">
+  <img src="../images/diagrams/03-log-router-boundary.png" alt="Google Cloud Log Router Architectural Boundary" width="100%">
+</p>
 
 The filter decides **both your coverage and your bill**. It is the highest-leverage thing
 in this repo and the easiest to get quietly wrong.
 
+> [!CAUTION]
+> ### Deep Troubleshooting Callout: The Silent Drop Trap in Filter Logic
 > **Routing is evaluated at WRITE TIME. There is no backfill.**
 >
 > A filter that was too narrow leaves a **permanent** hole — the logs were never routed,
 > they are not queued anywhere, and no later change recovers them. One that was too wide
 > costs money you can stop spending at any time.
 >
+> **The Two-Switch Trap**: Enabling the `data_access_all` sink filter without enabling the corresponding `auditConfigs` in the Organization IAM policy routes **zero events with no error**. The sink appears healthy, but delivers nothing. Always verify both switches.
+>
 > The asymmetry is the whole strategy: **start broad, measure for 7 days, then tighten.**
+> See [Troubleshooting Scenario 03](TROUBLESHOOTING-GUIDE.md#scenario-03-data-access-logs-bigquery--storage).
 
 ---
 
@@ -215,3 +229,28 @@ Before narrowing:
 4. Confirm nobody is relying on what you are about to drop
 
 Then apply. There is no undo.
+
+---
+
+## Quota Management & High-Volume Tiers
+
+> [!WARNING]
+> ### Deep Troubleshooting Callout: Volume Classes & Quota Caps
+> High-volume log categories (`vpc_flows`, `gke_container_logs`, `data_access_all`) can saturate regional Pub/Sub publish limits (`100 MB/s` per region default).
+>
+> 1. **Check Log Volume Breakdown by Service**:
+>    ```bash
+>    gcloud logging read 'timestamp >= "2026-10-01T00:00:00Z"' \
+>      --project="$LOG_PROJECT" --format="value(protoPayload.serviceName)" \
+>      | sort | uniq -c | sort -rn | head -10
+>    ```
+> 2. **Isolate Extreme Streams**: If network or container logs are required, route them to a dedicated sink and topic (`11-network-threats`) to keep control plane audit logs isolated and performant.
+
+---
+
+## Related Documentation & Visual Models
+
+* 📘 **Master Telemetry Reference**: [Master GCP Telemetry Dataflow Reference](DATAFLOW-AND-ARCHITECTURE-REFERENCE.md)
+* 🛠️ **Troubleshooting Runbooks**: [Master Troubleshooting Guide](TROUBLESHOOTING-GUIDE.md)
+* 🌐 **Interactive Diagram Viewer**: [Architecture Explorer Web UI](architecture-explorer.html)
+* 🎨 **Interactive Draw.io Launcher**: `./scripts/open-diagram.sh 03-log-router-boundary`

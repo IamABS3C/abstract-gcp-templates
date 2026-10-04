@@ -1,0 +1,323 @@
+{
+  "title": "Security Command Center findings to Abstract",
+  "theme": "dark",
+  "grid": false,
+  "animate": true,
+  "pages": [
+    {
+      "name": "SCC Finding Streaming",
+      "banner": {
+        "title": "Security Command Center (SCC) Real-Time Finding Streaming",
+        "subtitle": "Real-time vulnerability posture \u00b7 Event Threat Detection (ETD) \u00b7 NotificationConfig to Pub/Sub",
+        "x": 40,
+        "y": 20,
+        "w": 1050,
+        "h": 56
+      },
+      "groups": [
+        {
+          "id": "scc",
+          "label": "Security Command Center Engine",
+          "kind": "plain",
+          "x": 40,
+          "y": 110,
+          "w": 460,
+          "h": 660,
+          "color": "#2E9BF0"
+        },
+        {
+          "id": "lp",
+          "label": "Dedicated Logging Project",
+          "kind": "plain",
+          "x": 530,
+          "y": 110,
+          "w": 470,
+          "h": 660,
+          "color": "#01E69D"
+        },
+        {
+          "id": "abs",
+          "label": "Abstract Security Platform",
+          "kind": "plain",
+          "x": 1030,
+          "y": 110,
+          "w": 460,
+          "h": 660,
+          "color": "#FF216B"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "etd",
+          "label": "Event Threat Detection",
+          "icon": "gcp:securitycommandcenter",
+          "parent": "scc",
+          "x": 60,
+          "y": 80,
+          "sublabel": "lateral movement, malware, mining"
+        },
+        {
+          "id": "sha",
+          "label": "VM & Container Threats",
+          "icon": "gcp:securitycommandcenter",
+          "parent": "scc",
+          "x": 60,
+          "y": 270,
+          "sublabel": "kernel rootkits, memory injection"
+        },
+        {
+          "id": "vuln",
+          "label": "Vulnerability Assessment",
+          "icon": "gcp:securitycommandcenter",
+          "parent": "scc",
+          "x": 60,
+          "y": 460,
+          "sublabel": "CVEs, misconfigurations, CIS"
+        },
+        {
+          "id": "notif",
+          "label": "SCC NotificationConfig",
+          "icon": "gcp:securitycommandcenter",
+          "parent": "scc",
+          "x": 300,
+          "y": 270,
+          "sublabel": "google_scc_notification_config"
+        },
+        {
+          "id": "sa",
+          "label": "SCC Service Agent",
+          "icon": "gcp:cloud_iam",
+          "parent": "lp",
+          "x": 60,
+          "y": 140,
+          "sublabel": "service-org-$ORG_ID@gcp-sa-scc...",
+          "fill": "#01E69D"
+        },
+        {
+          "id": "topic",
+          "label": "Pub/Sub Topic",
+          "icon": "gcp:cloud_pubsub",
+          "parent": "lp",
+          "x": 280,
+          "y": 140,
+          "sublabel": "abstract-scc-findings",
+          "fill": "#FF216B"
+        },
+        {
+          "id": "sub",
+          "label": "Pull Subscription",
+          "icon": "gcp:cloud_pubsub",
+          "parent": "lp",
+          "x": 280,
+          "y": 400,
+          "sublabel": "abstract-scc-findings-sub",
+          "fill": "#FF216B"
+        },
+        {
+          "id": "06-scc-findings_pipe",
+          "label": "Pipelines (COLLECT)",
+          "icon": "img:../brand/abstract-logo-mark.svg",
+          "parent": "abs",
+          "x": 50,
+          "y": 110,
+          "sublabel": "streaming normalizer \u00b7 -80% drop"
+        },
+        {
+          "id": "06-scc-findings_det",
+          "label": "Detections (DETECT)",
+          "icon": "gcp:anomaly_detection",
+          "parent": "abs",
+          "x": 260,
+          "y": 110,
+          "sublabel": "ASTRO real-time MITRE engine",
+          "fill": "#F5C61E"
+        },
+        {
+          "id": "06-scc-findings_lake",
+          "label": "LakeVilla (RETAIN)",
+          "icon": "gcp:dataanalytics",
+          "parent": "abs",
+          "x": 50,
+          "y": 360,
+          "sublabel": "security data lake \u00b7 search",
+          "fill": "#2E9BF0"
+        },
+        {
+          "id": "06-scc-findings_sec",
+          "label": "AI-SecOps (OPERATE)",
+          "icon": "gcp:threatintelligence",
+          "parent": "abs",
+          "x": 260,
+          "y": 360,
+          "sublabel": "ASTRO triage & response",
+          "fill": "#01E69D"
+        }
+      ],
+      "edges": [
+        {
+          "from": "etd",
+          "to": "notif",
+          "tone": "muted"
+        },
+        {
+          "from": "sha",
+          "to": "notif",
+          "tone": "muted"
+        },
+        {
+          "from": "vuln",
+          "to": "notif",
+          "tone": "muted"
+        },
+        {
+          "from": "notif",
+          "to": "topic",
+          "tone": "brand",
+          "label": "publishes findings"
+        },
+        {
+          "from": "sa",
+          "to": "topic",
+          "tone": "teal",
+          "dashed": true,
+          "label": "roles/pubsub.publisher",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        },
+        {
+          "from": "topic",
+          "to": "sub",
+          "tone": "brand",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "sub",
+          "to": "06-scc-findings_pipe",
+          "label": "pull stream",
+          "tone": "brand",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        },
+        {
+          "from": "06-scc-findings_pipe",
+          "to": "06-scc-findings_det",
+          "tone": "amber",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        },
+        {
+          "from": "06-scc-findings_pipe",
+          "to": "06-scc-findings_lake",
+          "tone": "brand",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "06-scc-findings_det",
+          "to": "06-scc-findings_sec",
+          "tone": "teal",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "06-scc-findings_lake",
+          "to": "06-scc-findings_sec",
+          "tone": "muted",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        }
+      ],
+      "badges": [
+        {
+          "id": "b1",
+          "text": "OUT-OF-ROUTER: SCC findings publish directly to Pub/Sub, not Log Router",
+          "x": 60,
+          "y": 75,
+          "w": 420,
+          "h": 26,
+          "tone": "amber"
+        },
+        {
+          "id": "b2",
+          "text": "AGENT BINDING: roles/pubsub.publisher bound to organization SCC agent",
+          "x": 550,
+          "y": 75,
+          "w": 430,
+          "h": 26,
+          "tone": "teal"
+        },
+        {
+          "id": "06-scc-findings_b_abs1",
+          "text": "COMPOSABLE SIEM: Decoupled ingest, in-stream detect & LakeVilla",
+          "x": 1050,
+          "y": 145,
+          "w": 420,
+          "h": 26,
+          "tone": "brand"
+        },
+        {
+          "id": "06-scc-findings_b_abs2",
+          "text": "DATA REDUCTION: Drops up to 80% volume before storage tier",
+          "x": 1050,
+          "y": 725,
+          "w": 420,
+          "h": 26,
+          "tone": "teal"
+        }
+      ],
+      "notes": [
+        {
+          "id": "n1",
+          "text": "SCC SERVICE AGENT PERMISSION: Organization-level SCC notifications publish using the dedicated service agent service-org-@gcp-sa-scc-notification.iam.gserviceaccount.com. This identity must hold roles/pubsub.publisher on the destination topic.",
+          "x": 40,
+          "y": 790,
+          "w": 1380,
+          "h": 50
+        }
+      ]
+    }
+  ]
+}

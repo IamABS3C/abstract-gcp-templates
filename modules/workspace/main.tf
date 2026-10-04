@@ -31,11 +31,16 @@ terraform {
 }
 
 locals {
-  # Verified against Google's OAuth 2.0 scope registry 2026-08-26.
-  workspace_scopes = [
+  # Verified against Google's OAuth 2.0 scope registry.
+  workspace_base_scopes = [
     "https://www.googleapis.com/auth/admin.reports.audit.readonly",
     "https://www.googleapis.com/auth/admin.reports.usage.readonly",
   ]
+  workspace_directory_scopes = [
+    "https://www.googleapis.com/auth/admin.directory.user.readonly",
+    "https://www.googleapis.com/auth/admin.directory.group.readonly",
+  ]
+  workspace_scopes = var.include_directory_enrichment_scopes ? concat(local.workspace_base_scopes, local.workspace_directory_scopes) : local.workspace_base_scopes
 
   # The 23 applications the integration accepts, grouped by what they answer.
   # Verified live against default.google_workspace.0_1_0.

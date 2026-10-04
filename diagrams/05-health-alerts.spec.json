@@ -1,0 +1,333 @@
+{
+  "title": "Pipeline health monitoring & non-destructive observability",
+  "theme": "dark",
+  "grid": false,
+  "animate": true,
+  "pages": [
+    {
+      "name": "Health Alerts",
+      "banner": {
+        "title": "Pipeline Health Monitoring & Non-Destructive Observability",
+        "subtitle": "Zero Silent Failures \u00b7 Three Critical Alert Policies \u00b7 Real-Time Incident Routing",
+        "x": 40,
+        "y": 20,
+        "w": 1050,
+        "h": 56
+      },
+      "groups": [
+        {
+          "id": "lp",
+          "label": "Logging Project Infrastructure",
+          "kind": "plain",
+          "x": 40,
+          "y": 110,
+          "w": 400,
+          "h": 660,
+          "color": "#01E69D"
+        },
+        {
+          "id": "mon",
+          "label": "Cloud Monitoring & Alerting Engine",
+          "kind": "plain",
+          "x": 470,
+          "y": 110,
+          "w": 530,
+          "h": 660,
+          "color": "#F5C61E"
+        },
+        {
+          "id": "abs",
+          "label": "Abstract SOC & Observability",
+          "kind": "plain",
+          "x": 1030,
+          "y": 110,
+          "w": 460,
+          "h": 660,
+          "color": "#FF216B"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "sink",
+          "label": "Log Router Sink",
+          "icon": "gcp:logging",
+          "parent": "lp",
+          "x": 150,
+          "y": 70,
+          "sublabel": "exports to Pub/Sub"
+        },
+        {
+          "id": "topic",
+          "label": "Pub/Sub Topic",
+          "icon": "gcp:cloud_pubsub",
+          "parent": "lp",
+          "x": 150,
+          "y": 250,
+          "sublabel": "abstract-audit-logs",
+          "fill": "#FF216B"
+        },
+        {
+          "id": "sub",
+          "label": "Pull Subscription",
+          "icon": "gcp:cloud_pubsub",
+          "parent": "lp",
+          "x": 150,
+          "y": 430,
+          "sublabel": "abstract-audit-logs-sub",
+          "fill": "#FF216B"
+        },
+        {
+          "id": "p_err",
+          "label": "Policy 1: Sink Errors",
+          "icon": "gcp:monitor",
+          "parent": "mon",
+          "x": 80,
+          "y": 70,
+          "sublabel": "logging.../exports/error_count > 0"
+        },
+        {
+          "id": "p_inact",
+          "label": "Policy 2: Inactivity",
+          "icon": "gcp:monitor",
+          "parent": "mon",
+          "x": 80,
+          "y": 250,
+          "sublabel": "send_message_count == 0 (>60m)"
+        },
+        {
+          "id": "p_stall",
+          "label": "Policy 3: Backlog Stall",
+          "icon": "gcp:monitor",
+          "parent": "mon",
+          "x": 80,
+          "y": 430,
+          "sublabel": "oldest_unacked_age > 1h"
+        },
+        {
+          "id": "chans",
+          "label": "Notification Channels",
+          "icon": "gcp:cloud_pubsub",
+          "parent": "mon",
+          "x": 340,
+          "y": 250,
+          "sublabel": "Email / Slack / PagerDuty / Webhook"
+        },
+        {
+          "id": "05-health-alerts_pipe",
+          "label": "Pipelines (COLLECT)",
+          "icon": "img:../brand/abstract-logo-mark.svg",
+          "parent": "abs",
+          "x": 50,
+          "y": 110,
+          "sublabel": "streaming normalizer \u00b7 -80% drop"
+        },
+        {
+          "id": "05-health-alerts_det",
+          "label": "Detections (DETECT)",
+          "icon": "gcp:anomaly_detection",
+          "parent": "abs",
+          "x": 260,
+          "y": 110,
+          "sublabel": "ASTRO real-time MITRE engine",
+          "fill": "#F5C61E"
+        },
+        {
+          "id": "05-health-alerts_lake",
+          "label": "LakeVilla (RETAIN)",
+          "icon": "gcp:dataanalytics",
+          "parent": "abs",
+          "x": 50,
+          "y": 360,
+          "sublabel": "security data lake \u00b7 search",
+          "fill": "#2E9BF0"
+        },
+        {
+          "id": "05-health-alerts_sec",
+          "label": "AI-SecOps (OPERATE)",
+          "icon": "gcp:threatintelligence",
+          "parent": "abs",
+          "x": 260,
+          "y": 360,
+          "sublabel": "ASTRO triage & response",
+          "fill": "#01E69D"
+        }
+      ],
+      "edges": [
+        {
+          "from": "sink",
+          "to": "p_err",
+          "tone": "brand",
+          "dashed": true
+        },
+        {
+          "from": "topic",
+          "to": "p_inact",
+          "tone": "amber",
+          "dashed": true
+        },
+        {
+          "from": "sub",
+          "to": "p_stall",
+          "tone": "brand",
+          "dashed": true
+        },
+        {
+          "from": "p_err",
+          "to": "chans",
+          "tone": "brand",
+          "dashed": true
+        },
+        {
+          "from": "p_inact",
+          "to": "chans",
+          "tone": "amber",
+          "dashed": true
+        },
+        {
+          "from": "p_stall",
+          "to": "chans",
+          "tone": "brand",
+          "dashed": true
+        },
+        {
+          "from": "plat",
+          "to": "sink",
+          "tone": "teal",
+          "dashed": true,
+          "exit": [
+            0.5,
+            0
+          ],
+          "entry": [
+            0,
+            0.5
+          ],
+          "label": "canary injection"
+        },
+        {
+          "from": "chans",
+          "to": "05-health-alerts_pipe",
+          "label": "incident webhook",
+          "tone": "brand",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        },
+        {
+          "from": "05-health-alerts_pipe",
+          "to": "05-health-alerts_det",
+          "tone": "amber",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        },
+        {
+          "from": "05-health-alerts_pipe",
+          "to": "05-health-alerts_lake",
+          "tone": "brand",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "05-health-alerts_det",
+          "to": "05-health-alerts_sec",
+          "tone": "teal",
+          "exit": [
+            0.5,
+            1
+          ],
+          "entry": [
+            0.5,
+            0
+          ]
+        },
+        {
+          "from": "05-health-alerts_lake",
+          "to": "05-health-alerts_sec",
+          "tone": "muted",
+          "exit": [
+            1,
+            0.5
+          ],
+          "entry": [
+            0,
+            0.5
+          ]
+        }
+      ],
+      "badges": [
+        {
+          "id": "b1",
+          "text": "POLICY 1 (SINK ERRORS): Instant alert on publisher permission revocation",
+          "x": 480,
+          "y": 75,
+          "w": 460,
+          "h": 26,
+          "tone": "brand"
+        },
+        {
+          "id": "b2",
+          "text": "POLICY 2 (DEAD-MAN SWITCH): Catches silent pipeline drops within 60 min",
+          "x": 480,
+          "y": 700,
+          "w": 460,
+          "h": 26,
+          "tone": "amber"
+        },
+        {
+          "id": "b3",
+          "text": "POLICY 3 (SUBSCRIBER STALL): Alerts if consumer stops acknowledging",
+          "x": 60,
+          "y": 700,
+          "w": 350,
+          "h": 26,
+          "tone": "teal"
+        },
+        {
+          "id": "05-health-alerts_b_abs1",
+          "text": "COMPOSABLE SIEM: Decoupled ingest, in-stream detect & LakeVilla",
+          "x": 1050,
+          "y": 145,
+          "w": 420,
+          "h": 26,
+          "tone": "brand"
+        },
+        {
+          "id": "05-health-alerts_b_abs2",
+          "text": "DATA REDUCTION: Drops up to 80% volume before storage tier",
+          "x": 1050,
+          "y": 725,
+          "w": 420,
+          "h": 26,
+          "tone": "teal"
+        }
+      ],
+      "notes": [
+        {
+          "id": "n1",
+          "text": "THE DEAD-MAN PRINCIPLE: Logging pipelines must never fail quietly. If an adversary strips the sink publisher role or revokes credentials, an inactivity alert triggers immediately before damage spreads.",
+          "x": 40,
+          "y": 790,
+          "w": 1380,
+          "h": 50
+        }
+      ]
+    }
+  ]
+}
