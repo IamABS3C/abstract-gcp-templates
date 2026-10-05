@@ -1075,7 +1075,7 @@ def generate_specs():
                 {
                     "id": "plat", "label": "Abstract SIEM Engine", "icon": "img:../brand/abstract-logo-mark.svg",
                     "parent": "siem", "x": 60, "y": 120,
-                    "sublabel": "parsers/gcp-identity-auth.yml"
+                    "sublabel": "managed GCP Pub/Sub parser"
                 },
                 {
                     "id": "bq_lake", "label": "BigQuery Security Lake", "icon": "gcp:bigquery",

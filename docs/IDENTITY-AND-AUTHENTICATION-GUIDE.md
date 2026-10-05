@@ -46,7 +46,7 @@ flowchart TD
     end
 
     subgraph SIEM["4. Detection & Analytics"]
-        Abstract["Abstract Security SIEM\n(parsers/gcp-identity-auth.yml)"]
+        Abstract["Abstract Security SIEM\n(managed GCP Pub/Sub parser)"]
         BigQuery["BigQuery Security Data Lake\n(Log Analytics & Forensic Queries)"]
         SecOps["Security Operations Center (SOC)\n(Real-Time Alerts & Automated Response)"]
     end
@@ -312,7 +312,7 @@ Control-plane modifications that establish persistence or elevate privileges.
 The following rules provide production-ready detection logic across three standard formats:
 1. **Google Cloud Logging Filter**: For Log Router sinks, Log Analytics, and Log-Based Alerting policies.
 2. **BigQuery SQL**: For scheduled analytical rules, Google SecOps, and retrospective threat hunting.
-3. **Abstract Security Stream Rule**: For inline real-time detection on normalized ECS/OCSF streams (`parsers/gcp-identity-auth.yml`).
+3. **Abstract Security**: audit-log identity events are parsed by Abstract's managed GCP Pub/Sub parser; no custom parser is needed.
 
 ---
 

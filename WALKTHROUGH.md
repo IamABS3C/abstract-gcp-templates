@@ -942,11 +942,11 @@ gcloud infra-manager deployments describe \
    - **Google Cloud Project ID**: `$LOG_PROJECT` *(the central logging project, NOT workload projects)*.
    - **Pub/Sub Subscription ID**: `abstract-audit-logs-sub`
    - **Credentials File**: Upload the private key JSON from `~/abstract-keys/abstract-pubsub-key.json`.
-4. Upload Ingestion Parsers from `parsers/`:
-   - [`parsers/gcp-identity-auth.yml`](parsers/gcp-identity-auth.yml) for Google Cloud identity and authentication events (see [Identity Threat Detection Guide](docs/IDENTITY-AND-AUTHENTICATION-GUIDE.md)).
-   - [`parsers/cloud-asset-inventory.yml`](parsers/cloud-asset-inventory.yml) for Asset feeds.
-   - [`parsers/scc-findings.yml`](parsers/scc-findings.yml) for Security Command Center.
-   - [`parsers/workspace-reports.yml`](parsers/workspace-reports.yml) for Google Workspace Reports.
+4. **Do not upload any parser onto this audit-log configuration.** Abstract's managed GCP Pub/Sub parser already parses audit logs, including identity and authentication events. A configuration-level parser **replaces** the managed one, so a parser uploaded here stops audit logs being stored.
+5. Custom parsers from `parsers/` go only on a **separate** GCP Pub/Sub configuration that reads that feed's own subscription:
+   - [`parsers/cloud-asset-inventory.yml`](parsers/cloud-asset-inventory.yml) on the configuration for `abstract-asset-changes-sub` (deployment 07). See [Asset inventory](docs/ABSTRACT-INTEGRATION.md#asset-inventory--resource-and-iam-policy-changes).
+   - [`parsers/scc-findings.yml`](parsers/scc-findings.yml) (preview) on the configuration for `abstract-audit-logs-sub-scc` (deployment 06).
+   - Google Workspace logs come from Abstract's **Google Workspace** integration (Reports API, deployment 04), not from a Pub/Sub parser. Do not upload `parsers/workspace-reports.yml`.
 
 Print your deployment's exact integration values:
 

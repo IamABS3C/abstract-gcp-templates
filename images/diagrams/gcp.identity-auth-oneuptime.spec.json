@@ -153,7 +153,7 @@
         {
           "id": "plat",
           "label": "Abstract SIEM Engine",
-          "sublabel": "parsers/gcp-identity-auth.yml",
+          "sublabel": "managed GCP Pub/Sub parser",
           "icon": "img:brand/abstract-logo-mark.svg",
           "parent": "siem",
           "x": 80,

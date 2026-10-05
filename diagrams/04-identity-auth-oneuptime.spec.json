@@ -166,7 +166,7 @@
           "parent": "siem",
           "x": 60,
           "y": 120,
-          "sublabel": "parsers/gcp-identity-auth.yml"
+          "sublabel": "managed GCP Pub/Sub parser"
         },
         {
           "id": "bq_lake",
