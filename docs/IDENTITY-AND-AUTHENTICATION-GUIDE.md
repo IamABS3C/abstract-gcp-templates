@@ -759,11 +759,15 @@ cd ../..
 
 If deploying without Infrastructure-as-Code:
 
+> [!WARNING]
+> `gcloud organizations set-iam-policy` replaces the organization's **entire** IAM policy. The steps below are safe only because they edit the live policy fetched in step 1 and keep its `bindings` and `etag` untouched. A policy file built any other way, without the current bindings, removes every org IAM binding. Keep a copy of `/tmp/org_policy.json` until you have checked the result, and prefer Option A.
+
 ```bash
 export ORG_ID="123456789012"
 
 # 1. Fetch the current organization IAM policy to a temporary JSON file
 gcloud organizations get-iam-policy "$ORG_ID" --format=json > /tmp/org_policy.json
+cp /tmp/org_policy.json /tmp/org_policy.backup.json
 
 # 2. Add Data Access audit configuration for iamcredentials and sts
 cat << 'EOF' > /tmp/add_audit_config.py

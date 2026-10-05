@@ -855,9 +855,15 @@ module "workspace_logs" {
 > ### THE #1 TRAP: Service Account Impersonation Invisible Without DATA_READ
 > Impersonation methods like GenerateAccessToken and SignBlob emit to DATA_ACCESS logs, NOT Admin Activity! If iamcredentials.googleapis.com is not enabled in Org IAM auditConfig, impersonations are 100% invisible!
 >
-> **Immediate CLI Remediation**:
+> **Remediation**: manage the audit config with Terraform through [`deployments/03-data-access`](../deployments/03-data-access/README.md). If you must do it by hand, read-modify-write only:
 ```bash
-gcloud organizations set-iam-policy $ORG_ID updated-audit-policy.yaml
+# set-iam-policy REPLACES the organization's whole IAM policy. A policy file without the
+# current bindings removes every org IAM binding. Always start from the live policy.
+gcloud organizations get-iam-policy "$ORG_ID" --format=json > policy.json
+cp policy.json policy.backup.json
+# Edit ONLY "auditConfigs" in policy.json. Keep "bindings" and "etag" exactly as fetched;
+# the etag makes set-iam-policy fail instead of overwriting a policy changed since.
+gcloud organizations set-iam-policy "$ORG_ID" policy.json
 ```
 
 #### 5-Step Diagnostic Verification Protocol
