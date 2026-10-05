@@ -32,6 +32,7 @@ Use this deployment when security data is written directly to Cloud Storage buck
 
 > [!NOTE]
 > For native Google Cloud platform telemetry (Audit logs, VPC DNS, Firewall logs), use [02-audit-logs-organization](../02-audit-logs-organization/README.md) instead. Aggregated sinks stream events directly without per-bucket notification configuration or batch delays.
+> Note: VPC DNS and firewall logs reach the Pub/Sub topic, but Abstract's managed GCP parser keeps only Cloud Audit Logs and does not yet store them.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐

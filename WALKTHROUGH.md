@@ -583,7 +583,7 @@ tofu init && tofu apply
 cd ../..
 ```
 
-Use [`parsers/scc-findings.yml`](parsers/scc-findings.yml) in Abstract Security to normalize CVEs, CVSS scores, threat indicators, and MITRE ATT&CK techniques.
+Findings are stored only with [`parsers/scc-findings.yml`](parsers/scc-findings.yml) (preview) on the Abstract GCP Pub/Sub configuration for `abstract-audit-logs-sub-scc`. Never put it on the audit-log configuration: a configuration-level parser replaces the managed one.
 
 ### Diagnostic Verification Checkpoint:
 
@@ -640,7 +640,7 @@ tofu init && tofu apply
 cd ../..
 ```
 
-Use [`parsers/cloud-asset-inventory.yml`](parsers/cloud-asset-inventory.yml) in Abstract Security to normalize asset states and IAM changes.
+Asset changes are stored only with [`parsers/cloud-asset-inventory.yml`](parsers/cloud-asset-inventory.yml) on the Abstract GCP Pub/Sub configuration for `abstract-asset-changes-sub`. Never put it on the audit-log configuration: a configuration-level parser replaces the managed one.
 
 ### Diagnostic Verification Checkpoint:
 
@@ -774,7 +774,7 @@ tofu init && tofu apply
 cd ../..
 ```
 
-Use [`parsers/workspace-reports.yml`](parsers/workspace-reports.yml) in Abstract Security to normalize logins, suspicious activity, and admin events.
+Abstract's **Google Workspace** integration parses these events with its own managed parser. Do not upload `parsers/workspace-reports.yml`: a configuration-level parser would replace the managed one.
 
 ### Diagnostic Verification Checkpoint:
 
