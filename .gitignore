@@ -26,3 +26,6 @@ app/web/.deploy.zip
 # Real deployment values: never commit (the *.tfvars.example files are the templates)
 *.tfvars
 !*.tfvars.example
+
+# Editor / AI-tool settings: personal, never published
+.vscode/
