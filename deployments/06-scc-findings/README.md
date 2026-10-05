@@ -9,6 +9,9 @@
 
 Streams Google Cloud Security Command Center (SCC) vulnerability and threat findings directly to **Abstract Security** via Cloud Pub/Sub.
 
+> [!IMPORTANT]
+> Findings are stored only if the Abstract GCP Pub/Sub configuration for `abstract-audit-logs-sub-scc` carries the configuration-level parser [`parsers/scc-findings.yml`](../../parsers/scc-findings.yml) (parser in preview). The managed GCP parser keeps only audit logs and drops findings. Never put this parser on the audit-log configuration.
+
 <p align="center">
   <img src="../../images/diagrams/06-scc-findings.png" width="100%" alt="Security Command Center (SCC) Findings Export Architecture Diagram">
 </p>

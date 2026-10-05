@@ -407,6 +407,9 @@ gcloud logging read 'logName:"logs/cloudaudit.googleapis.com%2Fdata_access"' \
 
 **What it does.** Deploys a dedicated pipeline for network security events: Cloud Armor WAF decisions, Cloud IDS threat signatures, Cloud DNS query logging, and Compute Engine firewall rules.
 
+> [!WARNING]
+> These logs reach the Pub/Sub topic; Abstract's managed GCP parser does not yet store them (it keeps only Cloud Audit Logs, and there is no network parser yet). Do not rely on them for detection until a parser ships.
+
 <p align="center">
   <img src="images/diagrams/11-network-threats.png" alt="Abstract Security - GCP Network Threat Telemetry Architecture" width="100%">
 </p>
@@ -432,7 +435,7 @@ Firewall Rules (Allow / Deny)   ─┘
 |---|---|---|
 | **Volume Profile** | Admin logs: 5–50 events/sec. Low volume. | DNS & WAF: 2,000–50,000+ events/sec. High volume. |
 | **Noisy Neighbor Risk** | High: A network volumetric attack or DNS burst can throttle and delay critical IAM audit logs. | **Zero**: High-volume network stream is isolated; control plane audit delivery remains unaffected. |
-| **Abstract Pipeline** | Single ingestion parser pipeline. | Tuned network parser and custom retention settings. |
+| **Abstract Pipeline** | Single ingestion parser pipeline. | No network parser yet: these logs are not stored by Abstract today. |
 | **Recommendation** | Low-traffic sandbox / pilot. | **Production enterprise environments.** |
 
 ### Prerequisites in Workload Projects:
@@ -994,7 +997,7 @@ Congratulations! You have completed the comprehensive Google Cloud and Google Wo
 Your Google Cloud estate now streams:
 - ✅ Organization-wide Admin Activity, System Events, and Policy Denied audit logs
 - ✅ Scoped BigQuery, Cloud Storage, and Cloud KMS Data Access telemetry
-- ✅ Curated Network Threat logs (Cloud Armor WAF, Cloud IDS, Cloud DNS, and Firewalls)
+- ⚠️ Network Threat logs (Cloud Armor WAF, Cloud IDS, Cloud DNS, and Firewalls) reach Pub/Sub, but Abstract does not store them until a network parser ships
 - ✅ Out-of-hierarchy Cloud Billing Account audit events
 - ✅ Real-time Security Command Center findings
 - ✅ Real-time Cloud Asset Inventory resource and IAM drift feeds

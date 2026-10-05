@@ -11,7 +11,10 @@ Network threat detection is a primary security workload in Google Cloud. This tu
 3. **VPC DNS query logs** (`logName:"dns.googleapis.com%2Fdns_queries"`)
 4. **Firewall rule decisions** (`logName:"compute.googleapis.com%2Ffirewall"`)
 
-All four streams route into a single Pub/Sub topic and pull subscription in your dedicated security logging project, where Abstract Security ingests them in real time.
+All four streams route into a single Pub/Sub topic and pull subscription in your dedicated security logging project.
+
+> [!WARNING]
+> **These logs reach the Pub/Sub topic; Abstract's managed GCP parser does not yet store them.** The managed GCP Pub/Sub parser keeps only Cloud Audit Log records, and firewall, DNS, Cloud Armor and Cloud IDS logs are not audit logs. There is no parser for them yet. Do not rely on them for detection until a parser ships.
 
 ## Sign in first
 
@@ -82,6 +85,9 @@ gcloud compute backend-services update BACKEND_SERVICE_NAME \
 ```
 
 ## Step 2 — Verify Cloud IDS Endpoints
+
+> [!NOTE]
+> **Cloud IDS costs money on its own.** It is billed per endpoint-hour plus per GB of traffic inspected, and it needs Packet Mirroring. These templates do not create the IDS endpoint or the mirroring policy; they only route the threat logs an existing endpoint writes.
 
 Cloud IDS uses Palo Alto Networks threat detection engines to analyze mirrored network traffic for malware, spyware, and exploit CVEs.
 
@@ -173,7 +179,7 @@ acknowledge_high_volume = true
 EOF
 ```
 
-<walkthrough-info-message>`acknowledge_high_volume = true` is set because `dns_queries` and `load_balancer` (Cloud Armor) are high-volume telemetry streams.</walkthrough-info-message>
+<walkthrough-info-message>`dns_queries` and `load_balancer` (Cloud Armor) are high-volume streams, so the plan stops unless `acknowledge_high_volume = true` is set here or passed as `terraform plan -var acknowledge_high_volume=true`. Measure a baseline before you acknowledge it.</walkthrough-info-message>
 
 ## Step 6 — Plan and Apply
 
@@ -301,7 +307,7 @@ In the Abstract Security Platform:
 
 <walkthrough-conclusion-trophy></walkthrough-conclusion-trophy>
 
-Your network threat telemetry pipeline is live! Cloud Armor WAF decisions, Cloud IDS threat detections, VPC DNS queries, and firewall rule decisions are now streaming directly to Abstract Security.
+The pipeline delivers Cloud Armor, Cloud IDS, DNS and firewall logs to the `abstract-network-threats` topic. Abstract's managed GCP parser does not yet store these logs, so do not rely on them for detection until a parser ships.
 
 ---
 

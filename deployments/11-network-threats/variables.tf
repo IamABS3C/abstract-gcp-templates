@@ -66,9 +66,9 @@ variable "audit_streams" {
 }
 
 variable "acknowledge_high_volume" {
-  description = "Acknowledge high volume log ingestion. Default true because dns_queries and load_balancer are high-tier categories."
+  description = "Required when any high- or extreme-tier category is selected (the defaults dns_queries and load_balancer are high tier). These can dominate the bill; measure a 7-day baseline first."
   type        = bool
-  default     = true
+  default     = false
 }
 
 # --- Naming variables -------------------------------------------------------

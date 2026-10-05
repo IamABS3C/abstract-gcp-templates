@@ -47,3 +47,15 @@ module "log_export" {
   exclusions                        = var.exclusions
   labels                            = var.labels
 }
+
+# Cost guard. The module itself only stops on extreme-tier categories; the defaults here
+# (dns_queries, load_balancer) are high tier, so the plan also stops on those until the
+# volume is acknowledged.
+resource "terraform_data" "volume_acknowledgement" {
+  lifecycle {
+    precondition {
+      condition     = var.acknowledge_high_volume || (module.log_export.volume_profile.high + module.log_export.volume_profile.extreme) == 0
+      error_message = "High-volume categories selected (${join(", ", var.log_categories)}). They can dominate your bill.\nMeasure a 7-day baseline first. To proceed set acknowledge_high_volume = true (or -var acknowledge_high_volume=true)."
+    }
+  }
+}

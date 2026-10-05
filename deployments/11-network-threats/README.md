@@ -9,6 +9,9 @@
 
 Provisions a high-performance aggregated export pipeline routing the four fundamental pillars of GCP network threat telemetry directly to **Abstract Security** via Google Cloud Pub/Sub.
 
+> [!WARNING]
+> **These logs reach the Pub/Sub topic; Abstract's managed GCP parser does not yet store them.** The managed GCP Pub/Sub parser keeps only Cloud Audit Log records, and firewall, DNS, Cloud Armor and Cloud IDS logs are not audit logs. There is no parser for them yet. Do not rely on them for detection until a parser ships.
+
 <p align="center">
   <img src="../../images/diagrams/11-network-threats.png" width="100%" alt="GCP Network Threat Telemetry Architecture Diagram">
 </p>
@@ -330,6 +333,9 @@ Cloud Armor enriches `resource.type="http_load_balancer"` entries with `jsonPayl
 
 ## 2. Cloud IDS Threat Logs
 
+> [!NOTE]
+> **Cloud IDS costs money on its own.** It is billed per endpoint-hour plus per GB of traffic inspected, and it needs Packet Mirroring. These templates do not create the IDS endpoint or the mirroring policy; they only route the threat logs an existing endpoint writes.
+
 ### Architecture & Mechanism
 Google Cloud Intrusion Detection System (Cloud IDS) delivers cloud-native network threat detection powered by Palo Alto Networks technologies. Cloud IDS inspects traffic for:
 - Malware communication and spyware command-and-control (C2)
@@ -509,7 +515,8 @@ log_categories = ["firewall", "dns_queries", "load_balancer"]
 # Cloud IDS threat log filter:
 platform_log_filters = ["ids.googleapis.com%2Fthreat"]
 
-# Acknowledge high volume (dns_queries and load_balancer are high tier):
+# dns_queries and load_balancer are high tier. The plan stops until you acknowledge
+# the volume (or pass -var acknowledge_high_volume=true). Measure a baseline first.
 acknowledge_high_volume = true
 ```
 

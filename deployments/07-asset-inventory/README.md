@@ -9,6 +9,9 @@
 
 Streams real-time Cloud Asset Inventory (CAI) state changes and IAM policy diffs directly to **Abstract Security** via Cloud Pub/Sub.
 
+> [!IMPORTANT]
+> Asset changes are stored only if the Abstract GCP Pub/Sub configuration for `abstract-asset-changes-sub` carries the configuration-level parser [`parsers/cloud-asset-inventory.yml`](../../parsers/cloud-asset-inventory.yml). The managed GCP parser keeps only audit logs and drops asset changes. Never put this parser on the audit-log configuration.
+
 <p align="center">
   <img src="../../images/diagrams/07-asset-inventory.png" width="100%" alt="Cloud Asset Inventory Real-Time Feeds Architecture Diagram">
 </p>

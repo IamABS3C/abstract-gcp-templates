@@ -1442,6 +1442,9 @@ module "billing_audit" {
 > **Cloud Armor WAF · Cloud IDS threat logs · VPC Flow Logs · Cloud DNS query telemetry**  
 > `HIGH-VOLUME TELEMETRY` · `DEDICATED TOPIC` · `50,000+ EPS` · `EDGE WAF DEFENSE`
 
+> [!WARNING]
+> These logs reach the Pub/Sub topic; Abstract's managed GCP parser does not yet store them (it keeps only Cloud Audit Logs, and there is no network parser yet). Do not rely on them for detection until a parser ships.
+
 <p align="center">
   <img src="../images/diagrams/11-network-threats.png" width="100%" alt="Scenario 11 · Network Threat Defense & Edge Perimeter Ingestion">
 </p>
