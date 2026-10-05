@@ -29,3 +29,8 @@ app/web/.deploy.zip
 
 # Editor / AI-tool settings: personal, never published
 .vscode/
+
+# Service-account keys: never commit. Keys belong in ~/abstract-keys (mode 600), not the clone
+*-key.json
+key.json
+*.keyfile.json

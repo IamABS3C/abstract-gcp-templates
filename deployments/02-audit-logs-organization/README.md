@@ -190,15 +190,17 @@ Generate the credentials key file out of band:
 ```bash
 export SA_EMAIL=$(tofu output -json abstract_onboarding | jq -r .service_account_email)
 
-gcloud iam service-accounts keys create abstract-key.json \
+mkdir -p ~/abstract-keys && chmod 700 ~/abstract-keys   # outside the repo clone
+gcloud iam service-accounts keys create ~/abstract-keys/abstract-pubsub-key.json \
   --iam-account="$SA_EMAIL" \
   --project="$LOG_PROJECT"
+chmod 600 ~/abstract-keys/abstract-pubsub-key.json
 ```
 
 In the Abstract Security console:
 1. Navigate to **Integrations** &rarr; **Google Cloud Pub/Sub**.
-2. Provide `project_id`, `subscription_id`, and upload `abstract-key.json`.
-3. Securely delete the local private key: `rm abstract-key.json`.
+2. Provide `project_id`, `subscription_id`, and upload `~/abstract-keys/abstract-pubsub-key.json`.
+3. Securely delete the local private key: `rm ~/abstract-keys/abstract-pubsub-key.json`.
 
 ---
 

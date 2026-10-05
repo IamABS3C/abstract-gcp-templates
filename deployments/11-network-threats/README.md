@@ -560,17 +560,19 @@ The output returns:
 1. Generate a key for the provisioned Abstract subscriber service account:
    ```bash
    SA_EMAIL=$(tofu output -raw service_account_email)
-   gcloud iam service-accounts keys create key.json \
+   mkdir -p ~/abstract-keys && chmod 700 ~/abstract-keys   # outside the repo clone
+   gcloud iam service-accounts keys create ~/abstract-keys/abstract-network-key.json \
      --iam-account="$SA_EMAIL"
+   chmod 600 ~/abstract-keys/abstract-network-key.json
    ```
 2. Navigate to your **Abstract Security Platform Console**.
 3. Create a new **Google Cloud Pub/Sub** Data Source:
    * **Project ID**: Supply the output from `tofu output -raw abstract_onboarding` (`project_id`).
    * **Subscription ID**: Supply the short subscription name (`abstract-network-threats-sub`).
-   * **Service Account Key**: Upload the generated `key.json`.
-4. Delete the local `key.json` file once uploaded:
+   * **Service Account Key**: Upload the generated `~/abstract-keys/abstract-network-key.json`.
+4. Delete the local `~/abstract-keys/abstract-network-key.json` file once uploaded:
    ```bash
-   rm -f key.json
+   rm -f ~/abstract-keys/abstract-network-key.json
    ```
 
 ---

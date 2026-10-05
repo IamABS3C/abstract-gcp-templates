@@ -190,9 +190,11 @@ You need two values, plus a key:
 
 ```bash
 export SA_EMAIL=$(terraform output -raw service_account_email)
-gcloud iam service-accounts keys create key.json \
+mkdir -p ~/abstract-keys && chmod 700 ~/abstract-keys   # outside the repo clone
+gcloud iam service-accounts keys create ~/abstract-keys/abstract-billing-key.json \
   --iam-account="$SA_EMAIL" \
   --project="$LOG_PROJECT"
+chmod 600 ~/abstract-keys/abstract-billing-key.json
 ```
 
 ## Done

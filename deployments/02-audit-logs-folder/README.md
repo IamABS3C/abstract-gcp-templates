@@ -221,9 +221,11 @@ Retrieve onboarding credentials for Abstract Security:
 tofu output abstract_onboarding
 export SA_EMAIL=$(tofu output -json abstract_onboarding | jq -r .service_account_email)
 
-gcloud iam service-accounts keys create abstract-key.json \
+mkdir -p ~/abstract-keys && chmod 700 ~/abstract-keys   # outside the repo clone
+gcloud iam service-accounts keys create ~/abstract-keys/abstract-pubsub-key.json \
   --iam-account="$SA_EMAIL" \
   --project="acme-security-logging"
+chmod 600 ~/abstract-keys/abstract-pubsub-key.json
 ```
 
 ---

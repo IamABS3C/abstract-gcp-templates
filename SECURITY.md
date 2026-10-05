@@ -11,9 +11,11 @@ vulnerability.
 created **out of band** and uploaded directly to Abstract:
 
 ```bash
-gcloud iam service-accounts keys create abstract-key.json --iam-account="$SA"
+mkdir -p ~/abstract-keys && chmod 700 ~/abstract-keys   # outside the repo clone
+gcloud iam service-accounts keys create ~/abstract-keys/abstract-pubsub-key.json --iam-account="$SA"
+chmod 600 ~/abstract-keys/abstract-pubsub-key.json
 # upload to Abstract, then
-rm abstract-key.json
+rm ~/abstract-keys/abstract-pubsub-key.json
 ```
 
 `create_service_account_key` defaults to **false** precisely because generating it in

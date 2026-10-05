@@ -287,7 +287,9 @@ Generate the credentials key for the Abstract service account:
 
 ```bash
 SA_EMAIL=$(terraform output -raw service_account_email)
-gcloud iam service-accounts keys create key.json --iam-account="$SA_EMAIL"
+mkdir -p ~/abstract-keys && chmod 700 ~/abstract-keys   # outside the repo clone
+gcloud iam service-accounts keys create ~/abstract-keys/abstract-network-key.json --iam-account="$SA_EMAIL"
+chmod 600 ~/abstract-keys/abstract-network-key.json
 ```
 
 In the Abstract Security Platform:
@@ -297,10 +299,10 @@ In the Abstract Security Platform:
    ```bash
    terraform output -raw subscription_id
    ```
-4. Upload `key.json`.
+4. Upload `~/abstract-keys/abstract-network-key.json`.
 5. Remove the local key file:
    ```bash
-   rm -f key.json
+   rm -f ~/abstract-keys/abstract-network-key.json
    ```
 
 ## Done

@@ -268,18 +268,20 @@ Generate the service account private key out of band:
 ```bash
 export SA_EMAIL=$(tofu output -json workspace_onboarding | jq -r .service_account_email)
 
-gcloud iam service-accounts keys create abstract-workspace-key.json \
+mkdir -p ~/abstract-keys && chmod 700 ~/abstract-keys   # outside the repo clone
+gcloud iam service-accounts keys create ~/abstract-keys/abstract-workspace-key.json \
   --iam-account="$SA_EMAIL" \
   --project="acme-security-logging"
+chmod 600 ~/abstract-keys/abstract-workspace-key.json
 ```
 
 In the Abstract Security console:
 1. Navigate to **Integrations** &rarr; **Google Workspace** (`default.google_workspace`).
 2. Enter **Admin Email**: `admin-audit@example.com`.
-3. Upload **Credentials**: `abstract-workspace-key.json`.
+3. Upload **Credentials**: `~/abstract-keys/abstract-workspace-key.json`.
 4. Select **Application Names**: `login`, `saml`, `token`, `admin`, `groups`, `rules`.
 5. Save the integration.
-6. Delete the local JSON key file: `rm abstract-workspace-key.json`.
+6. Delete the local JSON key file: `rm ~/abstract-keys/abstract-workspace-key.json`.
 
 ---
 

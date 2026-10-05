@@ -62,7 +62,9 @@ scopes exactly as printed, comma-separated with no spaces.
 ```bash
 SA=$(terraform output -json workspace_onboarding | jq -r .service_account_email)
 echo "Service Account: $SA"
-gcloud iam service-accounts keys create ws-key.json --iam-account="$SA" --project="YOUR_PROJECT"
+mkdir -p ~/abstract-keys && chmod 700 ~/abstract-keys   # outside the repo clone
+gcloud iam service-accounts keys create ~/abstract-keys/abstract-workspace-key.json --iam-account="$SA" --project="YOUR_PROJECT"
+chmod 600 ~/abstract-keys/abstract-workspace-key.json
 ```
 
 `-json | jq` rather than `-raw`: **`-raw` only works on a string output and errors on an
@@ -71,7 +73,7 @@ object**, which `workspace_onboarding` is.
 Upload it to Abstract with the admin email and application list, then **delete the local
 copy**:
 ```bash
-rm ws-key.json
+rm ~/abstract-keys/abstract-workspace-key.json
 ```
 
 ## Step 5 — Verification & Failure Troubleshooting
