@@ -34,3 +34,6 @@ app/web/.deploy.zip
 *-key.json
 key.json
 *.keyfile.json
+
+# Restricted-name list for tests/check-leaks.sh — never committed
+tests/.leak-names
