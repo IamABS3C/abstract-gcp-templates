@@ -31,7 +31,7 @@ DATA_ACCESS=false
 DATA_ACCESS_SERVICES="bigquery.googleapis.com,storage.googleapis.com"
 PLATFORM_LOGS=""
 CONFIRM=false; ROTATE_KEY=false
-KEY_OUT="abstract-sa-key.json"
+KEY_OUT="$HOME/abstract-keys/abstract-sa-key.json"  # outside the repo clone
 
 C_OK=$'\033[0;32m'; C_WARN=$'\033[0;33m'; C_ERR=$'\033[0;31m'
 C_BRAND=$'\033[38;5;198m'; C_DIM=$'\033[2m'; C_OFF=$'\033[0m'
@@ -232,7 +232,9 @@ if [[ "${EXISTING_KEYS:-0}" -gt 0 && "$ROTATE_KEY" != "true" ]]; then
   warn "GCP caps these at 10. Pass --rotate-key to mint a new one deliberately."
 else
   say "Creating the service-account key"
+  mkdir -p "$(dirname "$KEY_OUT")" && chmod 700 "$(dirname "$KEY_OUT")"
   run gcloud iam service-accounts keys create "$KEY_OUT" --iam-account="$SA_EMAIL"
+  chmod 600 "$KEY_OUT"
 fi
 ok "key written to $KEY_OUT"
 warn "Upload it to Abstract, then DELETE the local copy. Do not email it, do not commit it."
