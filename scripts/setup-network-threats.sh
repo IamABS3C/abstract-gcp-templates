@@ -2,9 +2,14 @@
 # =============================================================================
 #   Abstract Security — Standalone Network Threat & Security Telemetry Setup
 # =============================================================================
-set -uo pipefail
+set -euo pipefail
 
-B=$'\033[1m'; P=$'\033[38;5;198m'; G=$'\033[0;32m'; Y=$'\033[0;33m'; R=$'\033[0;31m'; C=$'\033[0;36m'; D=$'\033[2m'; O=$'\033[0m'
+# shellcheck disable=SC2034  # the full palette is defined in every setup script
+B=$'\033[1m' P=$'\033[38;5;198m' G=$'\033[0;32m' Y=$'\033[0;33m' R=$'\033[0;31m' C=$'\033[0;36m' D=$'\033[2m' O=$'\033[0m'
+# Fail loudly: any gcloud call that fails stops the script with a non-zero exit, so it can
+# never print "complete" over a half-built pipeline.
+die() { printf '%s✗ %s%s\n' "$R" "$*" "$O" >&2; exit 1; }
+trap 'printf "%s✗ a command failed at line %s; nothing after it ran%s\n" "$R" "$LINENO" "$O" >&2' ERR
 banner() {
   printf "%s" "$P"
   cat <<'EOF'
@@ -42,42 +47,56 @@ SUB_NAME="abstract-network-threats-sub"
 SINK_NAME="abstract-network-threats-sink"
 SA_NAME="abstract-network-reader"
 KEY_DIR="$HOME/abstract-keys"
-mkdir -p "$KEY_DIR"
+mkdir -p "$KEY_DIR" && chmod 700 "$KEY_DIR"
 KEY_FILE="$KEY_DIR/abstract-network-key.json"
 
 echo "Creating Dedicated High-Volume Network Topic & Subscription in $LOG_PROJECT..."
-gcloud pubsub topics create "$TOPIC_NAME" --project="$LOG_PROJECT" 2>/dev/null || true
-gcloud pubsub subscriptions create "$SUB_NAME" --topic="$TOPIC_NAME" --project="$LOG_PROJECT" \
-  --ack-deadline=60 --message-retention-duration=7d --expiration-period=never 2>/dev/null || true
+gcloud pubsub topics describe "$TOPIC_NAME" --project="$LOG_PROJECT" >/dev/null 2>&1 \
+  || gcloud pubsub topics create "$TOPIC_NAME" --project="$LOG_PROJECT" \
+  || die "could not create topic $TOPIC_NAME in $LOG_PROJECT"
+gcloud pubsub subscriptions describe "$SUB_NAME" --project="$LOG_PROJECT" >/dev/null 2>&1 \
+  || gcloud pubsub subscriptions create "$SUB_NAME" --topic="$TOPIC_NAME" --project="$LOG_PROJECT" \
+       --ack-deadline=60 --message-retention-duration=7d --expiration-period=never \
+  || die "could not create subscription $SUB_NAME in $LOG_PROJECT"
 
 TOPIC_DEST="pubsub.googleapis.com/projects/$LOG_PROJECT/topics/$TOPIC_NAME"
 FILTER='logName:"compute.googleapis.com%2Ffirewall" OR logName:"dns.googleapis.com%2Fdns_queries" OR resource.type="http_load_balancer" OR logName:"ids.googleapis.com%2Fthreat"'
 
 echo "Creating Aggregated Network Security Log Sink ($SINK_NAME)..."
-gcloud logging sinks create "$SINK_NAME" "$TOPIC_DEST" \
-  --organization="$ORG_ID" \
-  --include-children \
-  --log-filter="$FILTER" 2>/dev/null || \
-gcloud logging sinks update "$SINK_NAME" "$TOPIC_DEST" \
-  --organization="$ORG_ID" \
-  --log-filter="$FILTER" 2>/dev/null || true
-
-WRITER_IDENTITY=$(gcloud logging sinks describe "$SINK_NAME" --organization="$ORG_ID" --format="value(writerIdentity)" 2>/dev/null || true)
-if [[ -n "$WRITER_IDENTITY" ]]; then
-  echo "Granting roles/pubsub.publisher to Network Sink Writer Identity ($WRITER_IDENTITY)..."
-  gcloud pubsub topics add-iam-policy-binding "$TOPIC_NAME" --project="$LOG_PROJECT" \
-    --member="$WRITER_IDENTITY" --role="roles/pubsub.publisher" >/dev/null
+EXISTING_DEST=""
+if EXISTING_DEST=$(gcloud logging sinks describe "$SINK_NAME" --organization="$ORG_ID" --format="value(destination)" 2>/dev/null); then
+  [[ "$EXISTING_DEST" == "$TOPIC_DEST" ]] \
+    || die "sink $SINK_NAME already exists and sends to $EXISTING_DEST; this script would repoint it. Manage it with deployments/11-network-threats instead."
+  gcloud logging sinks update "$SINK_NAME" "$TOPIC_DEST" \
+    --organization="$ORG_ID" --log-filter="$FILTER" \
+    || die "could not update sink $SINK_NAME"
+else
+  gcloud logging sinks create "$SINK_NAME" "$TOPIC_DEST" \
+    --organization="$ORG_ID" --include-children --log-filter="$FILTER" \
+    || die "could not create sink $SINK_NAME (needs roles/logging.configWriter on organization $ORG_ID)"
 fi
 
+WRITER_IDENTITY=$(gcloud logging sinks describe "$SINK_NAME" --organization="$ORG_ID" --format="value(writerIdentity)") \
+  || die "could not read the writer identity of $SINK_NAME"
+[[ -n "$WRITER_IDENTITY" ]] || die "sink $SINK_NAME has no writer identity"
+echo "Granting roles/pubsub.publisher to Network Sink Writer Identity ($WRITER_IDENTITY)..."
+gcloud pubsub topics add-iam-policy-binding "$TOPIC_NAME" --project="$LOG_PROJECT" \
+  --member="$WRITER_IDENTITY" --role="roles/pubsub.publisher" >/dev/null \
+  || die "could not grant roles/pubsub.publisher on $TOPIC_NAME to $WRITER_IDENTITY"
+
 echo "Creating Subscriber Service Account ($SA_NAME)..."
-gcloud iam service-accounts create "$SA_NAME" --project="$LOG_PROJECT" --display-name="Abstract Network Telemetry Reader" 2>/dev/null || true
 SA_EMAIL="$SA_NAME@$LOG_PROJECT.iam.gserviceaccount.com"
+gcloud iam service-accounts describe "$SA_EMAIL" --project="$LOG_PROJECT" >/dev/null 2>&1 \
+  || gcloud iam service-accounts create "$SA_NAME" --project="$LOG_PROJECT" --display-name="Abstract Network Telemetry Reader" \
+  || die "could not create service account $SA_NAME in $LOG_PROJECT"
 
 gcloud pubsub subscriptions add-iam-policy-binding "$SUB_NAME" --project="$LOG_PROJECT" \
-  --member="serviceAccount:$SA_EMAIL" --role="roles/pubsub.subscriber" >/dev/null
+  --member="serviceAccount:$SA_EMAIL" --role="roles/pubsub.subscriber" >/dev/null \
+  || die "could not grant roles/pubsub.subscriber on $SUB_NAME to $SA_EMAIL"
 
 if [[ ! -f "$KEY_FILE" ]]; then
-  gcloud iam service-accounts keys create "$KEY_FILE" --iam-account="$SA_EMAIL" --project="$LOG_PROJECT" 2>/dev/null
+  gcloud iam service-accounts keys create "$KEY_FILE" --iam-account="$SA_EMAIL" --project="$LOG_PROJECT" \
+    || die "could not create a key for $SA_EMAIL"
   chmod 600 "$KEY_FILE"
 fi
 
