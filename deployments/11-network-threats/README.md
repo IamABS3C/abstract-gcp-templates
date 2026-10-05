@@ -9,6 +9,9 @@
 
 Provisions a high-performance aggregated export pipeline routing the four fundamental pillars of GCP network threat telemetry directly to **Abstract Security** via Google Cloud Pub/Sub.
 
+> [!WARNING]
+> **These logs reach the Pub/Sub topic; Abstract's managed GCP parser does not yet store them.** The managed GCP Pub/Sub parser keeps only Cloud Audit Log records, and firewall, DNS, Cloud Armor and Cloud IDS logs are not audit logs. There is no parser for them yet. Do not rely on them for detection until a parser ships.
+
 <p align="center">
   <img src="../../images/diagrams/11-network-threats.png" width="100%" alt="GCP Network Threat Telemetry Architecture Diagram">
 </p>
@@ -249,11 +252,19 @@ gcloud pubsub topics add-iam-policy-binding abstract-network-threats \
   --role="roles/pubsub.publisher"
 ```
 
-#### 6. Pull Test Network Threat Messages
+#### 6. Test Network Messages via a Probe Subscription
 ```bash
-gcloud pubsub subscriptions pull abstract-network-threats-sub \
-  --project="$LOG_PROJECT" \
-  --limit=2
+# Never pull from abstract-network-threats-sub: with --auto-ack that deletes events before Abstract
+# reads them, and without it hides them from Abstract for the ack deadline.
+# Pull from a throwaway subscription on the same topic instead. Create it BEFORE the
+# test event: a new subscription only receives messages published after it exists.
+PROBE="abstract-probe-$(date +%s)"
+gcloud pubsub subscriptions create "$PROBE" --topic=abstract-network-threats \
+  --project="$LOG_PROJECT" --expiration-period=1d --message-retention-duration=10m
+# Make a DNS query or trigger a logged firewall rule from a VM in the VPC, then wait.
+sleep 60
+gcloud pubsub subscriptions pull "$PROBE" --project="$LOG_PROJECT" --limit=2 --auto-ack
+gcloud pubsub subscriptions delete "$PROBE" --project="$LOG_PROJECT" --quiet
 ```
 
 ---
@@ -321,6 +332,9 @@ Cloud Armor enriches `resource.type="http_load_balancer"` entries with `jsonPayl
 ---
 
 ## 2. Cloud IDS Threat Logs
+
+> [!NOTE]
+> **Cloud IDS costs money on its own.** It is billed per endpoint-hour plus per GB of traffic inspected, and it needs Packet Mirroring. These templates do not create the IDS endpoint or the mirroring policy; they only route the threat logs an existing endpoint writes.
 
 ### Architecture & Mechanism
 Google Cloud Intrusion Detection System (Cloud IDS) delivers cloud-native network threat detection powered by Palo Alto Networks technologies. Cloud IDS inspects traffic for:
@@ -501,7 +515,8 @@ log_categories = ["firewall", "dns_queries", "load_balancer"]
 # Cloud IDS threat log filter:
 platform_log_filters = ["ids.googleapis.com%2Fthreat"]
 
-# Acknowledge high volume (dns_queries and load_balancer are high tier):
+# dns_queries and load_balancer are high tier. The plan stops until you acknowledge
+# the volume (or pass -var acknowledge_high_volume=true). Measure a baseline first.
 acknowledge_high_volume = true
 ```
 
@@ -545,17 +560,19 @@ The output returns:
 1. Generate a key for the provisioned Abstract subscriber service account:
    ```bash
    SA_EMAIL=$(tofu output -raw service_account_email)
-   gcloud iam service-accounts keys create key.json \
+   mkdir -p ~/abstract-keys && chmod 700 ~/abstract-keys   # outside the repo clone
+   gcloud iam service-accounts keys create ~/abstract-keys/abstract-network-key.json \
      --iam-account="$SA_EMAIL"
+   chmod 600 ~/abstract-keys/abstract-network-key.json
    ```
 2. Navigate to your **Abstract Security Platform Console**.
 3. Create a new **Google Cloud Pub/Sub** Data Source:
    * **Project ID**: Supply the output from `tofu output -raw abstract_onboarding` (`project_id`).
    * **Subscription ID**: Supply the short subscription name (`abstract-network-threats-sub`).
-   * **Service Account Key**: Upload the generated `key.json`.
-4. Delete the local `key.json` file once uploaded:
+   * **Service Account Key**: Upload the generated `~/abstract-keys/abstract-network-key.json`.
+4. Delete the local `~/abstract-keys/abstract-network-key.json` file once uploaded:
    ```bash
-   rm -f key.json
+   rm -f ~/abstract-keys/abstract-network-key.json
    ```
 
 ---

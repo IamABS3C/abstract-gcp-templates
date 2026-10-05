@@ -358,11 +358,16 @@ gcloud infra-manager deployments apply \
 
 Exports Cloud Armor WAF decisions, Cloud IDS threat detections, VPC DNS queries, and Firewall rule evaluations in a single aggregated pipeline.
 
+> [!WARNING]
+> These logs reach the Pub/Sub topic; Abstract's managed GCP parser does not yet store them (it keeps only Cloud Audit Logs, and there is no network parser yet). Do not rely on them for detection until a parser ships.
+
 #### Step A — Create `terraform.tfvars`
 ```bash
 cat > deployments/11-network-threats/terraform.tfvars <<EOF
 log_categories          = ["load_balancer", "dns_queries", "firewall"]
 platform_log_filters    = ["ids.googleapis.com%2Fthreat"]
+# load_balancer and dns_queries are high tier: the preview stops until this is true.
+# Measure a 7-day baseline before you set it.
 acknowledge_high_volume = false
 EOF
 ```
@@ -435,4 +440,3 @@ gcloud infra-manager deployments delete \
 * 🛠️ **Troubleshooting Runbooks**: [Master Troubleshooting Guide](TROUBLESHOOTING-GUIDE.md)
 * 📘 **Master Telemetry Reference**: [Master GCP Telemetry Dataflow Reference](DATAFLOW-AND-ARCHITECTURE-REFERENCE.md)
 * 📋 **Permissions Matrix**: [Permissions Reference Across All Scopes](PERMISSIONS.md)
-* 🌐 **Interactive Diagram Explorer**: [Architecture Explorer Web UI](architecture-explorer.html)

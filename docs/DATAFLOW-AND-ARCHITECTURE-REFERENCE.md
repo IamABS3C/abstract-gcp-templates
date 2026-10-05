@@ -5,6 +5,9 @@
 
 # Master GCP Telemetry Dataflow & Architectural Reference
 
+> [!WARNING]
+> The field names in this document's "Abstract Unified Schema" columns have not been validated against Abstract, and several do not exist (for example `event.action`, `source.ip`, `cloud.project.id`). A search on a field that does not exist silently matches nothing. The managed GCP parser writes `action`, `user_name`, `source_address` and `cloud.project_id`; see [VERIFIED.md](VERIFIED.md#confirming-events-landed-and-which-query-surface-to-use).
+
 This document is the definitive architectural specification, telemetry dataflow contract, and operational runbook for streaming Google Cloud Platform (GCP) and Google Workspace security telemetry into the **Abstract Security Platform**.
 
 ---
@@ -56,7 +59,6 @@ The **Abstract Security Platform** is an AI-native, Composable SIEM engineered t
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 01-sink-scope`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#01-sink-scope)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -101,17 +103,7 @@ gcloud organizations get-iam-policy $ORG_ID --flatten="bindings[].members" --fil
 
 ##### Actionable SIEM Rule: Log Sink Deleted or Filter Tampered at Any Scope
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.action in ["google.logging.v2.ConfigServiceV2.DeleteSink", "google.logging.v2.ConfigServiceV2.UpdateSink"] | score risk_score=100
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, protoPayload.authenticationInfo.principalEmail, protoPayload.resourceName
-FROM `logging_project.audit_logs.cloudaudit_googleapis_com_activity`
-WHERE protoPayload.methodName LIKE '%ConfigServiceV2%Sink%'
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -136,7 +128,6 @@ WHERE protoPayload.methodName LIKE '%ConfigServiceV2%Sink%'
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 01-logging-project`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#01-logging-project)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -188,9 +179,21 @@ gcloud pubsub subscriptions describe abstract-audit-logs-sub --project=$LOG_PROJ
 gcloud pubsub subscriptions get-iam-policy abstract-audit-logs-sub --project=$LOG_PROJECT --flatten="bindings[].members" --filter="bindings.role:roles/pubsub.subscriber"
 ```
 
-**Step 5: Perform Live Non-Destructive Subscription Pull Test**
+**Step 5: Prove delivery on a probe subscription**
 ```bash
-gcloud pubsub subscriptions pull abstract-audit-logs-sub --project=$LOG_PROJECT --auto-ack --limit=1
+# Never pull from abstract-audit-logs-sub: with --auto-ack that deletes events before Abstract
+# reads them, and without it hides them from Abstract for the ack deadline.
+# Pull from a throwaway subscription on the same topic instead. Create it BEFORE the
+# test event: a new subscription only receives messages published after it exists.
+PROBE="abstract-probe-$(date +%s)"
+gcloud pubsub subscriptions create "$PROBE" --topic=abstract-audit-logs \
+  --project="$LOG_PROJECT" --expiration-period=1d --message-retention-duration=10m
+# Fire a fresh Admin Activity event inside the sink's scope, then wait for routing.
+gcloud pubsub topics create "$PROBE" --project="$LOG_PROJECT" --quiet
+gcloud pubsub topics delete "$PROBE" --project="$LOG_PROJECT" --quiet
+sleep 75
+gcloud pubsub subscriptions pull "$PROBE" --project="$LOG_PROJECT" --limit=1 --auto-ack
+gcloud pubsub subscriptions delete "$PROBE" --project="$LOG_PROJECT" --quiet
 ```
 
 #### Schema Normalization & Threat Detections
@@ -207,18 +210,7 @@ gcloud pubsub subscriptions pull abstract-audit-logs-sub --project=$LOG_PROJECT 
 
 ##### Actionable SIEM Rule: Critical Service Account Key Creation Outside Bastion
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.action: "google.iam.admin.v1.CreateServiceAccountKey" and not (source.ip in ["10.0.0.0/8", "192.168.0.0/16"]) | score risk_score=95
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, protoPayload.authenticationInfo.principalEmail, protoPayload.requestMetadata.callerIp
-FROM `logging_project.audit_logs.cloudaudit_googleapis_com_activity`
-WHERE protoPayload.methodName = 'google.iam.admin.v1.CreateServiceAccountKey'
-  AND NOT NET.IP_TRUNC(NET.SAFE_IP_FROM_STRING(protoPayload.requestMetadata.callerIp), 16) = b"\xc0\xa8\x00\x00"
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -257,7 +249,6 @@ module "logging_project" {
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 02-audit-logs-organization`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#02-audit-logs-organization)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -309,9 +300,21 @@ gcloud pubsub topics get-iam-policy abstract-audit-logs --project=$LOG_PROJECT -
 gcloud monitoring metrics-scopes list --project=$LOG_PROJECT
 ```
 
-**Step 5: Pull Live Message to Verify End-to-End Delivery**
+**Step 5: Prove delivery on a probe subscription**
 ```bash
-gcloud pubsub subscriptions pull abstract-audit-logs-sub --project=$LOG_PROJECT --auto-ack --limit=1
+# Never pull from abstract-audit-logs-sub: with --auto-ack that deletes events before Abstract
+# reads them, and without it hides them from Abstract for the ack deadline.
+# Pull from a throwaway subscription on the same topic instead. Create it BEFORE the
+# test event: a new subscription only receives messages published after it exists.
+PROBE="abstract-probe-$(date +%s)"
+gcloud pubsub subscriptions create "$PROBE" --topic=abstract-audit-logs \
+  --project="$LOG_PROJECT" --expiration-period=1d --message-retention-duration=10m
+# Fire a fresh Admin Activity event inside the sink's scope, then wait for routing.
+gcloud pubsub topics create "$PROBE" --project="$LOG_PROJECT" --quiet
+gcloud pubsub topics delete "$PROBE" --project="$LOG_PROJECT" --quiet
+sleep 75
+gcloud pubsub subscriptions pull "$PROBE" --project="$LOG_PROJECT" --limit=1 --auto-ack
+gcloud pubsub subscriptions delete "$PROBE" --project="$LOG_PROJECT" --quiet
 ```
 
 #### Schema Normalization & Threat Detections
@@ -327,18 +330,7 @@ gcloud pubsub subscriptions pull abstract-audit-logs-sub --project=$LOG_PROJECT 
 
 ##### Actionable SIEM Rule: Organization-Level IAM Policy Tampering
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.action: "SetIamPolicy" and cloud.resource_type: "organization" | score risk_score=100
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, protoPayload.authenticationInfo.principalEmail, protoPayload.serviceData.policyDelta
-FROM `logging_project.audit_logs.cloudaudit_googleapis_com_activity`
-WHERE protoPayload.methodName = 'SetIamPolicy'
-  AND resource.type = 'organization'
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -372,7 +364,6 @@ module "org_audit_logs" {
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 02-audit-logs-folder`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#02-audit-logs-folder)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -428,17 +419,7 @@ gcloud logging read 'logName:"logs/cloudaudit.googleapis.com%2Factivity"' --fold
 
 ##### Actionable SIEM Rule: Project Moved Out of Monitored Security Folder
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.action: "google.resourcemanager.v3.Projects.MoveProject" | score risk_score=85
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, protoPayload.authenticationInfo.principalEmail, protoPayload.resourceName
-FROM `logging_project.audit_logs.cloudaudit_googleapis_com_activity`
-WHERE protoPayload.methodName = 'google.resourcemanager.v3.Projects.MoveProject'
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -466,7 +447,6 @@ module "folder_audit_logs" {
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 02-audit-logs-project`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#02-audit-logs-project)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -510,17 +490,7 @@ gcloud logging sinks describe abstract-pilot-sink --project=$PROJECT_ID
 
 ##### Actionable SIEM Rule: Pilot Project Admin Role Escalation
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.action: "SetIamPolicy" and cloud.project.id: "$PILOT_PROJECT" | score risk_score=90
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, protoPayload.authenticationInfo.principalEmail
-FROM `pilot_project.audit_logs.cloudaudit_googleapis_com_activity`
-WHERE protoPayload.methodName = 'SetIamPolicy'
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -547,7 +517,6 @@ module "pilot_project_sink" {
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 03-data-access`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#03-data-access)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -604,18 +573,7 @@ gcloud logging read 'logName:"logs/cloudaudit.googleapis.com%2Fdata_access"' --o
 
 ##### Actionable SIEM Rule: Mass BigQuery Data Exfiltration (>1TB Scanned)
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.dataset: "bigquery.googleapis.com" and gcp.bigquery.total_billed_bytes > 1099511627776 | score risk_score=90
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, protoPayload.authenticationInfo.principalEmail, protoPayload.serviceData.jobCompletedEvent.job.jobStatistics.totalBilledBytes
-FROM `logging_project.audit_logs.cloudaudit_googleapis_com_data_access`
-WHERE protoPayload.serviceName = 'bigquery.googleapis.com'
-  AND CAST(JSON_VALUE(protoPayload.serviceData, '$.jobCompletedEvent.job.jobStatistics.totalBilledBytes') AS INT64) > 1000000000000
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -650,7 +608,6 @@ module "data_access_audit" {
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 03-log-router-boundary`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#03-log-router-boundary)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -694,17 +651,7 @@ gcloud scc notifications list --organization=$ORG_ID
 
 ##### Actionable SIEM Rule: Log Router Ingestion Boundary Exclusion Rule Added
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.action: "google.logging.v2.ConfigServiceV2.CreateExclusion" | score risk_score=85
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, protoPayload.authenticationInfo.principalEmail, protoPayload.request
-FROM `logging_project.audit_logs.cloudaudit_googleapis_com_activity`
-WHERE protoPayload.methodName = 'google.logging.v2.ConfigServiceV2.CreateExclusion'
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -728,7 +675,6 @@ WHERE protoPayload.methodName = 'google.logging.v2.ConfigServiceV2.CreateExclusi
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 04-workspace`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#04-workspace)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -779,18 +725,7 @@ gcloud iam service-accounts describe abstract-workspace-dwd@$LOG_PROJECT.iam.gse
 
 ##### Actionable SIEM Rule: Suspicious Workspace Login with 2SV Challenge Failure
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: Google and event.dataset: "google_workspace.audit" and event.action: "login_challenge_failed" | score risk_score=95
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, protoPayload.authenticationInfo.principalEmail, protoPayload.requestMetadata.callerIp
-FROM `logging_project.audit_logs.cloudaudit_googleapis_com_data_access`
-WHERE protoPayload.serviceName = 'login.googleapis.com'
-  AND JSON_VALUE(protoPayload.metadata, '$.loginDetails.isSuspicious') = 'true'
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -818,7 +753,6 @@ module "workspace_logs" {
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 04-identity-auth-oneuptime`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#04-identity-auth-oneuptime)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -840,9 +774,15 @@ module "workspace_logs" {
 > ### THE #1 TRAP: Service Account Impersonation Invisible Without DATA_READ
 > Impersonation methods like GenerateAccessToken and SignBlob emit to DATA_ACCESS logs, NOT Admin Activity! If iamcredentials.googleapis.com is not enabled in Org IAM auditConfig, impersonations are 100% invisible!
 >
-> **Immediate CLI Remediation**:
+> **Remediation**: manage the audit config with Terraform through [`deployments/03-data-access`](../deployments/03-data-access/README.md). If you must do it by hand, read-modify-write only:
 ```bash
-gcloud organizations set-iam-policy $ORG_ID updated-audit-policy.yaml
+# set-iam-policy REPLACES the organization's whole IAM policy. A policy file without the
+# current bindings removes every org IAM binding. Always start from the live policy.
+gcloud organizations get-iam-policy "$ORG_ID" --format=json > policy.json
+cp policy.json policy.backup.json
+# Edit ONLY "auditConfigs" in policy.json. Keep "bindings" and "etag" exactly as fetched;
+# the etag makes set-iam-policy fail instead of overwriting a policy changed since.
+gcloud organizations set-iam-policy "$ORG_ID" policy.json
 ```
 
 #### 5-Step Diagnostic Verification Protocol
@@ -868,17 +808,7 @@ gcloud logging read 'protoPayload.serviceName:"iamcredentials.googleapis.com"' -
 
 ##### Actionable SIEM Rule: Unauthorized Service Account Impersonation
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.action: "GenerateAccessToken" and not (user.email in ["ci-cd@iam.gserviceaccount.com"]) | score risk_score=95
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, protoPayload.authenticationInfo.principalEmail, protoPayload.resourceName
-FROM `logging_project.audit_logs.cloudaudit_googleapis_com_data_access`
-WHERE protoPayload.methodName = 'GenerateAccessToken'
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -912,7 +842,6 @@ module "identity_auth_pipeline" {
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 05-health-alerts`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#05-health-alerts)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -962,17 +891,7 @@ gcloud pubsub subscriptions describe abstract-audit-logs-sub --project=$LOG_PROJ
 
 ##### Actionable SIEM Rule: Critical Telemetry Pipeline Ingestion Stall
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.dataset: "cloud_monitoring.alert" and severity: "CRITICAL" | score risk_score=100
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, incident.summary
-FROM `logging_project.monitoring.incidents`
-WHERE incident.state = 'OPEN' AND incident.severity = 'CRITICAL'
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -1001,7 +920,6 @@ module "health_monitoring" {
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 06-scc-findings`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#06-scc-findings)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -1047,18 +965,7 @@ gcloud scc notifications describe abstract-scc-feed --organization=$ORG_ID --for
 
 ##### Actionable SIEM Rule: Critical Container Threat or Crypto Mining Finding
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.dataset: "gcp.scc_findings" and event.severity in ["CRITICAL", "HIGH"] | score risk_score=100
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, raw.finding.name, raw.finding.category, raw.finding.severity
-FROM `logging_project.scc.findings`
-WHERE raw.finding.state = 'ACTIVE'
-  AND raw.finding.severity IN ('CRITICAL', 'HIGH')
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -1087,7 +994,6 @@ resource "google_scc_organization_notification_config" "abstract_feed" {
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 07-asset-inventory`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#07-asset-inventory)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -1133,18 +1039,7 @@ gcloud asset feeds list --organization=$ORG_ID --format="table(name,contentType,
 
 ##### Actionable SIEM Rule: Public Cloud Storage Bucket Created or Modified
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.dataset: "gcp.asset_inventory" and gcp.asset.type: "storage.googleapis.com/Bucket" and gcp.asset.iam.is_public: true | score risk_score=95
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, asset.name, asset.iamPolicy
-FROM `logging_project.asset_inventory.feeds`
-WHERE asset.assetType = 'storage.googleapis.com/Bucket'
-  AND EXISTS(SELECT 1 FROM UNNEST(asset.iamPolicy.bindings) WHERE 'allUsers' IN UNNEST(members))
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -1176,7 +1071,6 @@ resource "google_cloud_asset_organization_feed" "abstract_feed" {
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 08-bucket-logs`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#08-bucket-logs)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -1221,17 +1115,7 @@ gcloud storage buckets notifications list --bucket=gs://$BUCKET_NAME
 
 ##### Actionable SIEM Rule: Bulk Cloud Storage Object Deletions (Ransomware)
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.action: "OBJECT_DELETE" | count() by user.email > 500 in 5m | score risk_score=95
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, name, bucket
-FROM `logging_project.bucket_events.notifications`
-WHERE eventType = 'OBJECT_DELETE'
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -1257,7 +1141,6 @@ resource "google_storage_notification" "bucket_notification" {
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 09-log-archive`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#09-log-archive)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -1303,18 +1186,7 @@ gcloud logging sinks list --organization=$ORG_ID --format="table(name,destinatio
 
 ##### Actionable SIEM Rule: Unauthorized GCS Log Archive Lifecycle or Policy Mutation
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and cloud.resource_type: "storage.googleapis.com/Bucket" and event.action: "storage.setIamPermissions" | score risk_score=100
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, protoPayload.authenticationInfo.principalEmail
-FROM `logging_project.audit_logs.cloudaudit_googleapis_com_activity`
-WHERE protoPayload.resourceName LIKE '%abstract-gcp-archive%'
-  AND protoPayload.methodName = 'storage.setIamPermissions'
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -1345,7 +1217,6 @@ module "archive_dual_pipeline" {
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 10-billing-account`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#10-billing-account)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -1395,17 +1266,7 @@ gcloud logging sinks describe abstract-billing-sink --billing-account=$BILLING_A
 
 ##### Actionable SIEM Rule: Project Linked to Billing Account Outside Whitelist
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.action: "google.cloud.billing.v1.CloudBilling.UpdateProjectBillingInfo" | score risk_score=90
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, protoPayload.authenticationInfo.principalEmail, protoPayload.resourceName
-FROM `logging_project.billing_audit.cloudaudit_googleapis_com_activity`
-WHERE protoPayload.methodName = 'google.cloud.billing.v1.CloudBilling.UpdateProjectBillingInfo'
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -1427,13 +1288,15 @@ module "billing_audit" {
 > **Cloud Armor WAF · Cloud IDS threat logs · VPC Flow Logs · Cloud DNS query telemetry**  
 > `HIGH-VOLUME TELEMETRY` · `DEDICATED TOPIC` · `50,000+ EPS` · `EDGE WAF DEFENSE`
 
+> [!WARNING]
+> These logs reach the Pub/Sub topic; Abstract's managed GCP parser does not yet store them (it keeps only Cloud Audit Logs, and there is no network parser yet). Do not rely on them for detection until a parser ships.
+
 <p align="center">
   <img src="../images/diagrams/11-network-threats.png" width="100%" alt="Scenario 11 · Network Threat Defense & Edge Perimeter Ingestion">
 </p>
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 11-network-threats`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#11-network-threats)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -1484,17 +1347,7 @@ gcloud dns policies list --format="table(name,enableLogging,networks[].targetNet
 
 ##### Actionable SIEM Rule: Cloud Armor SQLi Block Followed by Cloud IDS Alert
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.dataset: "gcp.network_threats" and rule.action: "DENY" | count() by source.ip > 10 in 1m | score risk_score=95
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, jsonPayload.client_ip, jsonPayload.threat_id
-FROM `logging_project.network_logs.ids_googleapis_com_threat`
-WHERE jsonPayload.alert_severity = 'HIGH'
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -1531,7 +1384,6 @@ module "network_threats_pipeline" {
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 03-log-router-boundary`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#03-log-router-boundary)
 
 ### Five Fundamental Log Router Principles
 
@@ -1664,7 +1516,6 @@ The Abstract Security Ingestion Pipeline normalizes raw, verbose Google Cloud `p
 - 🔑 **[Permissions Matrix](PERMISSIONS.md)**: Complete IAM role specifications at every resource hierarchy level.
 - 🎯 **[Filters & Cost Optimization](FILTERS.md)**: Pre-tuned log categories, exclusion rules, and volume management.
 - 🔐 **[Enterprise Identity & Auth Guide](IDENTITY-AND-AUTHENTICATION-GUIDE.md)**: Deep dive into Workspace, Service Account Keys, Impersonation, and Workload Identity Federation.
-- 🌐 **[Interactive Architecture Explorer](architecture-explorer.html)**: Standalone single-page application with interactive zoom/pan viewers, CLI runbooks, and schema mappings.
 
 ---
 *Document compiled with Abstract Security CI/CD automation. Verified collision-free and mathematically validated.*

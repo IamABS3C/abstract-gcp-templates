@@ -32,6 +32,7 @@ Use this deployment when security data is written directly to Cloud Storage buck
 
 > [!NOTE]
 > For native Google Cloud platform telemetry (Audit logs, VPC DNS, Firewall logs), use [02-audit-logs-organization](../02-audit-logs-organization/README.md) instead. Aggregated sinks stream events directly without per-bucket notification configuration or batch delays.
+> Note: VPC DNS and firewall logs reach the Pub/Sub topic, but Abstract's managed GCP parser keeps only Cloud Audit Logs and does not yet store them.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -211,11 +212,19 @@ gcloud storage buckets add-iam-policy-binding gs://acme-firewall-logs-bucket \
   --role="roles/storage.objectViewer"
 ```
 
-#### 4. Pull Test Notification Messages
+#### 4. Test Notifications via a Probe Subscription
 ```bash
-gcloud pubsub subscriptions pull abstract-bucket-logs-sub \
-  --project="$LOG_PROJECT" \
-  --limit=2
+# Never pull from abstract-gcs-notifications-sub: with --auto-ack that deletes events before Abstract
+# reads them, and without it hides them from Abstract for the ack deadline.
+# Pull from a throwaway subscription on the same topic instead. Create it BEFORE the
+# test event: a new subscription only receives messages published after it exists.
+PROBE="abstract-probe-$(date +%s)"
+gcloud pubsub subscriptions create "$PROBE" --topic=abstract-gcs-notifications \
+  --project="$LOG_PROJECT" --expiration-period=1d --message-retention-duration=10m
+# Upload a real log file under the configured prefix, then wait.
+sleep 60
+gcloud pubsub subscriptions pull "$PROBE" --project="$LOG_PROJECT" --limit=2 --auto-ack
+gcloud pubsub subscriptions delete "$PROBE" --project="$LOG_PROJECT" --quiet
 ```
 
 ---

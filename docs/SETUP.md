@@ -286,5 +286,4 @@ The reverse order works too — it just collects nothing until you catch up.
 * 🛠️ **Troubleshooting Runbooks**: [Master Troubleshooting Guide](TROUBLESHOOTING-GUIDE.md)
 * 📋 **Permissions Matrix**: [Permissions Reference Across All Scopes](PERMISSIONS.md)
 * 🎯 **Filters & Costs**: [Log Category Catalog & Exclusion Rules](FILTERS.md)
-* 🌐 **Interactive Diagram Explorer**: [Architecture Explorer Web Viewer](architecture-explorer.html)
 * 🎨 **Interactive Draw.io Launcher**: `./scripts/open-diagram.sh 02-audit-logs-organization`

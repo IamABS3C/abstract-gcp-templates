@@ -190,15 +190,17 @@ Generate the credentials key file out of band:
 ```bash
 export SA_EMAIL=$(tofu output -json abstract_onboarding | jq -r .service_account_email)
 
-gcloud iam service-accounts keys create abstract-key.json \
+mkdir -p ~/abstract-keys && chmod 700 ~/abstract-keys   # outside the repo clone
+gcloud iam service-accounts keys create ~/abstract-keys/abstract-pubsub-key.json \
   --iam-account="$SA_EMAIL" \
   --project="$LOG_PROJECT"
+chmod 600 ~/abstract-keys/abstract-pubsub-key.json
 ```
 
 In the Abstract Security console:
 1. Navigate to **Integrations** &rarr; **Google Cloud Pub/Sub**.
-2. Provide `project_id`, `subscription_id`, and upload `abstract-key.json`.
-3. Securely delete the local private key: `rm abstract-key.json`.
+2. Provide `project_id`, `subscription_id`, and upload `~/abstract-keys/abstract-pubsub-key.json`.
+3. Securely delete the local private key: `rm ~/abstract-keys/abstract-pubsub-key.json`.
 
 ---
 
@@ -329,10 +331,21 @@ flowchart TD
      --project="$LOG_PROJECT" --limit=10
    ```
 
-4. **Pull Messages from Subscription**:
+4. **Prove delivery end to end**:
    ```bash
-   gcloud pubsub subscriptions pull abstract-audit-logs-sub \
-     --project="$LOG_PROJECT" --limit=5
+   # Never pull from abstract-audit-logs-sub: with --auto-ack that deletes events before Abstract
+   # reads them, and without it hides them from Abstract for the ack deadline.
+   # Pull from a throwaway subscription on the same topic instead. Create it BEFORE the
+   # test event: a new subscription only receives messages published after it exists.
+   PROBE="abstract-probe-$(date +%s)"
+   gcloud pubsub subscriptions create "$PROBE" --topic=abstract-audit-logs \
+     --project="$LOG_PROJECT" --expiration-period=1d --message-retention-duration=10m
+   # Fire a fresh Admin Activity event inside the sink's scope, then wait for routing.
+   gcloud pubsub topics create "$PROBE" --project="$LOG_PROJECT" --quiet
+   gcloud pubsub topics delete "$PROBE" --project="$LOG_PROJECT" --quiet
+   sleep 75
+   gcloud pubsub subscriptions pull "$PROBE" --project="$LOG_PROJECT" --limit=5 --auto-ack
+   gcloud pubsub subscriptions delete "$PROBE" --project="$LOG_PROJECT" --quiet
    ```
 
 ---

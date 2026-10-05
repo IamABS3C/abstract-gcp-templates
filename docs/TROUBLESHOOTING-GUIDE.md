@@ -16,7 +16,7 @@ Every telemetry failure—whether a silent log drop, quota throttle, or schema p
 ```
 [ Step 1: Ingestion ] ➔ [ Step 2: Sink Config ] ➔ [ Step 3: Topic IAM ] ➔ [ Step 4: Subscription ] ➔ [ Step 5: Abstract Lake ]
    gcloud logging         gcloud logging sinks     gcloud pubsub topics     gcloud pubsub subs       Abstract SIEM UI
-     read 'logName:*'          describe SINK         get-iam-policy TOPIC     pull SUB --auto-ack      Logs -> vendor: GCP
+     read 'logName:*'          describe SINK         get-iam-policy TOPIC     pull PROBE sub           Logs -> vendor: GCP
 ```
 
 ---
@@ -109,15 +109,23 @@ gcloud pubsub topics get-iam-policy abstract-audit-logs \
 gcloud monitoring metrics list \
   --filter="metric.type:pubsub.googleapis.com/subscription/num_undelivered_messages"
 
-# 2. Perform an active pull probe from Cloud Shell
-gcloud pubsub subscriptions pull abstract-audit-logs-sub \
-  --project="LOGGING_PROJECT_ID" \
-  --limit=1 \
-  --auto-ack \
-  --format="json"
+# 2. Prove delivery on a probe subscription from Cloud Shell
+# Never pull from abstract-audit-logs-sub: with --auto-ack that deletes events before Abstract
+# reads them, and without it hides them from Abstract for the ack deadline.
+# Pull from a throwaway subscription on the same topic instead. Create it BEFORE the
+# test event: a new subscription only receives messages published after it exists.
+PROBE="abstract-probe-$(date +%s)"
+gcloud pubsub subscriptions create "$PROBE" --topic=abstract-audit-logs \
+  --project="LOGGING_PROJECT_ID" --expiration-period=1d --message-retention-duration=10m
+# Fire a fresh Admin Activity event inside the sink's scope, then wait for routing.
+gcloud pubsub topics create "$PROBE" --project="LOGGING_PROJECT_ID" --quiet
+gcloud pubsub topics delete "$PROBE" --project="LOGGING_PROJECT_ID" --quiet
+sleep 75
+gcloud pubsub subscriptions pull "$PROBE" --project="LOGGING_PROJECT_ID" --limit=1 --auto-ack
+gcloud pubsub subscriptions delete "$PROBE" --project="LOGGING_PROJECT_ID" --quiet
 ```
 
-* **PASS:** Pull returns a valid Cloud Audit Log JSON message with base64 payload.
+* **PASS:** The probe pull returns a valid Cloud Audit Log JSON message with base64 payload.
 * **FAIL:**
   * If `PERMISSION_DENIED`: The caller or ingestion service account lacks `roles/pubsub.subscriber` on the subscription.
   * If `num_undelivered_messages` is accumulating steadily: The Abstract subscriber worker is disconnected, rate-limited, or token expired.
@@ -126,16 +134,17 @@ gcloud pubsub subscriptions pull abstract-audit-logs-sub \
 
 ### Step 5: Abstract Security Ingestion & Normalizer Verification
 
-**Question:** Are raw events parsed into normalized Elastic Common Schema (ECS) / Abstract Common Schema (ACS) and indexed into search?
+**Question:** Are raw events parsed into the Abstract Common Schema (ACS) and indexed into search?
 
-1. Open the **Abstract Security Platform Console**.
-2. Navigate to **Data Lake ➔ Logs ➔ Live Tail**.
-3. Apply filter: `vendor: "GCP"` or `event.dataset: "gcp.audit_logs"`.
-4. Verify that fields like `user.email`, `event.action`, `source.ip`, and `threat.score` are populated.
+1. Open the **Abstract Security Platform Console** and search the recent events (StreamViewer raw search; see [VERIFIED.md](VERIFIED.md#confirming-events-landed-and-which-query-surface-to-use)).
+2. Filter on `vendor:GCP` (the value is `GCP`, not `google`).
+3. Verify that `action`, `user_name` and `source_address` are populated, as in the documents measured in [VERIFIED.md](VERIFIED.md#confirming-events-landed-and-which-query-surface-to-use).
 
 * **FAIL (Raw message visible but unparsed):**
-  * Schema definition update required in `parsers/`.
-  * Ensure the parser regex matches the incoming `protoPayload.methodName`.
+  * Audit logs are parsed by Abstract's managed GCP Pub/Sub parser. Check the integration version first.
+  * Do not upload a parser from `parsers/` onto the audit-log configuration: a configuration-level parser replaces the managed one.
+
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 ---
 

@@ -46,7 +46,7 @@ flowchart TD
     end
 
     subgraph SIEM["4. Detection & Analytics"]
-        Abstract["Abstract Security SIEM\n(parsers/gcp-identity-auth.yml)"]
+        Abstract["Abstract Security SIEM\n(managed GCP Pub/Sub parser)"]
         BigQuery["BigQuery Security Data Lake\n(Log Analytics & Forensic Queries)"]
         SecOps["Security Operations Center (SOC)\n(Real-Time Alerts & Automated Response)"]
     end
@@ -309,10 +309,7 @@ Control-plane modifications that establish persistence or elevate privileges.
 
 ## 2. Actionable Detection Queries & SIEM Rules
 
-The following rules provide production-ready detection logic across three standard formats:
-1. **Google Cloud Logging Filter**: For Log Router sinks, Log Analytics, and Log-Based Alerting policies.
-2. **BigQuery SQL**: For scheduled analytical rules, Google SecOps, and retrospective threat hunting.
-3. **Abstract Security Stream Rule**: For inline real-time detection on normalized ECS/OCSF streams (`parsers/gcp-identity-auth.yml`).
+Each rule below describes what to detect and gives a **Google Cloud Logging filter** for Log Router sinks, Log Analytics and log-based alerting. In Abstract, these audit-log identity events are parsed by the managed GCP Pub/Sub parser; no custom parser is needed. Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 ---
 
@@ -329,58 +326,7 @@ protoPayload.serviceName="login.googleapis.com"
 protoPayload.methodName="google.login.LoginService.loginFailure"
 ```
 
-#### BigQuery SQL (SIEM Detection Window)
-```sql
-WITH failed_logins AS (
-  SELECT
-    timestamp,
-    protopayload_auditlog.authenticationInfo.principalEmail AS principal_email,
-    protopayload_auditlog.requestMetadata.callerIp AS caller_ip,
-    protopayload_auditlog.requestMetadata.callerSuppliedUserAgent AS user_agent
-  FROM
-    `your_project.your_dataset.cloudaudit_googleapis_com_data_access`
-  WHERE
-    protopayload_auditlog.serviceName = 'login.googleapis.com'
-    AND protopayload_auditlog.methodName = 'google.login.LoginService.loginFailure'
-    AND timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 HOUR)
-)
-SELECT
-  principal_email,
-  caller_ip,
-  COUNT(*) AS failure_count,
-  MIN(timestamp) AS first_attempt,
-  MAX(timestamp) AS last_attempt,
-  TIMESTAMP_DIFF(MAX(timestamp), MIN(timestamp), SECOND) AS duration_seconds
-FROM
-  failed_logins
-GROUP BY
-  principal_email,
-  caller_ip
-HAVING
-  failure_count >= 5
-ORDER BY
-  failure_count DESC;
-```
-
-#### Abstract Security Rule Definition
-```yaml
-rule:
-  name: "GCP Cloud Identity: Multiple Failed Logins (Brute Force)"
-  severity: high
-  condition:
-    all:
-      - equals: { event.dataset: "gcp.identity_auth" }
-      - equals: { service.name: "login.googleapis.com" }
-      - equals: { event.outcome: "failure" }
-  aggregation:
-    group_by: [user.email]
-    window: 10m
-    threshold: 5
-  actions:
-    - alert:
-        title: "Potential Brute Force: 5+ Failed Logins for {{user.email}}"
-        description: "Principal {{user.email}} experienced multiple failed authentications from IP {{source.ip}}."
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 ---
 
@@ -397,40 +343,7 @@ protoPayload.serviceName="iam.googleapis.com"
 protoPayload.methodName=~"google.iam.admin.v1.CreateServiceAccountKey"
 ```
 
-#### BigQuery SQL
-```sql
-SELECT
-  timestamp,
-  protopayload_auditlog.authenticationInfo.principalEmail AS creator_principal,
-  protopayload_auditlog.resourceName AS target_service_account,
-  protopayload_auditlog.requestMetadata.callerIp AS caller_ip,
-  protopayload_auditlog.requestMetadata.callerSuppliedUserAgent AS user_agent,
-  protopayload_auditlog.response.name AS created_key_name
-FROM
-  `your_project.your_dataset.cloudaudit_googleapis_com_activity`
-  , UNNEST(protopayload_auditlog.authorizationInfo) AS auth
-WHERE
-  protopayload_auditlog.methodName LIKE '%CreateServiceAccountKey%'
-  AND timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
-ORDER BY
-  timestamp DESC;
-```
-
-#### Abstract Security Rule Definition
-```yaml
-rule:
-  name: "GCP IAM: Static Service Account Key Created"
-  severity: high
-  condition:
-    all:
-      - equals: { event.dataset: "gcp.identity_auth" }
-      - equals: { event.action: "google.iam.admin.v1.CreateServiceAccountKey" }
-      - equals: { event.outcome: "success" }
-  actions:
-    - alert:
-        title: "Security Risk: New Static Key Created for {{gcp.audit.resource_name}}"
-        description: "Principal {{user.email}} generated a static private key from IP {{source.ip}}."
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 ---
 
@@ -447,50 +360,7 @@ NOT protoPayload.requestMetadata.callerIp =~ "^(10\.|172\.(1[6-9]|2[0-9]|3[01])\
 NOT protoPayload.requestMetadata.callerIp = "private"
 ```
 
-#### BigQuery SQL
-```sql
-SELECT
-  timestamp,
-  protopayload_auditlog.authenticationInfo.principalEmail AS service_account_email,
-  protopayload_auditlog.authenticationInfo.serviceAccountKeyName AS key_resource_name,
-  protopayload_auditlog.serviceName AS target_service,
-  protopayload_auditlog.methodName AS api_method,
-  protopayload_auditlog.requestMetadata.callerIp AS anomalous_ip,
-  protopayload_auditlog.requestMetadata.callerSuppliedUserAgent AS user_agent
-FROM
-  `your_project.your_dataset.cloudaudit_googleapis_com_*`
-WHERE
-  protopayload_auditlog.authenticationInfo.serviceAccountKeyName IS NOT NULL
-  -- Exclude internal RFC 1918 addresses and authorized corporate egress IP ranges
-  AND NOT (
-    NET.IP_TRUNC(NET.SAFE_IP_FROM_STRING(protopayload_auditlog.requestMetadata.callerIp), 8) = NET.IP_FROM_STRING('10.0.0.0')
-    OR NET.IP_TRUNC(NET.SAFE_IP_FROM_STRING(protopayload_auditlog.requestMetadata.callerIp), 16) = NET.IP_FROM_STRING('192.168.0.0')
-    -- Replace with your corporate egress CIDR:
-    OR NET.IP_TRUNC(NET.SAFE_IP_FROM_STRING(protopayload_auditlog.requestMetadata.callerIp), 24) = NET.IP_FROM_STRING('203.0.113.0')
-  )
-  AND timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 HOUR);
-```
-
-#### Abstract Security Rule Definition
-```yaml
-rule:
-  name: "GCP IAM: Static Service Account Key Used from Untrusted IP"
-  severity: critical
-  condition:
-    all:
-      - equals: { gcp.iam.auth_mechanism: "static_service_account_key" }
-      - not:
-          cidr_match:
-            source.ip:
-              - "10.0.0.0/8"
-              - "172.16.0.0/12"
-              - "192.168.0.0/16"
-              - "203.0.113.0/24" # Corporate Gateway
-  actions:
-    - alert:
-        title: "CRITICAL: Leaked Key Suspected for {{user.email}} from {{source.ip}}"
-        description: "Static key {{gcp.iam.service_account_key_name}} used outside authorized corporate CIDRs."
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 ---
 
@@ -508,50 +378,7 @@ protoPayload.methodName=("GenerateAccessToken" OR "GenerateIdToken" OR "SignJwt"
 NOT protoPayload.authenticationInfo.principalEmail=~"(terraform|github-runner|security-scanner)@"
 ```
 
-#### BigQuery SQL
-```sql
-SELECT
-  timestamp,
-  protopayload_auditlog.authenticationInfo.principalEmail AS calling_principal,
-  protopayload_auditlog.resourceName AS target_impersonated_sa,
-  protopayload_auditlog.methodName AS impersonation_method,
-  protopayload_auditlog.requestMetadata.callerIp AS caller_ip,
-  protopayload_auditlog.authenticationInfo.serviceAccountDelegationInfo
-FROM
-  `your_project.your_dataset.cloudaudit_googleapis_com_data_access`
-WHERE
-  protopayload_auditlog.serviceName = 'iamcredentials.googleapis.com'
-  AND protopayload_auditlog.methodName IN ('GenerateAccessToken', 'GenerateIdToken', 'SignJwt')
-  -- Focus on Tier-0 sensitive accounts:
-  AND (
-    protopayload_auditlog.resourceName LIKE '%admin%'
-    OR protopayload_auditlog.resourceName LIKE '%deployer%'
-    OR protopayload_auditlog.resourceName LIKE '%prod%'
-  )
-  -- Exclude approved bastion or automation accounts:
-  AND protopayload_auditlog.authenticationInfo.principalEmail NOT IN (
-    'ci-cd-orchestrator@management-prod.iam.gserviceaccount.com'
-  )
-  AND timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 6 HOUR);
-```
-
-#### Abstract Security Rule Definition
-```yaml
-rule:
-  name: "GCP IAM: Unauthorized Service Account Impersonation"
-  severity: high
-  condition:
-    all:
-      - equals: { service.name: "iamcredentials.googleapis.com" }
-      - in: { event.action: ["GenerateAccessToken", "GenerateIdToken", "SignJwt"] }
-      - not:
-          wildcard:
-            user.email: ["*ci-cd*", "*automation*"]
-  actions:
-    - alert:
-        title: "Service Account Impersonation: {{user.email}} assumed {{gcp.audit.resource_name}}"
-        description: "Caller {{user.email}} minted access tokens for privileged service account."
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 ---
 
@@ -569,48 +396,7 @@ protoPayload.methodName="google.identity.sts.v1.SecurityTokenService.ExchangeTok
 NOT protoPayload.authenticationInfo.principalSubject=~"subject/repo:acme-corp/.*:ref:refs/heads/main"
 ```
 
-#### BigQuery SQL
-```sql
-SELECT
-  timestamp,
-  protopayload_auditlog.authenticationInfo.principalSubject AS federated_subject,
-  protopayload_auditlog.resourceName AS wif_provider,
-  protopayload_auditlog.requestMetadata.callerIp AS caller_ip,
-  REGEXP_EXTRACT(protopayload_auditlog.authenticationInfo.principalSubject, r'repo:([^:]+)') AS git_repo,
-  REGEXP_EXTRACT(protopayload_auditlog.authenticationInfo.principalSubject, r'ref:([^:]+)') AS git_ref
-FROM
-  `your_project.your_dataset.cloudaudit_googleapis_com_data_access`
-WHERE
-  protopayload_auditlog.serviceName = 'sts.googleapis.com'
-  AND protopayload_auditlog.methodName = 'google.identity.sts.v1.SecurityTokenService.ExchangeToken'
-  -- Flag branches outside main/release or repositories outside approved organization
-  AND (
-    NOT protopayload_auditlog.authenticationInfo.principalSubject LIKE '%repo:acme-corp/%'
-    OR (
-      protopayload_auditlog.authenticationInfo.principalSubject LIKE '%:ref:refs/pull/%'
-      AND protopayload_auditlog.resourceName LIKE '%production%'
-    )
-  )
-  AND timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR);
-```
-
-#### Abstract Security Rule Definition
-```yaml
-rule:
-  name: "GCP STS: Anomalous Workload Identity Federation Subject"
-  severity: high
-  condition:
-    all:
-      - equals: { service.name: "sts.googleapis.com" }
-      - equals: { event.action: "google.identity.sts.v1.SecurityTokenService.ExchangeToken" }
-      - not:
-          wildcard:
-            gcp.iam.principal_subject: ["*//iam.googleapis.com/*repo:acme-corp/*:ref:refs/heads/main*"]
-  actions:
-    - alert:
-        title: "Workload Identity Anomaly: Untrusted Subject {{gcp.iam.principal_subject}}"
-        description: "Token exchange performed from non-approved repository or branch."
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 ---
 
@@ -620,67 +406,7 @@ rule:
 - **Severity**: High
 - **Logic**: Calculate the physical distance between consecutive successful logins for the same principal. If the required velocity between login $A$ and login $B$ exceeds $800\text{ km/h}$, flag as impossible travel.
 
-#### BigQuery SQL (Haversine Velocity Formula)
-```sql
-WITH user_logins AS (
-  SELECT
-    timestamp,
-    protopayload_auditlog.authenticationInfo.principalEmail AS principal_email,
-    protopayload_auditlog.requestMetadata.callerIp AS caller_ip,
-    -- Assume IP geolocation table ip_geo_lookup(ip_range, country, city, latitude, longitude)
-    geo.country,
-    geo.city,
-    geo.latitude,
-    geo.longitude,
-    LAG(timestamp) OVER (PARTITION BY protopayload_auditlog.authenticationInfo.principalEmail ORDER BY timestamp) AS prev_time,
-    LAG(geo.latitude) OVER (PARTITION BY protopayload_auditlog.authenticationInfo.principalEmail ORDER BY timestamp) AS prev_lat,
-    LAG(geo.longitude) OVER (PARTITION BY protopayload_auditlog.authenticationInfo.principalEmail ORDER BY timestamp) AS prev_lon,
-    LAG(geo.city) OVER (PARTITION BY protopayload_auditlog.authenticationInfo.principalEmail ORDER BY timestamp) AS prev_city
-  FROM
-    `your_project.your_dataset.cloudaudit_googleapis_com_data_access` log
-  LEFT JOIN
-    `your_project.reference.ip_geo_lookup` geo
-    ON NET.SAFE_IP_FROM_STRING(log.protopayload_auditlog.requestMetadata.callerIp) BETWEEN geo.start_ip AND geo.end_ip
-  WHERE
-    protopayload_auditlog.serviceName = 'login.googleapis.com'
-    AND protopayload_auditlog.methodName = 'google.login.LoginService.loginSuccess'
-    AND timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 12 HOUR)
-),
-velocity_calc AS (
-  SELECT
-    principal_email,
-    prev_time,
-    timestamp AS curr_time,
-    prev_city,
-    city AS curr_city,
-    TIMESTAMP_DIFF(timestamp, prev_time, SECOND) / 3600.0 AS hours_delta,
-    -- Great-circle Haversine formula (Earth radius ~6371 km)
-    6371 * 2 * ASIN(SQRT(
-      POW(SIN((latitude - prev_lat) * ACOS(-1) / 360), 2) +
-      COS(prev_lat * ACOS(-1) / 180) * COS(latitude * ACOS(-1) / 180) *
-      POW(SIN((longitude - prev_lon) * ACOS(-1) / 360), 2)
-    )) AS distance_km
-  FROM
-    user_logins
-  WHERE
-    prev_time IS NOT NULL
-)
-SELECT
-  principal_email,
-  prev_city,
-  curr_city,
-  ROUND(distance_km, 1) AS distance_km,
-  ROUND(hours_delta, 2) AS hours_delta,
-  ROUND(distance_km / hours_delta, 1) AS velocity_kmh
-FROM
-  velocity_calc
-WHERE
-  hours_delta > 0
-  AND hours_delta < 4 -- Focus on logins within 4 hours
-  AND (distance_km / hours_delta) > 800 -- Exceeds commercial flight speed
-ORDER BY
-  velocity_kmh DESC;
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 ---
 
@@ -759,11 +485,15 @@ cd ../..
 
 If deploying without Infrastructure-as-Code:
 
+> [!WARNING]
+> `gcloud organizations set-iam-policy` replaces the organization's **entire** IAM policy. The steps below are safe only because they edit the live policy fetched in step 1 and keep its `bindings` and `etag` untouched. A policy file built any other way, without the current bindings, removes every org IAM binding. Keep a copy of `/tmp/org_policy.json` until you have checked the result, and prefer Option A.
+
 ```bash
 export ORG_ID="123456789012"
 
 # 1. Fetch the current organization IAM policy to a temporary JSON file
 gcloud organizations get-iam-policy "$ORG_ID" --format=json > /tmp/org_policy.json
+cp /tmp/org_policy.json /tmp/org_policy.backup.json
 
 # 2. Add Data Access audit configuration for iamcredentials and sts
 cat << 'EOF' > /tmp/add_audit_config.py
@@ -842,11 +572,18 @@ gcloud infra-manager deployments apply \
 
 ## 4. End-to-End Pipeline Verification Probe
 
-Run a synthetic, non-destructive impersonation test to verify that your identity audit pipeline captures events and delivers them to Pub/Sub:
+Run a synthetic impersonation test to verify that your identity audit pipeline captures events and delivers them to Pub/Sub. It reads the result from a throwaway probe subscription, never from Abstract's:
 
 ```bash
 export LOG_PROJECT="my-security-logging-prod"
 export TEST_SA="probe-identity-sa@${LOG_PROJECT}.iam.gserviceaccount.com"
+
+# Never pull from abstract-audit-logs-sub: with --auto-ack that deletes events before Abstract
+# reads them, and without it hides them from Abstract for the ack deadline.
+# Create the probe subscription BEFORE the test event.
+PROBE="abstract-probe-$(date +%s)"
+gcloud pubsub subscriptions create "$PROBE" --topic=abstract-audit-logs \
+  --project="$LOG_PROJECT" --expiration-period=1d --message-retention-duration=10m
 
 # 1. Create a lightweight test service account
 gcloud iam service-accounts create probe-identity-sa \
@@ -869,19 +606,20 @@ gcloud auth print-access-token --impersonate-service-account="$TEST_SA" > /dev/n
 echo "Waiting 60 seconds for pipeline routing..."
 sleep 60
 
-# 5. Pull the message directly from the Pub/Sub subscription
-echo "Verifying delivery in Pub/Sub subscription..."
-gcloud pubsub subscriptions pull abstract-audit-logs-sub \
+# 5. Pull the message from the probe subscription (only you read it, so --auto-ack is safe)
+echo "Verifying delivery on the probe subscription..."
+gcloud pubsub subscriptions pull "$PROBE" \
   --project="$LOG_PROJECT" \
   --limit=10 \
   --auto-ack \
   --format="json" | grep -i "iamcredentials.googleapis.com"
 
-# 6. Clean up test service account
+# 6. Clean up the probe subscription and the test service account
+gcloud pubsub subscriptions delete "$PROBE" --project="$LOG_PROJECT" --quiet
 gcloud iam service-accounts delete "$TEST_SA" --project="$LOG_PROJECT" --quiet
 ```
 
-If the `grep` command returns entries containing `iamcredentials.googleapis.com` and `GenerateAccessToken`, your pipeline is operational and feeding Abstract Security.
+If the `grep` command returns entries containing `iamcredentials.googleapis.com` and `GenerateAccessToken`, the events reach the topic Abstract reads from.
 
 ---
 

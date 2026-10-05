@@ -11,7 +11,10 @@ Network threat detection is a primary security workload in Google Cloud. This tu
 3. **VPC DNS query logs** (`logName:"dns.googleapis.com%2Fdns_queries"`)
 4. **Firewall rule decisions** (`logName:"compute.googleapis.com%2Ffirewall"`)
 
-All four streams route into a single Pub/Sub topic and pull subscription in your dedicated security logging project, where Abstract Security ingests them in real time.
+All four streams route into a single Pub/Sub topic and pull subscription in your dedicated security logging project.
+
+> [!WARNING]
+> **These logs reach the Pub/Sub topic; Abstract's managed GCP parser does not yet store them.** The managed GCP Pub/Sub parser keeps only Cloud Audit Log records, and firewall, DNS, Cloud Armor and Cloud IDS logs are not audit logs. There is no parser for them yet. Do not rely on them for detection until a parser ships.
 
 ## Sign in first
 
@@ -82,6 +85,9 @@ gcloud compute backend-services update BACKEND_SERVICE_NAME \
 ```
 
 ## Step 2 — Verify Cloud IDS Endpoints
+
+> [!NOTE]
+> **Cloud IDS costs money on its own.** It is billed per endpoint-hour plus per GB of traffic inspected, and it needs Packet Mirroring. These templates do not create the IDS endpoint or the mirroring policy; they only route the threat logs an existing endpoint writes.
 
 Cloud IDS uses Palo Alto Networks threat detection engines to analyze mirrored network traffic for malware, spyware, and exploit CVEs.
 
@@ -173,7 +179,7 @@ acknowledge_high_volume = true
 EOF
 ```
 
-<walkthrough-info-message>`acknowledge_high_volume = true` is set because `dns_queries` and `load_balancer` (Cloud Armor) are high-volume telemetry streams.</walkthrough-info-message>
+<walkthrough-info-message>`dns_queries` and `load_balancer` (Cloud Armor) are high-volume streams, so the plan stops unless `acknowledge_high_volume = true` is set here or passed as `terraform plan -var acknowledge_high_volume=true`. Measure a baseline before you acknowledge it.</walkthrough-info-message>
 
 ## Step 6 — Plan and Apply
 
@@ -253,13 +259,20 @@ gcloud logging read 'logName:"logging.googleapis.com%2Fsink_error"' \
 
 ### 4. End-to-End Delivery Test
 
-Perform a DNS query or trigger a firewall probe from a VM in your VPC:
+Create a probe subscription, then perform a DNS query or trigger a firewall probe from a VM in your VPC:
 
 ```bash
-# Pull without auto-acking messages so Abstract can still process them:
-gcloud pubsub subscriptions pull abstract-network-threats-sub \
-  --project="$LOG_PROJECT" \
-  --limit=5
+# Never pull from abstract-network-threats-sub: with --auto-ack that deletes events before Abstract
+# reads them, and without it hides them from Abstract for the ack deadline.
+# Pull from a throwaway subscription on the same topic instead. Create it BEFORE the
+# test event: a new subscription only receives messages published after it exists.
+PROBE="abstract-probe-$(date +%s)"
+gcloud pubsub subscriptions create "$PROBE" --topic=abstract-network-threats \
+  --project="$LOG_PROJECT" --expiration-period=1d --message-retention-duration=10m
+# Now make a DNS query or trigger a logged firewall rule from a VM, then wait.
+sleep 60
+gcloud pubsub subscriptions pull "$PROBE" --project="$LOG_PROJECT" --limit=5 --auto-ack
+gcloud pubsub subscriptions delete "$PROBE" --project="$LOG_PROJECT" --quiet
 ```
 
 ## Step 9 — Connect to Abstract Security
@@ -274,7 +287,9 @@ Generate the credentials key for the Abstract service account:
 
 ```bash
 SA_EMAIL=$(terraform output -raw service_account_email)
-gcloud iam service-accounts keys create key.json --iam-account="$SA_EMAIL"
+mkdir -p ~/abstract-keys && chmod 700 ~/abstract-keys   # outside the repo clone
+gcloud iam service-accounts keys create ~/abstract-keys/abstract-network-key.json --iam-account="$SA_EMAIL"
+chmod 600 ~/abstract-keys/abstract-network-key.json
 ```
 
 In the Abstract Security Platform:
@@ -284,17 +299,17 @@ In the Abstract Security Platform:
    ```bash
    terraform output -raw subscription_id
    ```
-4. Upload `key.json`.
+4. Upload `~/abstract-keys/abstract-network-key.json`.
 5. Remove the local key file:
    ```bash
-   rm -f key.json
+   rm -f ~/abstract-keys/abstract-network-key.json
    ```
 
 ## Done
 
 <walkthrough-conclusion-trophy></walkthrough-conclusion-trophy>
 
-Your network threat telemetry pipeline is live! Cloud Armor WAF decisions, Cloud IDS threat detections, VPC DNS queries, and firewall rule decisions are now streaming directly to Abstract Security.
+The pipeline delivers Cloud Armor, Cloud IDS, DNS and firewall logs to the `abstract-network-threats` topic. Abstract's managed GCP parser does not yet store these logs, so do not rely on them for detection until a parser ships.
 
 ---
 

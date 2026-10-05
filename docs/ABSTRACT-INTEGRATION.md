@@ -39,9 +39,11 @@ Cloud Shell path that state is a file in a home directory.
 
 ```bash
 SA=$(terraform output -json abstract_onboarding | jq -r .service_account_email)
-gcloud iam service-accounts keys create abstract-key.json --iam-account="$SA"
+mkdir -p ~/abstract-keys && chmod 700 ~/abstract-keys   # outside the repo clone
+gcloud iam service-accounts keys create ~/abstract-keys/abstract-pubsub-key.json --iam-account="$SA"
+chmod 600 ~/abstract-keys/abstract-pubsub-key.json
 # upload to Abstract, then:
-rm abstract-key.json
+rm ~/abstract-keys/abstract-pubsub-key.json
 ```
 
 > **Abstract PULLS.** It needs `roles/pubsub.subscriber` on the **subscription** — not
@@ -51,15 +53,23 @@ rm abstract-key.json
 ### Verify before you blame the integration
 
 ```bash
-gcloud pubsub topics create abstract-probe --project="$LOG_PROJECT" --quiet
-gcloud pubsub topics delete abstract-probe --project="$LOG_PROJECT" --quiet
+# Never pull from abstract-audit-logs-sub: with --auto-ack that deletes events before Abstract
+# reads them, and without it hides them from Abstract for the ack deadline.
+# Pull from a throwaway subscription on the same topic instead. Create it BEFORE the
+# test event: a new subscription only receives messages published after it exists.
+PROBE="abstract-probe-$(date +%s)"
+gcloud pubsub subscriptions create "$PROBE" --topic=abstract-audit-logs \
+  --project="$LOG_PROJECT" --expiration-period=1d --message-retention-duration=10m
+# Fire a fresh Admin Activity event inside the sink's scope, then wait for routing.
+gcloud pubsub topics create "$PROBE" --project="$LOG_PROJECT" --quiet
+gcloud pubsub topics delete "$PROBE" --project="$LOG_PROJECT" --quiet
 sleep 75
-gcloud pubsub subscriptions pull abstract-audit-logs-sub \
-  --project="$LOG_PROJECT" --limit=5 --auto-ack
+gcloud pubsub subscriptions pull "$PROBE" --project="$LOG_PROJECT" --limit=5 --auto-ack
+gcloud pubsub subscriptions delete "$PROBE" --project="$LOG_PROJECT" --quiet
 ```
 
-Events here but not in Abstract → credentials or config. Nothing here → the cloud side, and
-the integration is not the problem.
+Events on the probe but not in Abstract → credentials or config. Nothing on the probe → the
+cloud side, and the integration is not the problem.
 
 ---
 

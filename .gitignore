@@ -26,3 +26,14 @@ app/web/.deploy.zip
 # Real deployment values: never commit (the *.tfvars.example files are the templates)
 *.tfvars
 !*.tfvars.example
+
+# Editor / AI-tool settings: personal, never published
+.vscode/
+
+# Service-account keys: never commit. Keys belong in ~/abstract-keys (mode 600), not the clone
+*-key.json
+key.json
+*.keyfile.json
+
+# Restricted-name list for tests/check-leaks.sh — never committed
+tests/.leak-names

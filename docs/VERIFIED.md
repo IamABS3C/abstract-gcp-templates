@@ -122,7 +122,12 @@ Wait five minutes, then fire a **fresh** event.
 The first pull delivers but does not acknowledge, so the message sits inside the 60-second
 ack deadline and a second pull returns nothing. That reads as "it stopped working."
 
-Always `--auto-ack` when testing by hand.
+When testing by hand, never pull from the subscription Abstract reads: with `--auto-ack`
+that deletes events before Abstract reads them, and without it hides them from Abstract for
+the ack deadline. Create a throwaway subscription on the same topic before the test event
+(`gcloud pubsub subscriptions create abstract-probe-$(date +%s) --topic=abstract-audit-logs
+--expiration-period=1d --message-retention-duration=10m`), pull from it with `--auto-ack`,
+then delete it.
 
 ---
 

@@ -186,9 +186,11 @@ Retrieve onboarding credentials for Abstract Security:
 tofu output abstract_onboarding
 export SA_EMAIL=$(tofu output -json abstract_onboarding | jq -r .service_account_email)
 
-gcloud iam service-accounts keys create abstract-key.json \
+mkdir -p ~/abstract-keys && chmod 700 ~/abstract-keys   # outside the repo clone
+gcloud iam service-accounts keys create ~/abstract-keys/abstract-pubsub-key.json \
   --iam-account="$SA_EMAIL" \
   --project="acme-security-logging"
+chmod 600 ~/abstract-keys/abstract-pubsub-key.json
 ```
 
 ---
@@ -200,9 +202,20 @@ gcloud iam service-accounts keys create abstract-key.json \
 gcloud logging sinks describe abstract-project-sink \
   --project="$SINK_PROJECT"
 
-# 2. Pull a message from the subscription
-gcloud pubsub subscriptions pull abstract-audit-logs-sub \
-  --project="acme-security-logging" --limit=3 --auto-ack
+# 2. Prove delivery end to end
+# Never pull from abstract-audit-logs-sub: with --auto-ack that deletes events before Abstract
+# reads them, and without it hides them from Abstract for the ack deadline.
+# Pull from a throwaway subscription on the same topic instead. Create it BEFORE the
+# test event: a new subscription only receives messages published after it exists.
+PROBE="abstract-probe-$(date +%s)"
+gcloud pubsub subscriptions create "$PROBE" --topic=abstract-audit-logs \
+  --project="acme-security-logging" --expiration-period=1d --message-retention-duration=10m
+# Fire a fresh Admin Activity event inside the sink's scope, then wait for routing.
+gcloud pubsub topics create "$PROBE" --project="$SINK_PROJECT" --quiet
+gcloud pubsub topics delete "$PROBE" --project="$SINK_PROJECT" --quiet
+sleep 75
+gcloud pubsub subscriptions pull "$PROBE" --project="acme-security-logging" --limit=3 --auto-ack
+gcloud pubsub subscriptions delete "$PROBE" --project="acme-security-logging" --quiet
 ```
 
 ---

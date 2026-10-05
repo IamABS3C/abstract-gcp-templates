@@ -155,14 +155,21 @@ gcloud logging read 'logName:"logging.googleapis.com%2Fsink_error"' \
 
 ### Pull test messages
 
-Check that the pull subscription is functional:
+Check delivery on a probe subscription, never on Abstract's:
 
 ```bash
-# Pull WITHOUT --auto-ack to inspect any incoming events without permanently consuming them.
-# Unacked messages return to the subscription after the 60s ack deadline so Abstract
-# will still receive them.
-gcloud pubsub subscriptions pull abstract-billing-audit-logs-sub \
-  --project="$LOG_PROJECT" --limit=5
+# Never pull from abstract-billing-audit-logs-sub: with --auto-ack that deletes events before Abstract
+# reads them, and without it hides them from Abstract for the ack deadline.
+# Pull from a throwaway subscription on the same topic instead. Create it BEFORE the
+# test event: a new subscription only receives messages published after it exists.
+PROBE="abstract-probe-$(date +%s)"
+gcloud pubsub subscriptions create "$PROBE" --topic=abstract-billing-audit-logs \
+  --project="$LOG_PROJECT" --expiration-period=1d --message-retention-duration=10m
+# Billing events are rare: make one on the billing account (for example create and
+# delete a budget), then wait.
+sleep 120
+gcloud pubsub subscriptions pull "$PROBE" --project="$LOG_PROJECT" --limit=5 --auto-ack
+gcloud pubsub subscriptions delete "$PROBE" --project="$LOG_PROJECT" --quiet
 ```
 
 <walkthrough-info-message>GCP has a **first-class health signal for its own main failure mode**. A sink whose writer identity lacks `pubsub.publisher` produces `exports/error_count`, a `sink_error` log entry, **and a daily `[ACTION REQUIRED]` email**.</walkthrough-info-message>
@@ -183,9 +190,11 @@ You need two values, plus a key:
 
 ```bash
 export SA_EMAIL=$(terraform output -raw service_account_email)
-gcloud iam service-accounts keys create key.json \
+mkdir -p ~/abstract-keys && chmod 700 ~/abstract-keys   # outside the repo clone
+gcloud iam service-accounts keys create ~/abstract-keys/abstract-billing-key.json \
   --iam-account="$SA_EMAIL" \
   --project="$LOG_PROJECT"
+chmod 600 ~/abstract-keys/abstract-billing-key.json
 ```
 
 ## Done

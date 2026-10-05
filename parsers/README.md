@@ -1,23 +1,13 @@
 # Abstract Security Normalization Parsers
 
-Ingestion pipeline definitions for Abstract Security that parse, normalize, and enrich Google Cloud and Google Workspace telemetry streams into standard Elastic Common Schema (ECS) and Open Cybersecurity Schema Framework (OCSF) events.
+Configuration-level parsers for Abstract Security GCP Pub/Sub configurations.
+
+**Audit logs need no parser from this folder.** Abstract's managed GCP Pub/Sub parser already parses Cloud Audit Logs, including logins, service-account impersonation, Workload Identity Federation and key use. A configuration-level parser **replaces** the managed parser, so never install one of these on the configuration that reads `abstract-audit-logs-sub`: audit logs would stop being stored. Each parser here goes only on a separate configuration that reads its own feed's subscription.
 
 ## Available Parsers
 
-| Parser | Telemetry Source | Description | Normalized Dataset |
-|---|---|---|---|
-| [`gcp-identity-auth.yml`](gcp-identity-auth.yml) | Google Cloud Audit Logs | Normalizes Cloud Identity/Workspace logins, Service Account impersonation (`iamcredentials`), Workload Identity Federation (`sts`), and static key usage | `gcp.identity_auth` |
-| [`scc-findings.yml`](scc-findings.yml) | Security Command Center | Normalizes real-time security posture violations, threats, and vulnerability findings | `gcp.scc_findings` |
-| [`workspace-reports.yml`](workspace-reports.yml) | Google Workspace Admin SDK Reports API | Normalizes user logins, token grants, admin actions, and SAML events | `google_workspace.audit` |
-
-## Key Identity Enrichment Fields
-
-The `gcp-identity-auth.yml` pipeline extracts critical security metadata from `protoPayload`:
-
-- `user.email`: Authenticated principal email (user or service account).
-- `source.ip`: Caller IP address (`protoPayload.requestMetadata.callerIp`).
-- `user_agent.original`: Client agent string (`callerSuppliedUserAgent`).
-- `gcp.iam.auth_mechanism`: Flagged as `static_service_account_key` when `serviceAccountKeyName` is present, or `workload_identity_federation` when `principalSubject` is present.
-- `gcp.iam.service_account_key_name`: Full resource path of the private key used.
-- `gcp.iam.delegation_chain`: Full service account impersonation trace.
-- `event.outcome`: Evaluated as `success` or `failure` based on `status.code` or login event name.
+| Parser | Install on | Status |
+|---|---|---|
+| [`cloud-asset-inventory.yml`](cloud-asset-inventory.yml) | The configuration for `abstract-asset-changes-sub` (deployment 07) | See [ABSTRACT-INTEGRATION.md](../docs/ABSTRACT-INTEGRATION.md#asset-inventory--resource-and-iam-policy-changes) |
+| [`scc-findings.yml`](scc-findings.yml) | The configuration for `abstract-audit-logs-sub-scc` (deployment 06) | Preview: writes some fields Abstract does not have yet |
+| [`workspace-reports.yml`](workspace-reports.yml) | Do not install | Workspace logs come from Abstract's Google Workspace integration, which has its own managed parser |

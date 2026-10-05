@@ -160,16 +160,26 @@ written ~30 s and ~2 min after `CreateSink` were **never delivered**; an event a
 arrived in about a minute. Routing is write-time, so the early ones were never routed and
 cannot be recovered. Wait five minutes, then fire a **fresh** event.
 
-**`gcloud pubsub subscriptions pull` without `--auto-ack` makes the next pull look empty.**
-The first pull delivers the message but does not acknowledge it, so it stays inside the
-60-second ack deadline and a second pull returns nothing. That reads as "it stopped
-working". Always use `--auto-ack` when testing.
+**Never test by pulling from Abstract's subscription.** With `--auto-ack` a pull deletes
+events before Abstract reads them; without it the message is hidden from Abstract for the
+ack deadline, and your own second pull returns nothing, which reads as "it stopped
+working". Test on a throwaway subscription on the same topic, created before the test
+event, and pull from that with `--auto-ack`:
 
 ```bash
-gcloud pubsub topics create abstract-probe --project=P --quiet
-gcloud pubsub topics delete abstract-probe --project=P --quiet
+# Never pull from abstract-audit-logs-sub: with --auto-ack that deletes events before Abstract
+# reads them, and without it hides them from Abstract for the ack deadline.
+# Pull from a throwaway subscription on the same topic instead. Create it BEFORE the
+# test event: a new subscription only receives messages published after it exists.
+PROBE="abstract-probe-$(date +%s)"
+gcloud pubsub subscriptions create "$PROBE" --topic=abstract-audit-logs \
+  --project="P" --expiration-period=1d --message-retention-duration=10m
+# Fire a fresh Admin Activity event inside the sink's scope, then wait for routing.
+gcloud pubsub topics create "$PROBE" --project="P" --quiet
+gcloud pubsub topics delete "$PROBE" --project="P" --quiet
 sleep 75
-gcloud pubsub subscriptions pull abstract-audit-logs-sub --project=P --limit=5 --auto-ack
+gcloud pubsub subscriptions pull "$PROBE" --project="P" --limit=5 --auto-ack
+gcloud pubsub subscriptions delete "$PROBE" --project="P" --quiet
 ```
 
 ---
@@ -248,4 +258,3 @@ Dedicated helper scripts for specific telemetry pipelines:
 * 📘 **Master Walkthrough**: [Comprehensive Master Walkthrough](../WALKTHROUGH.md)
 * 🛠️ **Troubleshooting Runbooks**: [Master Troubleshooting Guide](TROUBLESHOOTING-GUIDE.md)
 * 📘 **Master Telemetry Reference**: [Master GCP Telemetry Dataflow Reference](DATAFLOW-AND-ARCHITECTURE-REFERENCE.md)
-* 🌐 **Interactive Diagram Explorer**: [Architecture Explorer Web UI](architecture-explorer.html)

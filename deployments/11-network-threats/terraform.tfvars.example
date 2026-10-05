@@ -24,7 +24,8 @@ log_project = "acme-security-logging" # gcloud projects list
 # Cloud IDS threat logs filter (default: ids.googleapis.com%2Fthreat)
 # platform_log_filters = ["ids.googleapis.com%2Fthreat"]
 
-# Acknowledge high volume log ingestion (default: true)
+# Required with the default categories: dns_queries and load_balancer are high tier,
+# and the plan stops until you acknowledge the volume. Measure a baseline first.
 # acknowledge_high_volume = true
 
 # Custom resource naming

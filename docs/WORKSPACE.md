@@ -285,19 +285,21 @@ scope registry.
 ### 4. Create the key, out of band
 
 ```bash
-gcloud iam service-accounts keys create ws-key.json \
+mkdir -p ~/abstract-keys && chmod 700 ~/abstract-keys   # outside the repo clone
+gcloud iam service-accounts keys create ~/abstract-keys/abstract-workspace-key.json \
   --iam-account="$(tofu output -json workspace_onboarding | jq -r .service_account_email)" \
   --project="acme-security-logging"
+chmod 600 ~/abstract-keys/abstract-workspace-key.json
 ```
 
 Deliberately **not** created by Terraform: it would put a private key in state.
 
-Upload to Abstract with `admin_email` and the application list, then `rm ws-key.json`.
+Upload to Abstract with `admin_email` and the application list, then `rm ~/abstract-keys/abstract-workspace-key.json`.
 
 ### 5. Verify
 
 ```bash
-gcloud auth activate-service-account --key-file=ws-key.json
+gcloud auth activate-service-account --key-file="$HOME/abstract-keys/abstract-workspace-key.json"
 ```
 
 Or simply watch for events in Abstract. Delegation can take a few minutes to propagate.
@@ -373,5 +375,4 @@ Or simply watch for events in Abstract. Delegation can take a few minutes to pro
 * 📘 **Master Telemetry Reference**: [Master GCP Telemetry Dataflow Reference](DATAFLOW-AND-ARCHITECTURE-REFERENCE.md)
 * 🛠️ **Troubleshooting Runbooks**: [Master Troubleshooting Guide](TROUBLESHOOTING-GUIDE.md)
 * 🔐 **Identity Threat Detection**: [Enterprise Identity & Authentication Guide](IDENTITY-AND-AUTHENTICATION-GUIDE.md)
-* 🌐 **Interactive Diagram Viewer**: [Architecture Explorer Web UI](architecture-explorer.html)
 * 🎨 **Interactive Draw.io Launcher**: `./scripts/open-diagram.sh 04-identity-auth-oneuptime`

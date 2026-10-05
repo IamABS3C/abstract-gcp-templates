@@ -68,6 +68,10 @@ raises nothing, and is indistinguishable from a broken sink.
 | `load_balancer` | `resource.type="http_load_balancer"` | high | **Per backend service** (`log_config { enable = true }`). Cloud Armor WAF decisions ride here. Note this matches the global HTTP(S) LB only |
 | `vpc_flows` | `logName:"compute.googleapis.com%2Fvpc_flows"` | **extreme** | **Per subnet, with a sampling rate.** Sampling is the cost control and it belongs at the subnet, not in this filter |
 
+> **None of these five is stored by Abstract today.** They are not Cloud Audit Logs, and the managed
+> GCP Pub/Sub parser drops every non-audit payload; there is no network parser yet. Routing them
+> costs Pub/Sub delivery and stores nothing until a parser ships.
+>
 > Four of these five need enabling somewhere else first. **The sink can only route what is
 > already being generated** — adding the category and seeing nothing is the expected result
 > if the source is off, and it looks exactly like a broken pipeline.
@@ -252,5 +256,4 @@ Then apply. There is no undo.
 
 * 📘 **Master Telemetry Reference**: [Master GCP Telemetry Dataflow Reference](DATAFLOW-AND-ARCHITECTURE-REFERENCE.md)
 * 🛠️ **Troubleshooting Runbooks**: [Master Troubleshooting Guide](TROUBLESHOOTING-GUIDE.md)
-* 🌐 **Interactive Diagram Viewer**: [Architecture Explorer Web UI](architecture-explorer.html)
 * 🎨 **Interactive Draw.io Launcher**: `./scripts/open-diagram.sh 03-log-router-boundary`

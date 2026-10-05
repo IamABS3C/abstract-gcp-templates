@@ -204,9 +204,6 @@ You can inspect, edit, and re-export any diagram using your local Draw.io Deskto
 
 # 2. Open directly in diagrams.net in your default web browser
 ./scripts/open-diagram.sh 02-audit-logs-organization --web
-
-# 3. Explore interactively with pan/zoom in the web viewer
-open docs/architecture-explorer.html
 ```
 
 ---

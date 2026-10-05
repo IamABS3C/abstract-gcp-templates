@@ -8,7 +8,7 @@ output "workspace_onboarding" {
       note      = "Paste client_id into 'Client ID' and the scopes string into 'OAuth scopes' EXACTLY as shown, comma-separated with no spaces. Requires a Workspace SUPER ADMIN — a GCP Owner cannot do this."
     }
     step_2_create_key = {
-      command = "gcloud iam service-accounts keys create abstract-workspace-key.json --iam-account=${try(google_service_account.workspace[0].email, "")}"
+      command = "mkdir -p ~/abstract-keys && chmod 700 ~/abstract-keys && gcloud iam service-accounts keys create ~/abstract-keys/abstract-workspace-key.json --iam-account=${try(google_service_account.workspace[0].email, "")} && chmod 600 ~/abstract-keys/abstract-workspace-key.json"
       note    = "Upload to Abstract, then DELETE the local copy. Not created in Terraform on purpose — it would put a private key in state."
     }
     step_3_abstract_integration = {

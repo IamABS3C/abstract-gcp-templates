@@ -168,18 +168,25 @@ gcloud logging read 'logName:"logging.googleapis.com%2Fsink_error"' \
 Everything above can pass while nothing flows. This is the only check that does not.
 
 ```bash
+# Never pull from abstract-audit-logs-sub: with --auto-ack that deletes events before Abstract
+# reads them, and without it hides them from Abstract for the ack deadline.
+# Use a throwaway subscription on the same topic. Create it BEFORE the test event:
+# a new subscription only receives messages published after it exists.
+PROBE="abstract-probe-$(date +%s)"
+gcloud pubsub subscriptions create "$PROBE" --topic=abstract-audit-logs \
+  --project="$LOG_PROJECT" --expiration-period=1d --message-retention-duration=10m
+
 # Fire a fresh event. Create+delete of a topic is guaranteed Admin Activity,
 # costs nothing, and leaves nothing behind.
-gcloud pubsub topics create abstract-probe --project="$LOG_PROJECT" --quiet
-gcloud pubsub topics delete abstract-probe --project="$LOG_PROJECT" --quiet
+gcloud pubsub topics create "$PROBE" --project="$LOG_PROJECT" --quiet
+gcloud pubsub topics delete "$PROBE" --project="$LOG_PROJECT" --quiet
 
 sleep 75
 
-# --auto-ack MATTERS. Without it the message is delivered but not acknowledged,
-# so it stays inside the 60-second ack deadline and your NEXT pull returns
-# nothing — which reads as "it stopped working" and is not.
-gcloud pubsub subscriptions pull abstract-audit-logs-sub \
+# --auto-ack is safe here because only you read the probe subscription.
+gcloud pubsub subscriptions pull "$PROBE" \
   --project="$LOG_PROJECT" --limit=5 --auto-ack
+gcloud pubsub subscriptions delete "$PROBE" --project="$LOG_PROJECT" --quiet
 ```
 
 You should see your own `CreateTopic` and `DeleteTopic`, with `principalEmail`,

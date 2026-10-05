@@ -34,7 +34,7 @@ output "abstract_onboarding" {
     integration     = "default.google_cloud_pub_sub.0_0_11"
     project_id      = var.log_project
     subscription_id = google_pubsub_subscription.abstract.name
-    credentials     = var.create_service_account_key ? "see terraform output -raw service_account_key (WARNING: also in state)" : "create out of band: gcloud iam service-accounts keys create key.json --iam-account=${google_service_account.abstract.email}"
+    credentials     = var.create_service_account_key ? "see terraform output -raw service_account_key (WARNING: also in state)" : "create out of band, outside the repo clone: mkdir -p ~/abstract-keys && chmod 700 ~/abstract-keys && gcloud iam service-accounts keys create ~/abstract-keys/abstract-pubsub-key.json --iam-account=${google_service_account.abstract.email} && chmod 600 ~/abstract-keys/abstract-pubsub-key.json"
     next_steps = [
       "1. Verify the sink publishes: check logging.googleapis.com/exports/error_count and look for sink_error entries.",
       "2. Confirm topic/send_request_count is rising. Zero here is the sink or the publisher binding, NOT Abstract.",
