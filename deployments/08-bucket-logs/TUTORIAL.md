@@ -110,12 +110,20 @@ which is exactly why it proves nothing.
 
 ### Troubleshooting: Verify Notification Arrival
 
-Pull the test notification from the subscription:
+Create a probe subscription first, then upload the file again and pull from the probe:
 
 ```bash
-gcloud pubsub subscriptions pull abstract-bucket-logs-sub \
-  --project="YOUR_LOG_PROJECT" \
-  --limit=1
+# Never pull from abstract-gcs-notifications-sub: with --auto-ack that deletes events before Abstract
+# reads them, and without it hides them from Abstract for the ack deadline.
+# Pull from a throwaway subscription on the same topic instead. Create it BEFORE the
+# test event: a new subscription only receives messages published after it exists.
+PROBE="abstract-probe-$(date +%s)"
+gcloud pubsub subscriptions create "$PROBE" --topic=abstract-gcs-notifications \
+  --project="YOUR_LOG_PROJECT" --expiration-period=1d --message-retention-duration=10m
+gsutil cp /tmp/real-sample.gz gs://YOUR_BUCKET/logs/
+sleep 60
+gcloud pubsub subscriptions pull "$PROBE" --project="YOUR_LOG_PROJECT" --limit=1 --auto-ack
+gcloud pubsub subscriptions delete "$PROBE" --project="YOUR_LOG_PROJECT" --quiet
 ```
 
 If no message arrives:

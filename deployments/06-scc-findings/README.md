@@ -191,12 +191,19 @@ gcloud pubsub topics add-iam-policy-binding abstract-scc-findings \
   --role="roles/pubsub.publisher"
 ```
 
-#### 3. Test Ingestion via Active Pull
+#### 3. Test Ingestion via a Probe Subscription
 ```bash
-# Pull test message without auto-ack
-gcloud pubsub subscriptions pull abstract-scc-findings-sub \
-  --project="$LOG_PROJECT" \
-  --limit=2
+# Never pull from abstract-audit-logs-sub-scc: with --auto-ack that deletes events before Abstract
+# reads them, and without it hides them from Abstract for the ack deadline.
+# Pull from a throwaway subscription on the same topic instead. Create it BEFORE the
+# test event: a new subscription only receives messages published after it exists.
+PROBE="abstract-probe-$(date +%s)"
+gcloud pubsub subscriptions create "$PROBE" --topic=abstract-audit-logs-scc \
+  --project="$LOG_PROJECT" --expiration-period=1d --message-retention-duration=10m
+# Wait for a new ACTIVE finding (findings are not generated on demand), then pull.
+sleep 600
+gcloud pubsub subscriptions pull "$PROBE" --project="$LOG_PROJECT" --limit=2 --auto-ack
+gcloud pubsub subscriptions delete "$PROBE" --project="$LOG_PROJECT" --quiet
 ```
 
 ---

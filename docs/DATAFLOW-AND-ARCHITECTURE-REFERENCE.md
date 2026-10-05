@@ -186,9 +186,21 @@ gcloud pubsub subscriptions describe abstract-audit-logs-sub --project=$LOG_PROJ
 gcloud pubsub subscriptions get-iam-policy abstract-audit-logs-sub --project=$LOG_PROJECT --flatten="bindings[].members" --filter="bindings.role:roles/pubsub.subscriber"
 ```
 
-**Step 5: Perform Live Non-Destructive Subscription Pull Test**
+**Step 5: Prove delivery on a probe subscription**
 ```bash
-gcloud pubsub subscriptions pull abstract-audit-logs-sub --project=$LOG_PROJECT --auto-ack --limit=1
+# Never pull from abstract-audit-logs-sub: with --auto-ack that deletes events before Abstract
+# reads them, and without it hides them from Abstract for the ack deadline.
+# Pull from a throwaway subscription on the same topic instead. Create it BEFORE the
+# test event: a new subscription only receives messages published after it exists.
+PROBE="abstract-probe-$(date +%s)"
+gcloud pubsub subscriptions create "$PROBE" --topic=abstract-audit-logs \
+  --project="$LOG_PROJECT" --expiration-period=1d --message-retention-duration=10m
+# Fire a fresh Admin Activity event inside the sink's scope, then wait for routing.
+gcloud pubsub topics create "$PROBE" --project="$LOG_PROJECT" --quiet
+gcloud pubsub topics delete "$PROBE" --project="$LOG_PROJECT" --quiet
+sleep 75
+gcloud pubsub subscriptions pull "$PROBE" --project="$LOG_PROJECT" --limit=1 --auto-ack
+gcloud pubsub subscriptions delete "$PROBE" --project="$LOG_PROJECT" --quiet
 ```
 
 #### Schema Normalization & Threat Detections
@@ -306,9 +318,21 @@ gcloud pubsub topics get-iam-policy abstract-audit-logs --project=$LOG_PROJECT -
 gcloud monitoring metrics-scopes list --project=$LOG_PROJECT
 ```
 
-**Step 5: Pull Live Message to Verify End-to-End Delivery**
+**Step 5: Prove delivery on a probe subscription**
 ```bash
-gcloud pubsub subscriptions pull abstract-audit-logs-sub --project=$LOG_PROJECT --auto-ack --limit=1
+# Never pull from abstract-audit-logs-sub: with --auto-ack that deletes events before Abstract
+# reads them, and without it hides them from Abstract for the ack deadline.
+# Pull from a throwaway subscription on the same topic instead. Create it BEFORE the
+# test event: a new subscription only receives messages published after it exists.
+PROBE="abstract-probe-$(date +%s)"
+gcloud pubsub subscriptions create "$PROBE" --topic=abstract-audit-logs \
+  --project="$LOG_PROJECT" --expiration-period=1d --message-retention-duration=10m
+# Fire a fresh Admin Activity event inside the sink's scope, then wait for routing.
+gcloud pubsub topics create "$PROBE" --project="$LOG_PROJECT" --quiet
+gcloud pubsub topics delete "$PROBE" --project="$LOG_PROJECT" --quiet
+sleep 75
+gcloud pubsub subscriptions pull "$PROBE" --project="$LOG_PROJECT" --limit=1 --auto-ack
+gcloud pubsub subscriptions delete "$PROBE" --project="$LOG_PROJECT" --quiet
 ```
 
 #### Schema Normalization & Threat Detections

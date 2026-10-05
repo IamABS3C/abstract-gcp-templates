@@ -224,11 +224,20 @@ gcloud logging read 'logName:"logging.googleapis.com%2Fsink_error"' \
   --limit=20
 ```
 
-#### 4. Pull Test Billing Messages
+#### 4. Test Billing Messages via a Probe Subscription
 ```bash
-gcloud pubsub subscriptions pull abstract-billing-audit-logs-sub \
-  --project="$LOG_PROJECT" \
-  --limit=2
+# Never pull from abstract-billing-audit-logs-sub: with --auto-ack that deletes events before Abstract
+# reads them, and without it hides them from Abstract for the ack deadline.
+# Pull from a throwaway subscription on the same topic instead. Create it BEFORE the
+# test event: a new subscription only receives messages published after it exists.
+PROBE="abstract-probe-$(date +%s)"
+gcloud pubsub subscriptions create "$PROBE" --topic=abstract-billing-audit-logs \
+  --project="$LOG_PROJECT" --expiration-period=1d --message-retention-duration=10m
+# Billing events are rare: make one on the billing account (for example create and
+# delete a budget), then wait.
+sleep 120
+gcloud pubsub subscriptions pull "$PROBE" --project="$LOG_PROJECT" --limit=2 --auto-ack
+gcloud pubsub subscriptions delete "$PROBE" --project="$LOG_PROJECT" --quiet
 ```
 
 ---

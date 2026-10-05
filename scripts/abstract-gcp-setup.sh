@@ -515,7 +515,8 @@ probe_project() {
 step9() {
   title 9 "Test and verify"
   why "Writes a harmless admin event inside the ${SCOPE:-chosen scope} (creates and deletes a log-based metric),"
-  why "then waits for it on the subscription. A new sink routes nothing for about 3 minutes."
+  why "then waits for it on a throwaway subscription on the same topic, never on Abstract's."
+  why "A new sink routes nothing for about 3 minutes."
   [[ -n "$LOG_PROJECT" ]] || { bad "finish step 3 first"; return; }
   if $CHECK_ONLY; then
     gcloud pubsub subscriptions describe "$SUB" --project="$LOG_PROJECT" >/dev/null 2>&1 && pass "subscription is readable" || bad "subscription not found"
@@ -545,12 +546,21 @@ step9() {
     fi
     say "  test event written ($probe)"
   }
-  send_probe || return
-  say "  watching $SUB for up to 5 minutes…"
+  # Never pull from $SUB: with --auto-ack that deletes events before Abstract reads them, and
+  # without it hides them from Abstract for the ack deadline. Read a throwaway subscription on
+  # the same topic instead, created BEFORE the test event (it only receives later messages).
+  local probe_sub; probe_sub="abstract-probe-sub-$(date +%s)"
+  printf '%s   $ gcloud pubsub subscriptions create %s --topic=%s --project=%s --expiration-period=1d --message-retention-duration=10m%s\n' "$D" "$probe_sub" "$TOPIC" "$LOG_PROJECT" "$O"
+  if ! gcloud pubsub subscriptions create "$probe_sub" --topic="$TOPIC" --project="$LOG_PROJECT" \
+       --expiration-period=1d --message-retention-duration=10m --quiet >/dev/null 2>&1; then
+    bad "could not create the probe subscription $probe_sub on $TOPIC (needs pubsub.subscriptions.create in $LOG_PROJECT)"; return
+  fi
+  send_probe || { gcloud pubsub subscriptions delete "$probe_sub" --project="$LOG_PROJECT" --quiet >/dev/null 2>&1; return; }
+  say "  watching the probe subscription $probe_sub (on $TOPIC) for up to 5 minutes…"
   for i in $(seq 1 20); do
     sleep 15
-    # Peek without acknowledging, so Abstract still receives everything.
-    got=$(gcloud pubsub subscriptions pull "$SUB" --project="$LOG_PROJECT" --limit=50 --format=json 2>/dev/null | python3 -c '
+    # Only this script reads the probe subscription, so acknowledging there is safe.
+    got=$(gcloud pubsub subscriptions pull "$probe_sub" --project="$LOG_PROJECT" --limit=50 --auto-ack --format=json 2>/dev/null | python3 -c '
 import base64, json, sys
 for m in json.load(sys.stdin) or []:
     d = m.get("message", {}).get("data", "")
@@ -562,7 +572,9 @@ for m in json.load(sys.stdin) or []:
     [[ $i -eq 10 ]] && { echo; send_probe || true; }
     printf '.'
   done; echo
-  [[ -n "$got" ]] && pass "the test event arrived on $SUB — the pipeline works end to end" \
+  gcloud pubsub subscriptions delete "$probe_sub" --project="$LOG_PROJECT" --quiet >/dev/null 2>&1 \
+    || warn "could not delete the probe subscription $probe_sub; it expires by itself after 1 day"
+  [[ -n "$got" ]] && pass "the test event arrived on $TOPIC — the pipeline works end to end" \
     || bad "no test event after 5 minutes. Check sink errors: gcloud logging read 'logName:\"logging.googleapis.com%2Fsink_error\"' --project=$LOG_PROJECT --limit=5"
 }
 

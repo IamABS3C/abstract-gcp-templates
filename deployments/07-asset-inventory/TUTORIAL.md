@@ -130,12 +130,20 @@ If IAM changes in projects do not generate feed events:
 - Check that the modified resource type (e.g. `iam.googleapis.com/ServiceAccountKey`) is included in your `asset_types` variable.
 
 ### 2. Testing Feed Delivery
-Generate a benign asset event (such as updating a label or tag on a test resource) and pull from the subscription:
+Create a probe subscription, generate a benign asset event the feed covers (the default content type is `IAM_POLICY`, so add and remove an IAM binding on a test resource), and pull from the probe:
 
 ```bash
-gcloud pubsub subscriptions pull abstract-asset-inventory-sub \
-  --project="YOUR_LOG_PROJECT" \
-  --limit=1
+# Never pull from abstract-asset-changes-sub: with --auto-ack that deletes events before Abstract
+# reads them, and without it hides them from Abstract for the ack deadline.
+# Pull from a throwaway subscription on the same topic instead. Create it BEFORE the
+# test event: a new subscription only receives messages published after it exists.
+PROBE="abstract-probe-$(date +%s)"
+gcloud pubsub subscriptions create "$PROBE" --topic=abstract-asset-changes \
+  --project="YOUR_LOG_PROJECT" --expiration-period=1d --message-retention-duration=10m
+# Now add and remove an IAM binding on a test resource, then wait.
+sleep 120
+gcloud pubsub subscriptions pull "$PROBE" --project="YOUR_LOG_PROJECT" --limit=1 --auto-ack
+gcloud pubsub subscriptions delete "$PROBE" --project="YOUR_LOG_PROJECT" --quiet
 ```
 
 <walkthrough-conclusion-trophy></walkthrough-conclusion-trophy>

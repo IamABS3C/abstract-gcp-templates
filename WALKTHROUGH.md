@@ -827,14 +827,14 @@ tofu init && tofu apply
 cd ../..
 ```
 
-### Safe Non-Destructive Verification:
-Run an end-to-end verification probe that creates a benign admin event and pulls from Pub/Sub **without `--auto-ack`**:
+### End-to-end verification:
+Run the verification probe. It creates a throwaway subscription on the topic, writes a benign admin event, pulls the event from the throwaway subscription and then deletes it:
 
 ```bash
 ./scripts/abstract-gcp-setup.sh --step 9
 ```
 
-Because `--auto-ack` is omitted, the test event returns to the queue when the deadline expires and is delivered safely to Abstract Security!
+It never pulls from Abstract's subscription: pulling there with `--auto-ack` deletes events before Abstract reads them, and without it hides them from Abstract for the ack deadline.
 
 ### Diagnostic Verification Checkpoint:
 

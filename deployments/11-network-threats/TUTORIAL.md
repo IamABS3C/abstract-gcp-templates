@@ -253,13 +253,20 @@ gcloud logging read 'logName:"logging.googleapis.com%2Fsink_error"' \
 
 ### 4. End-to-End Delivery Test
 
-Perform a DNS query or trigger a firewall probe from a VM in your VPC:
+Create a probe subscription, then perform a DNS query or trigger a firewall probe from a VM in your VPC:
 
 ```bash
-# Pull without auto-acking messages so Abstract can still process them:
-gcloud pubsub subscriptions pull abstract-network-threats-sub \
-  --project="$LOG_PROJECT" \
-  --limit=5
+# Never pull from abstract-network-threats-sub: with --auto-ack that deletes events before Abstract
+# reads them, and without it hides them from Abstract for the ack deadline.
+# Pull from a throwaway subscription on the same topic instead. Create it BEFORE the
+# test event: a new subscription only receives messages published after it exists.
+PROBE="abstract-probe-$(date +%s)"
+gcloud pubsub subscriptions create "$PROBE" --topic=abstract-network-threats \
+  --project="$LOG_PROJECT" --expiration-period=1d --message-retention-duration=10m
+# Now make a DNS query or trigger a logged firewall rule from a VM, then wait.
+sleep 60
+gcloud pubsub subscriptions pull "$PROBE" --project="$LOG_PROJECT" --limit=5 --auto-ack
+gcloud pubsub subscriptions delete "$PROBE" --project="$LOG_PROJECT" --quiet
 ```
 
 ## Step 9 — Connect to Abstract Security

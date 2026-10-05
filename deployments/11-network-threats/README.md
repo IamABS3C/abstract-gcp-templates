@@ -249,11 +249,19 @@ gcloud pubsub topics add-iam-policy-binding abstract-network-threats \
   --role="roles/pubsub.publisher"
 ```
 
-#### 6. Pull Test Network Threat Messages
+#### 6. Test Network Messages via a Probe Subscription
 ```bash
-gcloud pubsub subscriptions pull abstract-network-threats-sub \
-  --project="$LOG_PROJECT" \
-  --limit=2
+# Never pull from abstract-network-threats-sub: with --auto-ack that deletes events before Abstract
+# reads them, and without it hides them from Abstract for the ack deadline.
+# Pull from a throwaway subscription on the same topic instead. Create it BEFORE the
+# test event: a new subscription only receives messages published after it exists.
+PROBE="abstract-probe-$(date +%s)"
+gcloud pubsub subscriptions create "$PROBE" --topic=abstract-network-threats \
+  --project="$LOG_PROJECT" --expiration-period=1d --message-retention-duration=10m
+# Make a DNS query or trigger a logged firewall rule from a VM in the VPC, then wait.
+sleep 60
+gcloud pubsub subscriptions pull "$PROBE" --project="$LOG_PROJECT" --limit=2 --auto-ack
+gcloud pubsub subscriptions delete "$PROBE" --project="$LOG_PROJECT" --quiet
 ```
 
 ---

@@ -16,7 +16,7 @@ Every telemetry failure—whether a silent log drop, quota throttle, or schema p
 ```
 [ Step 1: Ingestion ] ➔ [ Step 2: Sink Config ] ➔ [ Step 3: Topic IAM ] ➔ [ Step 4: Subscription ] ➔ [ Step 5: Abstract Lake ]
    gcloud logging         gcloud logging sinks     gcloud pubsub topics     gcloud pubsub subs       Abstract SIEM UI
-     read 'logName:*'          describe SINK         get-iam-policy TOPIC     pull SUB --auto-ack      Logs -> vendor: GCP
+     read 'logName:*'          describe SINK         get-iam-policy TOPIC     pull PROBE sub           Logs -> vendor: GCP
 ```
 
 ---
@@ -109,15 +109,23 @@ gcloud pubsub topics get-iam-policy abstract-audit-logs \
 gcloud monitoring metrics list \
   --filter="metric.type:pubsub.googleapis.com/subscription/num_undelivered_messages"
 
-# 2. Perform an active pull probe from Cloud Shell
-gcloud pubsub subscriptions pull abstract-audit-logs-sub \
-  --project="LOGGING_PROJECT_ID" \
-  --limit=1 \
-  --auto-ack \
-  --format="json"
+# 2. Prove delivery on a probe subscription from Cloud Shell
+# Never pull from abstract-audit-logs-sub: with --auto-ack that deletes events before Abstract
+# reads them, and without it hides them from Abstract for the ack deadline.
+# Pull from a throwaway subscription on the same topic instead. Create it BEFORE the
+# test event: a new subscription only receives messages published after it exists.
+PROBE="abstract-probe-$(date +%s)"
+gcloud pubsub subscriptions create "$PROBE" --topic=abstract-audit-logs \
+  --project="LOGGING_PROJECT_ID" --expiration-period=1d --message-retention-duration=10m
+# Fire a fresh Admin Activity event inside the sink's scope, then wait for routing.
+gcloud pubsub topics create "$PROBE" --project="LOGGING_PROJECT_ID" --quiet
+gcloud pubsub topics delete "$PROBE" --project="LOGGING_PROJECT_ID" --quiet
+sleep 75
+gcloud pubsub subscriptions pull "$PROBE" --project="LOGGING_PROJECT_ID" --limit=1 --auto-ack
+gcloud pubsub subscriptions delete "$PROBE" --project="LOGGING_PROJECT_ID" --quiet
 ```
 
-* **PASS:** Pull returns a valid Cloud Audit Log JSON message with base64 payload.
+* **PASS:** The probe pull returns a valid Cloud Audit Log JSON message with base64 payload.
 * **FAIL:**
   * If `PERMISSION_DENIED`: The caller or ingestion service account lacks `roles/pubsub.subscriber` on the subscription.
   * If `num_undelivered_messages` is accumulating steadily: The Abstract subscriber worker is disconnected, rate-limited, or token expired.

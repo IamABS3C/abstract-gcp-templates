@@ -236,9 +236,20 @@ gcloud logging sinks describe abstract-folder-sink \
   --folder="$FOLDER_ID" \
   --format="table(name,destination,writerIdentity,includeChildren)"
 
-# 2. Pull a message from the subscription
-gcloud pubsub subscriptions pull abstract-audit-logs-sub \
-  --project="acme-security-logging" --limit=3 --auto-ack
+# 2. Prove delivery end to end
+# Never pull from abstract-audit-logs-sub: with --auto-ack that deletes events before Abstract
+# reads them, and without it hides them from Abstract for the ack deadline.
+# Pull from a throwaway subscription on the same topic instead. Create it BEFORE the
+# test event: a new subscription only receives messages published after it exists.
+PROBE="abstract-probe-$(date +%s)"
+gcloud pubsub subscriptions create "$PROBE" --topic=abstract-audit-logs \
+  --project="acme-security-logging" --expiration-period=1d --message-retention-duration=10m
+# Fire a fresh Admin Activity event inside the sink's scope, then wait for routing.
+gcloud pubsub topics create "$PROBE" --project="A_PROJECT_INSIDE_THE_FOLDER" --quiet
+gcloud pubsub topics delete "$PROBE" --project="A_PROJECT_INSIDE_THE_FOLDER" --quiet
+sleep 75
+gcloud pubsub subscriptions pull "$PROBE" --project="acme-security-logging" --limit=3 --auto-ack
+gcloud pubsub subscriptions delete "$PROBE" --project="acme-security-logging" --quiet
 ```
 
 ---

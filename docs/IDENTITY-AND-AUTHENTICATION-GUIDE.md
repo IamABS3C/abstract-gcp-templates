@@ -842,11 +842,18 @@ gcloud infra-manager deployments apply \
 
 ## 4. End-to-End Pipeline Verification Probe
 
-Run a synthetic, non-destructive impersonation test to verify that your identity audit pipeline captures events and delivers them to Pub/Sub:
+Run a synthetic impersonation test to verify that your identity audit pipeline captures events and delivers them to Pub/Sub. It reads the result from a throwaway probe subscription, never from Abstract's:
 
 ```bash
 export LOG_PROJECT="my-security-logging-prod"
 export TEST_SA="probe-identity-sa@${LOG_PROJECT}.iam.gserviceaccount.com"
+
+# Never pull from abstract-audit-logs-sub: with --auto-ack that deletes events before Abstract
+# reads them, and without it hides them from Abstract for the ack deadline.
+# Create the probe subscription BEFORE the test event.
+PROBE="abstract-probe-$(date +%s)"
+gcloud pubsub subscriptions create "$PROBE" --topic=abstract-audit-logs \
+  --project="$LOG_PROJECT" --expiration-period=1d --message-retention-duration=10m
 
 # 1. Create a lightweight test service account
 gcloud iam service-accounts create probe-identity-sa \
@@ -869,19 +876,20 @@ gcloud auth print-access-token --impersonate-service-account="$TEST_SA" > /dev/n
 echo "Waiting 60 seconds for pipeline routing..."
 sleep 60
 
-# 5. Pull the message directly from the Pub/Sub subscription
-echo "Verifying delivery in Pub/Sub subscription..."
-gcloud pubsub subscriptions pull abstract-audit-logs-sub \
+# 5. Pull the message from the probe subscription (only you read it, so --auto-ack is safe)
+echo "Verifying delivery on the probe subscription..."
+gcloud pubsub subscriptions pull "$PROBE" \
   --project="$LOG_PROJECT" \
   --limit=10 \
   --auto-ack \
   --format="json" | grep -i "iamcredentials.googleapis.com"
 
-# 6. Clean up test service account
+# 6. Clean up the probe subscription and the test service account
+gcloud pubsub subscriptions delete "$PROBE" --project="$LOG_PROJECT" --quiet
 gcloud iam service-accounts delete "$TEST_SA" --project="$LOG_PROJECT" --quiet
 ```
 
-If the `grep` command returns entries containing `iamcredentials.googleapis.com` and `GenerateAccessToken`, your pipeline is operational and feeding Abstract Security.
+If the `grep` command returns entries containing `iamcredentials.googleapis.com` and `GenerateAccessToken`, the events reach the topic Abstract reads from.
 
 ---
 
