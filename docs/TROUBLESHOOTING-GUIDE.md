@@ -134,16 +134,17 @@ gcloud pubsub subscriptions delete "$PROBE" --project="LOGGING_PROJECT_ID" --qui
 
 ### Step 5: Abstract Security Ingestion & Normalizer Verification
 
-**Question:** Are raw events parsed into normalized Elastic Common Schema (ECS) / Abstract Common Schema (ACS) and indexed into search?
+**Question:** Are raw events parsed into the Abstract Common Schema (ACS) and indexed into search?
 
-1. Open the **Abstract Security Platform Console**.
-2. Navigate to **Data Lake ➔ Logs ➔ Live Tail**.
-3. Apply filter: `vendor: "GCP"` or `event.dataset: "gcp.audit_logs"`.
-4. Verify that fields like `user.email`, `event.action`, `source.ip`, and `threat.score` are populated.
+1. Open the **Abstract Security Platform Console** and search the recent events (StreamViewer raw search; see [VERIFIED.md](VERIFIED.md#confirming-events-landed-and-which-query-surface-to-use)).
+2. Filter on `vendor:GCP` (the value is `GCP`, not `google`).
+3. Verify that `action`, `user_name` and `source_address` are populated, as in the documents measured in [VERIFIED.md](VERIFIED.md#confirming-events-landed-and-which-query-surface-to-use).
 
 * **FAIL (Raw message visible but unparsed):**
-  * Schema definition update required in `parsers/`.
-  * Ensure the parser regex matches the incoming `protoPayload.methodName`.
+  * Audit logs are parsed by Abstract's managed GCP Pub/Sub parser. Check the integration version first.
+  * Do not upload a parser from `parsers/` onto the audit-log configuration: a configuration-level parser replaces the managed one.
+
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 ---
 

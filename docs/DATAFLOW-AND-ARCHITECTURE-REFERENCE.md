@@ -5,6 +5,9 @@
 
 # Master GCP Telemetry Dataflow & Architectural Reference
 
+> [!WARNING]
+> The field names in this document's "Abstract Unified Schema" columns have not been validated against Abstract, and several do not exist (for example `event.action`, `source.ip`, `cloud.project.id`). A search on a field that does not exist silently matches nothing. The managed GCP parser writes `action`, `user_name`, `source_address` and `cloud.project_id`; see [VERIFIED.md](VERIFIED.md#confirming-events-landed-and-which-query-surface-to-use).
+
 This document is the definitive architectural specification, telemetry dataflow contract, and operational runbook for streaming Google Cloud Platform (GCP) and Google Workspace security telemetry into the **Abstract Security Platform**.
 
 ---
@@ -100,17 +103,7 @@ gcloud organizations get-iam-policy $ORG_ID --flatten="bindings[].members" --fil
 
 ##### Actionable SIEM Rule: Log Sink Deleted or Filter Tampered at Any Scope
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.action in ["google.logging.v2.ConfigServiceV2.DeleteSink", "google.logging.v2.ConfigServiceV2.UpdateSink"] | score risk_score=100
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, protoPayload.authenticationInfo.principalEmail, protoPayload.resourceName
-FROM `logging_project.audit_logs.cloudaudit_googleapis_com_activity`
-WHERE protoPayload.methodName LIKE '%ConfigServiceV2%Sink%'
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -217,18 +210,7 @@ gcloud pubsub subscriptions delete "$PROBE" --project="$LOG_PROJECT" --quiet
 
 ##### Actionable SIEM Rule: Critical Service Account Key Creation Outside Bastion
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.action: "google.iam.admin.v1.CreateServiceAccountKey" and not (source.ip in ["10.0.0.0/8", "192.168.0.0/16"]) | score risk_score=95
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, protoPayload.authenticationInfo.principalEmail, protoPayload.requestMetadata.callerIp
-FROM `logging_project.audit_logs.cloudaudit_googleapis_com_activity`
-WHERE protoPayload.methodName = 'google.iam.admin.v1.CreateServiceAccountKey'
-  AND NOT NET.IP_TRUNC(NET.SAFE_IP_FROM_STRING(protoPayload.requestMetadata.callerIp), 16) = b"\xc0\xa8\x00\x00"
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -348,18 +330,7 @@ gcloud pubsub subscriptions delete "$PROBE" --project="$LOG_PROJECT" --quiet
 
 ##### Actionable SIEM Rule: Organization-Level IAM Policy Tampering
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.action: "SetIamPolicy" and cloud.resource_type: "organization" | score risk_score=100
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, protoPayload.authenticationInfo.principalEmail, protoPayload.serviceData.policyDelta
-FROM `logging_project.audit_logs.cloudaudit_googleapis_com_activity`
-WHERE protoPayload.methodName = 'SetIamPolicy'
-  AND resource.type = 'organization'
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -448,17 +419,7 @@ gcloud logging read 'logName:"logs/cloudaudit.googleapis.com%2Factivity"' --fold
 
 ##### Actionable SIEM Rule: Project Moved Out of Monitored Security Folder
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.action: "google.resourcemanager.v3.Projects.MoveProject" | score risk_score=85
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, protoPayload.authenticationInfo.principalEmail, protoPayload.resourceName
-FROM `logging_project.audit_logs.cloudaudit_googleapis_com_activity`
-WHERE protoPayload.methodName = 'google.resourcemanager.v3.Projects.MoveProject'
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -529,17 +490,7 @@ gcloud logging sinks describe abstract-pilot-sink --project=$PROJECT_ID
 
 ##### Actionable SIEM Rule: Pilot Project Admin Role Escalation
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.action: "SetIamPolicy" and cloud.project.id: "$PILOT_PROJECT" | score risk_score=90
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, protoPayload.authenticationInfo.principalEmail
-FROM `pilot_project.audit_logs.cloudaudit_googleapis_com_activity`
-WHERE protoPayload.methodName = 'SetIamPolicy'
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -622,18 +573,7 @@ gcloud logging read 'logName:"logs/cloudaudit.googleapis.com%2Fdata_access"' --o
 
 ##### Actionable SIEM Rule: Mass BigQuery Data Exfiltration (>1TB Scanned)
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.dataset: "bigquery.googleapis.com" and gcp.bigquery.total_billed_bytes > 1099511627776 | score risk_score=90
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, protoPayload.authenticationInfo.principalEmail, protoPayload.serviceData.jobCompletedEvent.job.jobStatistics.totalBilledBytes
-FROM `logging_project.audit_logs.cloudaudit_googleapis_com_data_access`
-WHERE protoPayload.serviceName = 'bigquery.googleapis.com'
-  AND CAST(JSON_VALUE(protoPayload.serviceData, '$.jobCompletedEvent.job.jobStatistics.totalBilledBytes') AS INT64) > 1000000000000
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -711,17 +651,7 @@ gcloud scc notifications list --organization=$ORG_ID
 
 ##### Actionable SIEM Rule: Log Router Ingestion Boundary Exclusion Rule Added
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.action: "google.logging.v2.ConfigServiceV2.CreateExclusion" | score risk_score=85
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, protoPayload.authenticationInfo.principalEmail, protoPayload.request
-FROM `logging_project.audit_logs.cloudaudit_googleapis_com_activity`
-WHERE protoPayload.methodName = 'google.logging.v2.ConfigServiceV2.CreateExclusion'
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -795,18 +725,7 @@ gcloud iam service-accounts describe abstract-workspace-dwd@$LOG_PROJECT.iam.gse
 
 ##### Actionable SIEM Rule: Suspicious Workspace Login with 2SV Challenge Failure
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: Google and event.dataset: "google_workspace.audit" and event.action: "login_challenge_failed" | score risk_score=95
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, protoPayload.authenticationInfo.principalEmail, protoPayload.requestMetadata.callerIp
-FROM `logging_project.audit_logs.cloudaudit_googleapis_com_data_access`
-WHERE protoPayload.serviceName = 'login.googleapis.com'
-  AND JSON_VALUE(protoPayload.metadata, '$.loginDetails.isSuspicious') = 'true'
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -889,17 +808,7 @@ gcloud logging read 'protoPayload.serviceName:"iamcredentials.googleapis.com"' -
 
 ##### Actionable SIEM Rule: Unauthorized Service Account Impersonation
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.action: "GenerateAccessToken" and not (user.email in ["ci-cd@iam.gserviceaccount.com"]) | score risk_score=95
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, protoPayload.authenticationInfo.principalEmail, protoPayload.resourceName
-FROM `logging_project.audit_logs.cloudaudit_googleapis_com_data_access`
-WHERE protoPayload.methodName = 'GenerateAccessToken'
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -982,17 +891,7 @@ gcloud pubsub subscriptions describe abstract-audit-logs-sub --project=$LOG_PROJ
 
 ##### Actionable SIEM Rule: Critical Telemetry Pipeline Ingestion Stall
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.dataset: "cloud_monitoring.alert" and severity: "CRITICAL" | score risk_score=100
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, incident.summary
-FROM `logging_project.monitoring.incidents`
-WHERE incident.state = 'OPEN' AND incident.severity = 'CRITICAL'
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -1066,18 +965,7 @@ gcloud scc notifications describe abstract-scc-feed --organization=$ORG_ID --for
 
 ##### Actionable SIEM Rule: Critical Container Threat or Crypto Mining Finding
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.dataset: "gcp.scc_findings" and event.severity in ["CRITICAL", "HIGH"] | score risk_score=100
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, raw.finding.name, raw.finding.category, raw.finding.severity
-FROM `logging_project.scc.findings`
-WHERE raw.finding.state = 'ACTIVE'
-  AND raw.finding.severity IN ('CRITICAL', 'HIGH')
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -1151,18 +1039,7 @@ gcloud asset feeds list --organization=$ORG_ID --format="table(name,contentType,
 
 ##### Actionable SIEM Rule: Public Cloud Storage Bucket Created or Modified
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.dataset: "gcp.asset_inventory" and gcp.asset.type: "storage.googleapis.com/Bucket" and gcp.asset.iam.is_public: true | score risk_score=95
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, asset.name, asset.iamPolicy
-FROM `logging_project.asset_inventory.feeds`
-WHERE asset.assetType = 'storage.googleapis.com/Bucket'
-  AND EXISTS(SELECT 1 FROM UNNEST(asset.iamPolicy.bindings) WHERE 'allUsers' IN UNNEST(members))
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -1238,17 +1115,7 @@ gcloud storage buckets notifications list --bucket=gs://$BUCKET_NAME
 
 ##### Actionable SIEM Rule: Bulk Cloud Storage Object Deletions (Ransomware)
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.action: "OBJECT_DELETE" | count() by user.email > 500 in 5m | score risk_score=95
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, name, bucket
-FROM `logging_project.bucket_events.notifications`
-WHERE eventType = 'OBJECT_DELETE'
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -1319,18 +1186,7 @@ gcloud logging sinks list --organization=$ORG_ID --format="table(name,destinatio
 
 ##### Actionable SIEM Rule: Unauthorized GCS Log Archive Lifecycle or Policy Mutation
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and cloud.resource_type: "storage.googleapis.com/Bucket" and event.action: "storage.setIamPermissions" | score risk_score=100
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, protoPayload.authenticationInfo.principalEmail
-FROM `logging_project.audit_logs.cloudaudit_googleapis_com_activity`
-WHERE protoPayload.resourceName LIKE '%abstract-gcp-archive%'
-  AND protoPayload.methodName = 'storage.setIamPermissions'
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -1410,17 +1266,7 @@ gcloud logging sinks describe abstract-billing-sink --billing-account=$BILLING_A
 
 ##### Actionable SIEM Rule: Project Linked to Billing Account Outside Whitelist
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.action: "google.cloud.billing.v1.CloudBilling.UpdateProjectBillingInfo" | score risk_score=90
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, protoPayload.authenticationInfo.principalEmail, protoPayload.resourceName
-FROM `logging_project.billing_audit.cloudaudit_googleapis_com_activity`
-WHERE protoPayload.methodName = 'google.cloud.billing.v1.CloudBilling.UpdateProjectBillingInfo'
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 
@@ -1501,17 +1347,7 @@ gcloud dns policies list --format="table(name,enableLogging,networks[].targetNet
 
 ##### Actionable SIEM Rule: Cloud Armor SQLi Block Followed by Cloud IDS Alert
 
-**Abstract KQL Detection Query**:
-```kql
-vendor: GCP and event.dataset: "gcp.network_threats" and rule.action: "DENY" | count() by source.ip > 10 in 1m | score risk_score=95
-```
-
-**BigQuery SQL Verification Query**:
-```sql
-SELECT timestamp, jsonPayload.client_ip, jsonPayload.threat_id
-FROM `logging_project.network_logs.ids_googleapis_com_threat`
-WHERE jsonPayload.alert_severity = 'HIGH'
-```
+Detection content for these sources is being validated against Abstract's query engine and will be published separately.
 
 #### Production Infrastructure as Code (OpenTofu / Terraform)
 

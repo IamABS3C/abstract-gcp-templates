@@ -971,7 +971,7 @@ ls -la parsers/*.yml
 ```
 
 > [!TIP]
-> See [Troubleshooting Step 5: Abstract Security Ingestion & Normalizer Verification](docs/TROUBLESHOOTING-GUIDE.md#step-5-abstract-security-ingestion--normalizer-verification) for steps to verify parsed fields (`user.email`, `event.action`, `source.ip`) in the Abstract console.
+> See [Troubleshooting Step 5: Abstract Security Ingestion & Normalizer Verification](docs/TROUBLESHOOTING-GUIDE.md#step-5-abstract-security-ingestion--normalizer-verification) for steps to verify parsed fields (`action`, `user_name`, `source_address`) in the Abstract console.
 
 ### Post-Onboarding Verification & Clean-up:
 Once Abstract confirms event delivery:
