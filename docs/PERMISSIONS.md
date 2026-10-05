@@ -245,5 +245,4 @@ report with a numbered action list.
 
 * 📘 **Telemetry Dataflow Reference**: [Master GCP Telemetry Dataflow Reference](DATAFLOW-AND-ARCHITECTURE-REFERENCE.md)
 * 🛠️ **Diagnostic Runbook**: [Master Troubleshooting Guide](TROUBLESHOOTING-GUIDE.md)
-* 🌐 **Interactive Diagram Explorer**: [Architecture Explorer Web Viewer](architecture-explorer.html)
 * 🎨 **Interactive Draw.io Launcher**: `./scripts/open-diagram.sh 02-audit-logs-organization`

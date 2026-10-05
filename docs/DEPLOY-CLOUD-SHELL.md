@@ -126,4 +126,3 @@ python3 tests/check-tutorials.py
 * 📘 **Master Walkthrough**: [Comprehensive Master Walkthrough](../WALKTHROUGH.md)
 * 🛠️ **Troubleshooting Runbooks**: [Master Troubleshooting Guide](TROUBLESHOOTING-GUIDE.md)
 * 📘 **Master Telemetry Reference**: [Master GCP Telemetry Dataflow Reference](DATAFLOW-AND-ARCHITECTURE-REFERENCE.md)
-* 🌐 **Interactive Diagram Explorer**: [Architecture Explorer Web UI](architecture-explorer.html)

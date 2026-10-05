@@ -74,7 +74,6 @@ This interactive guide walks you through a complete security assessment of your 
 > **Architecture & Diagnostic References**:
 > - 📘 **Architecture & Dataflow**: [Master GCP Telemetry Dataflow Reference](docs/DATAFLOW-AND-ARCHITECTURE-REFERENCE.md)
 > - 🛠️ **Troubleshooting**: [Master Troubleshooting & Diagnostic Runbook](docs/TROUBLESHOOTING-GUIDE.md)
-> - 🌐 **Interactive Diagram Viewer**: Open [`docs/architecture-explorer.html`](docs/architecture-explorer.html) in your browser.
 > - 🎨 **Draw.io Desktop Launcher**:
 >   - Desktop: `./scripts/open-diagram.sh gcp-orgwide-audit-logs`
 >   - Browser: `./scripts/open-diagram.sh gcp-orgwide-audit-logs --web`
@@ -1006,7 +1005,6 @@ Your Google Cloud estate now streams:
 ### Continued Operations & Deep Reference Documentation:
 - 🛠️ **Diagnostics & Remediation**: [Master Troubleshooting Guide](docs/TROUBLESHOOTING-GUIDE.md)
 - 📘 **Complete Dataflow Specification**: [Master GCP Telemetry Dataflow Reference](docs/DATAFLOW-AND-ARCHITECTURE-REFERENCE.md)
-- 🌐 **Interactive Diagram Explorer**: [Architecture Explorer HTML UI](docs/architecture-explorer.html)
 - 🔐 **Identity Threat Detection**: [Enterprise Identity & Authentication Guide](docs/IDENTITY-AND-AUTHENTICATION-GUIDE.md)
 
 Re-audit your estate at any time by running:

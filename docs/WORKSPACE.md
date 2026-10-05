@@ -373,5 +373,4 @@ Or simply watch for events in Abstract. Delegation can take a few minutes to pro
 * 📘 **Master Telemetry Reference**: [Master GCP Telemetry Dataflow Reference](DATAFLOW-AND-ARCHITECTURE-REFERENCE.md)
 * 🛠️ **Troubleshooting Runbooks**: [Master Troubleshooting Guide](TROUBLESHOOTING-GUIDE.md)
 * 🔐 **Identity Threat Detection**: [Enterprise Identity & Authentication Guide](IDENTITY-AND-AUTHENTICATION-GUIDE.md)
-* 🌐 **Interactive Diagram Viewer**: [Architecture Explorer Web UI](architecture-explorer.html)
 * 🎨 **Interactive Draw.io Launcher**: `./scripts/open-diagram.sh 04-identity-auth-oneuptime`

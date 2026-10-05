@@ -56,7 +56,6 @@ The **Abstract Security Platform** is an AI-native, Composable SIEM engineered t
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 01-sink-scope`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#01-sink-scope)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -136,7 +135,6 @@ WHERE protoPayload.methodName LIKE '%ConfigServiceV2%Sink%'
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 01-logging-project`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#01-logging-project)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -257,7 +255,6 @@ module "logging_project" {
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 02-audit-logs-organization`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#02-audit-logs-organization)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -372,7 +369,6 @@ module "org_audit_logs" {
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 02-audit-logs-folder`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#02-audit-logs-folder)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -466,7 +462,6 @@ module "folder_audit_logs" {
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 02-audit-logs-project`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#02-audit-logs-project)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -547,7 +542,6 @@ module "pilot_project_sink" {
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 03-data-access`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#03-data-access)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -650,7 +644,6 @@ module "data_access_audit" {
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 03-log-router-boundary`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#03-log-router-boundary)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -728,7 +721,6 @@ WHERE protoPayload.methodName = 'google.logging.v2.ConfigServiceV2.CreateExclusi
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 04-workspace`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#04-workspace)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -818,7 +810,6 @@ module "workspace_logs" {
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 04-identity-auth-oneuptime`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#04-identity-auth-oneuptime)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -912,7 +903,6 @@ module "identity_auth_pipeline" {
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 05-health-alerts`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#05-health-alerts)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -1001,7 +991,6 @@ module "health_monitoring" {
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 06-scc-findings`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#06-scc-findings)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -1087,7 +1076,6 @@ resource "google_scc_organization_notification_config" "abstract_feed" {
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 07-asset-inventory`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#07-asset-inventory)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -1176,7 +1164,6 @@ resource "google_cloud_asset_organization_feed" "abstract_feed" {
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 08-bucket-logs`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#08-bucket-logs)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -1257,7 +1244,6 @@ resource "google_storage_notification" "bucket_notification" {
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 09-log-archive`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#09-log-archive)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -1345,7 +1331,6 @@ module "archive_dual_pipeline" {
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 10-billing-account`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#10-billing-account)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -1433,7 +1418,6 @@ module "billing_audit" {
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 11-network-threats`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#11-network-threats)
 
 #### Telemetry Ingestion Contract & Transport Profile
 
@@ -1531,7 +1515,6 @@ module "network_threats_pipeline" {
 
 > [!TIP]
 > **Open in Draw.io Desktop**: `./scripts/open-diagram.sh 03-log-router-boundary`  
-> **Interactive Web Viewer**: [Launch in Architecture Explorer](architecture-explorer.html#03-log-router-boundary)
 
 ### Five Fundamental Log Router Principles
 
@@ -1664,7 +1647,6 @@ The Abstract Security Ingestion Pipeline normalizes raw, verbose Google Cloud `p
 - 🔑 **[Permissions Matrix](PERMISSIONS.md)**: Complete IAM role specifications at every resource hierarchy level.
 - 🎯 **[Filters & Cost Optimization](FILTERS.md)**: Pre-tuned log categories, exclusion rules, and volume management.
 - 🔐 **[Enterprise Identity & Auth Guide](IDENTITY-AND-AUTHENTICATION-GUIDE.md)**: Deep dive into Workspace, Service Account Keys, Impersonation, and Workload Identity Federation.
-- 🌐 **[Interactive Architecture Explorer](architecture-explorer.html)**: Standalone single-page application with interactive zoom/pan viewers, CLI runbooks, and schema mappings.
 
 ---
 *Document compiled with Abstract Security CI/CD automation. Verified collision-free and mathematically validated.*

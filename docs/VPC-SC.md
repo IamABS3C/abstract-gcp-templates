@@ -146,5 +146,4 @@ whole diagnosis.
 
 * 🛠️ **Troubleshooting Runbooks**: [Master Troubleshooting Guide: Step 1 & Scenario 02](TROUBLESHOOTING-GUIDE.md)
 * 📘 **Master Telemetry Reference**: [Master GCP Telemetry Dataflow Reference](DATAFLOW-AND-ARCHITECTURE-REFERENCE.md)
-* 🌐 **Interactive Diagram Explorer**: [Architecture Explorer Web Viewer](architecture-explorer.html)
 * 📋 **Permissions Matrix**: [Permissions Reference Across All Scopes](PERMISSIONS.md)
